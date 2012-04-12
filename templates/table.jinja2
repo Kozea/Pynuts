@@ -1,0 +1,20 @@
+<table border="1" cellspacing="0">
+  <tr>
+    {% for column in cls.table_columns %}
+      {% set field = cls.form[column] %}
+      <th>{{ field.label() }}</th>
+    {% endfor %}
+    <th>Edit</th>
+    <th>Delete</th>
+  </tr>
+  
+  {% for line in cls.model.query.all() %}
+    <tr>
+      {% for column in cls.table_columns %}
+        <td>{{ line[column] }}</td>
+      {% endfor %}
+      <td><a href="{{ url_for(cls.edit_endpoint, id=line.id, name=line.name) }}">></a></td>
+      <td><a href="{{ url_for(cls.delete_endpoint, id=line.id, name=line.name) }}">x</a></td>
+    </tr>
+  {% endfor %}
+</table>

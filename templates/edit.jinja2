@@ -1,0 +1,14 @@
+<form method="post" enctype="multipart/form-data">
+  {% for column in obj.create_columns %}
+    {% set field = obj.form[column] %}
+    {% if not field.flags.no_label %}
+      {% if field.errors %}
+        {{ field.label(class="error", title=', '.join(field.errors)) }}
+      {% else %}
+        {{ field.label() }}
+      {% endif %}
+    {% endif %}
+    {{ field() | safe }}
+  {% endfor %}
+  <input type="submit" />
+</form>
