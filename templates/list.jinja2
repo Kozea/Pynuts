@@ -1,5 +1,0 @@
-<ul>
-  {% for element in elements %}
-  <li><a href="{{ url_for('view_poney', id=element.data.id, name=element.data.name) }}">{{ element.data.fullname }}</a></li>
-  {% endfor %}
-</ul>
