@@ -1,0 +1,20 @@
+<table border="1" cellspacing="0">
+  <tr>
+    {% for column in cls.table_columns %}
+      {% set field = cls.Form()[column] %}
+      <th>{{ field.label() }}</th>
+    {% endfor %}
+    <th>Edit</th>
+    <th>Delete</th>
+  </tr>
+  
+  {% for obj in cls.all() %}
+    <tr>
+      {% for column in cls.table_columns %}
+        <td>{{ obj.data[column] }}</td>
+      {% endfor %}
+      <td><a href="{{ url_for(cls.edit_endpoint, **obj.primary_keys) }}">></a></td>
+      <td><a href="{{ url_for(cls.delete_endpoint, **obj.primary_keys) }}">x</a></td>
+    </tr>
+  {% endfor %}
+</table>

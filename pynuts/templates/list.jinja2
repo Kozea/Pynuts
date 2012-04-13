@@ -1,0 +1,5 @@
+<ul>
+  {% for obj in cls.all() %}
+  <li><a href="{{ url_for(obj.view_endpoint, **obj.primary_keys) }}">{{ obj.data[obj.list_column] }}</a></li>
+  {% endfor %}
+</ul>
