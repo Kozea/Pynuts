@@ -34,7 +34,7 @@ class ModelView(object):
     delete_endpoint = None
     view_endpoint = None
 
-     # Templates
+    # Templates
     view_template = 'view.jinja2'
     list_template = 'list.jinja2'
     table_template = 'table.jinja2'
@@ -91,8 +91,7 @@ class ModelView(object):
 
     @classmethod
     def view_list(cls):
-        template = JINJA2_ENVIRONMENT.get_template(
-            cls.list_template)
+        template = JINJA2_ENVIRONMENT.get_template(cls.list_template)
         return jinja2.Markup(template.render(cls=cls))
 
     def view_object(self):
@@ -121,6 +120,14 @@ class ModelView(object):
             cls.session.add(obj.data)
             cls.session.commit()
             return flask.redirect(flask.url_for(redirect))
+        return flask.render_template(template, cls=cls, *args, **kwargs)
+
+    @classmethod
+    def list(cls, template=None, *args, **kwargs):
+        return flask.render_template(template, cls=cls, *args, **kwargs)
+
+    @classmethod
+    def table(cls, template=None, *args, **kwargs):
         return flask.render_template(template, cls=cls, *args, **kwargs)
 
     def edit(self, template=None, redirect=None, *args, **kwargs):
