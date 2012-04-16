@@ -1,5 +1,5 @@
 import flask
-from flaskext.sqlalchemy import SQLAlchemy
+from flask.ext.sqlalchemy import SQLAlchemy
 
 
 class Pynuts(flask.Flask):
