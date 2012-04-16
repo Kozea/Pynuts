@@ -1,16 +1,28 @@
 import flask
 import jinja2
-import database
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
-
 
 JINJA2_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.PackageLoader('pynuts', 'templates'))
 JINJA2_ENVIRONMENT.globals.update({'url_for': flask.url_for})
 
 
+class MetaView(type):
+    def __init__(cls, name, bases, dict_):
+        if cls.model:
+            cls._mapping = cls._mapping or class_mapper(cls.model)
+            column_names = (column.key for column in cls._mapping.columns)
+            cls.view_columns = cls.view_columns or column_names
+            cls.table_columns = cls.table_columns or column_names
+            cls.edit_columns = cls.edit_columns or column_names
+            cls.create_columns = cls.create_columns or column_names
+        super(MetaView, cls).__init__(name, bases, dict_)
+
+
 class ModelView(object):
+    __metaclass__ = MetaView
+
     _mapping = None
 
     model = None
@@ -30,8 +42,8 @@ class ModelView(object):
     create_template = 'create.jinja2'
 
     # Columns
-    view_columns = None
     list_column = None
+    view_columns = None
     table_columns = None
     edit_columns = None
     create_columns = None
@@ -48,16 +60,14 @@ class ModelView(object):
         for element in cls.model.query.all():
             yield cls(element=element)
 
+    @classproperty
+    def session(cls):
+        return cls.model.query.session
+
     @staticmethod
     def _get_form_attributes(form):
         return {
             key: form[key].data for key in flask.request.form}
-
-    @classproperty
-    def mapping(cls):
-        if not cls._mapping:
-            cls._mapping = class_mapper(cls.model)
-        return cls._mapping
 
     @classmethod
     def edit_page(cls, function):
@@ -108,23 +118,22 @@ class ModelView(object):
         form = cls.Form(flask.request.form)
         if form.validate_on_submit():
             obj = cls(element=cls.model(**cls._get_form_attributes(form)))
-            database.db.session.add(obj.data)
-            database.db.session.commit()
+            cls.session.add(obj.data)
+            cls.session.commit()
             return flask.redirect(flask.url_for(redirect))
-        return flask.render_template(template, cls=cls, *args, **kwargs
-)
+        return flask.render_template(template, cls=cls, *args, **kwargs)
 
     def edit(self, template=None, redirect=None, *args, **kwargs):
         if self.form.validate_on_submit():
             for key, value in self._get_form_attributes(self.form).items():
                 setattr(self.data, key, value)
-            database.db.session.commit()
+            self.session.commit()
             return flask.redirect(flask.url_for(redirect))
         return flask.render_template(template, obj=self, *args, **kwargs)
 
     def delete(self, redirect=None):
-        database.db.session.delete(self.data)
-        database.db.session.commit()
+        self.session.delete(self.data)
+        self.session.commit()
         return flask.redirect(flask.url_for(redirect))
 
     def view(self, template=None, *args, **kwargs):
@@ -136,4 +145,4 @@ class ModelView(object):
     def primary_keys(self):
         return {
             column.key: getattr(self.data, column.key)
-            for column in self.mapping.primary_key}
+            for column in self._mapping.primary_key}
