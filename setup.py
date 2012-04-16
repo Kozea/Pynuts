@@ -6,4 +6,6 @@ setup(
     license="GNU GPL v3",
     platforms="Any",
     packages=["pynuts"],
-    provides=["pynuts"])
+    package_data={'pynuts': ['templates/*.jinja2']},
+    provides=["pynuts"]
+)
