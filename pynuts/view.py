@@ -175,7 +175,8 @@ class ModelView(object):
     def view_create(cls):
         """Render the HTML for create_template."""
         template = JINJA2_ENVIRONMENT.get_template(cls.create_template)
-        return jinja2.Markup(template.render(cls=cls))
+        form = cls.Form(flask.request.form)
+        return jinja2.Markup(template.render(cls=cls, form=form))
 
     def view_edit(self):
         """Render the HTML for edit_template."""
@@ -214,8 +215,7 @@ class ModelView(object):
             cls.session.add(obj.data)
             cls.session.commit()
             return flask.redirect(obj.template_url_for(redirect))
-        return flask.render_template(
-            template, cls=cls, form=form, *args, **kwargs)
+        return flask.render_template(template, cls=cls, *args, **kwargs)
 
     def edit(self, template=None, redirect=None, *args, **kwargs):
         """Return the edit_template.
