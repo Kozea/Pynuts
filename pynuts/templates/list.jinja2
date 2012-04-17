@@ -2,7 +2,7 @@
   {% for obj in cls.all() %}
     <li>
       {% if obj.view_endpoint %}
-        <a href="{{ url_for(obj.view_endpoint, **obj.primary_keys) }}">
+        <a href="{{ obj.action_url_for('view') }}">
       {% endif %}
         {{ obj.data[obj.list_column] }}
       {% if obj.view_endpoint %}

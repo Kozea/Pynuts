@@ -13,8 +13,8 @@
       {% for column in cls.table_columns %}
         <td>{{ obj.data[column] }}</td>
       {% endfor %}
-      <td><a href="{{ url_for(cls.edit_endpoint, **obj.primary_keys) }}">></a></td>
-      <td><a href="{{ url_for(cls.delete_endpoint, **obj.primary_keys) }}">x</a></td>
+      <td><a href="{{ obj.action_url_for('edit') }}">></a></td>
+      <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>
     </tr>
   {% endfor %}
 </table>
