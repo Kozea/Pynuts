@@ -214,7 +214,8 @@ class ModelView(object):
             cls.session.add(obj.data)
             cls.session.commit()
             return flask.redirect(obj.template_url_for(redirect))
-        return flask.render_template(template, cls=cls, *args, **kwargs)
+        return flask.render_template(
+            template, cls=cls, form=form, *args, **kwargs)
 
     def edit(self, template=None, redirect=None, *args, **kwargs):
         """Return the edit_template.
