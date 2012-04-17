@@ -115,7 +115,7 @@ class ModelView(object):
         if callable(endpoint):
             return endpoint(self, **self.primary_keys)
         else:
-            return flask.url_for(endpoint)
+            return endpoint
 
     def action_url_for(self, action):
         """Return url_for."""
