@@ -194,7 +194,8 @@ class ModelView(object):
         return flask.render_template(template, cls=cls, *args, **kwargs)
 
     @classmethod
-    def create(cls, template=None, redirect=None, *args, **kwargs):
+    def create(cls, template=None, redirect=None, values=None,
+               *args, **kwargs):
         """Define the create method.
 
         Also check the values in the form.
@@ -206,7 +207,10 @@ class ModelView(object):
         """
         form = cls.Form(flask.request.form)
         if form.validate_on_submit():
-            obj = cls(element=cls.model(**cls._get_form_attributes(form)))
+            form_values = cls._get_form_attributes(form)
+            if values:
+                form_values.update(values)
+            obj = cls(element=cls.model(**form_values))
             cls.session.add(obj.data)
             cls.session.commit()
             return flask.redirect(obj.template_url_for(redirect))
