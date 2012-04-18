@@ -1,6 +1,6 @@
 <form method="post" enctype="multipart/form-data">
   {% for column in cls.create_columns %}
-    {% set field = cls.Form()[column] %}
+    {% set field = form[column] %}
     {% if not field.flags.no_label %}
       {% if field.errors %}
         {{ field.label(class="error", title=', '.join(field.errors)) }}

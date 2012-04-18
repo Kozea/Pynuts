@@ -115,7 +115,7 @@ class ModelView(object):
         if callable(endpoint):
             return endpoint(self, **self.primary_keys)
         else:
-            return flask.url_for(endpoint)
+            return endpoint
 
     def action_url_for(self, action):
         """Return url_for."""
@@ -175,7 +175,8 @@ class ModelView(object):
     def view_create(cls):
         """Render the HTML for create_template."""
         template = JINJA2_ENVIRONMENT.get_template(cls.create_template)
-        return jinja2.Markup(template.render(cls=cls))
+        form = cls.Form(flask.request.form)
+        return jinja2.Markup(template.render(cls=cls, form=form))
 
     def view_edit(self):
         """Render the HTML for edit_template."""
