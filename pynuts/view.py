@@ -16,7 +16,7 @@ class MetaView(type):
     def __init__(metacls, name, bases, dict_):
         if metacls.model:
             metacls._mapping = metacls._mapping or class_mapper(metacls.model)
-            metacls._session = metacls._session or metacls.model.db.session
+            metacls._db = metacls._db or metacls.model.db
             column_names = (column.key for column in metacls._mapping.columns)
             metacls.view_columns = metacls.view_columns or column_names
             metacls.table_columns = metacls.table_columns or column_names
@@ -57,9 +57,9 @@ class ModelView(object):
     # Metaclass
     __metaclass__ = MetaView
 
-    # Mapper and session, set by the metaclass
+    # Mapper and database, set by the metaclass
     _mapping = None
-    _session = None
+    _db = None
 
     # SQLAlchemy model
     model = None
@@ -112,7 +112,7 @@ class ModelView(object):
     @classproperty
     def session(cls):
         """Database session."""
-        return cls._session
+        return cls._db.session
 
     @staticmethod
     def _get_form_attributes(form):
