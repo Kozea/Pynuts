@@ -13,9 +13,3 @@ class Pynuts(flask.Flask):
         self.db = SQLAlchemy(self)
         if reflect:
             self.db.metadata.reflect(bind=self.db.get_engine(self))
-
-    @property
-    def Model(self):
-        cls = self.db.Model
-        cls.db = self.db
-        return cls
