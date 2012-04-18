@@ -86,18 +86,20 @@ class ModelView(object):
     create_columns = None
 
     # Methods
-    def __init__(self, keys=None, element=None):
+    def __init__(self, keys=None, data=None):
         if keys:
             self.data = self.model.query.get_or_404(keys)
-        elif element:
-            self.data = element
+        elif data:
+            self.data = data
+        else:
+            self.data = None
         self.form = self.Form(flask.request.form, obj=self.data)
 
     @classmethod
     def all(cls):
         """Return all the elements of the SQLAlchemy class."""
-        for element in cls.model.query.all():
-            yield cls(element=element)
+        for data in cls.model.query.all():
+            yield cls(data=data)
 
     @classproperty
     def session(cls):
@@ -171,12 +173,10 @@ class ModelView(object):
         template = JINJA2_ENVIRONMENT.get_template(cls.table_template)
         return jinja2.Markup(template.render(cls=cls))
 
-    @classmethod
-    def view_create(cls):
+    def view_create(self):
         """Render the HTML for create_template."""
-        template = JINJA2_ENVIRONMENT.get_template(cls.create_template)
-        form = cls.Form(flask.request.form)
-        return jinja2.Markup(template.render(cls=cls, form=form))
+        template = JINJA2_ENVIRONMENT.get_template(self.create_template)
+        return jinja2.Markup(template.render(obj=self))
 
     def view_edit(self):
         """Render the HTML for edit_template."""
@@ -194,8 +194,7 @@ class ModelView(object):
         """Return the table_template."""
         return flask.render_template(template, cls=cls, *args, **kwargs)
 
-    @classmethod
-    def create(cls, template=None, redirect=None, values=None,
+    def create(self, template=None, redirect=None, values=None,
                *args, **kwargs):
         """Define the create method.
 
@@ -206,16 +205,15 @@ class ModelView(object):
         Else : Display the form with errors.
 
         """
-        form = cls.Form(flask.request.form)
-        if form.validate_on_submit():
-            form_values = cls._get_form_attributes(form)
+        if self.form.validate_on_submit():
+            form_values = self._get_form_attributes(self.form)
             if values:
                 form_values.update(values)
-            obj = cls(element=cls.model(**form_values))
-            cls.session.add(obj.data)
-            cls.session.commit()
-            return flask.redirect(obj.template_url_for(redirect))
-        return flask.render_template(template, cls=cls, *args, **kwargs)
+            self.data = self.model(**form_values)
+            self.session.add(self.data)
+            self.session.commit()
+            return flask.redirect(self.template_url_for(redirect))
+        return flask.render_template(template, obj=self, *args, **kwargs)
 
     def edit(self, template=None, redirect=None, *args, **kwargs):
         """Return the edit_template.
