@@ -103,8 +103,13 @@ class ModelView(object):
             yield cls(data=data)
 
     @classproperty
+    def mapping(cls):
+        """Table mapping."""
+        return cls._mapping
+
+    @classproperty
     def session(cls):
-        """Set the database session."""
+        """Database session."""
         return cls.model.query.session
 
     @staticmethod
