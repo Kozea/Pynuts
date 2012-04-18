@@ -77,6 +77,7 @@ class ModelView(object):
     table_template = 'table.jinja2'
     edit_template = 'edit.jinja2'
     create_template = 'create.jinja2'
+    delete_template = 'delete.jinja2'
 
     # Columns
     list_column = None
@@ -111,6 +112,14 @@ class ModelView(object):
         """Return the form attributes."""
         return {
             key: form[key].data for key in flask.request.form}
+
+    def handle_errors(self):
+        if self.form.errors:
+            for key, errors in self.form.errors.items():
+                flask.flash(jinja2.Markup(
+                    u'<label for="%s">%s</label>: %s.' % (
+                        key, self.form[key].label.text, ', '.join(errors))),
+                'error')
 
     def template_url_for(self, endpoint):
         """Return endpoint if callable, url_for this endpoint else."""
@@ -183,19 +192,23 @@ class ModelView(object):
         template = JINJA2_ENVIRONMENT.get_template(self.edit_template)
         return jinja2.Markup(template.render(obj=self))
 
+    def view_delete(self):
+        """Render the HTML for edit_template."""
+        template = JINJA2_ENVIRONMENT.get_template(self.delete_template)
+        return jinja2.Markup(template.render(obj=self))
+
     # CRUD methods
     @classmethod
-    def list(cls, template=None, *args, **kwargs):
+    def list(cls, template=None, **kwargs):
         """Return the list_template."""
-        return flask.render_template(template, cls=cls, *args, **kwargs)
+        return flask.render_template(template, cls=cls, **kwargs)
 
     @classmethod
-    def table(cls, template=None, *args, **kwargs):
+    def table(cls, template=None, **kwargs):
         """Return the table_template."""
-        return flask.render_template(template, cls=cls, *args, **kwargs)
+        return flask.render_template(template, cls=cls, **kwargs)
 
-    def create(self, template=None, redirect=None, values=None,
-               *args, **kwargs):
+    def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method.
 
         Also check the values in the form.
@@ -213,9 +226,10 @@ class ModelView(object):
             self.session.add(self.data)
             self.session.commit()
             return flask.redirect(self.template_url_for(redirect))
-        return flask.render_template(template, obj=self, *args, **kwargs)
+        self.handle_errors()
+        return flask.render_template(template, obj=self, **kwargs)
 
-    def edit(self, template=None, redirect=None, *args, **kwargs):
+    def edit(self, template=None, redirect=None, **kwargs):
         """Return the edit_template.
 
         Also check the values in the form.
@@ -230,24 +244,31 @@ class ModelView(object):
                 setattr(self.data, key, value)
             self.session.commit()
             return flask.redirect(self.template_url_for(redirect))
-        return flask.render_template(template, obj=self, *args, **kwargs)
+        self.handle_errors()
+        return flask.render_template(template, obj=self, **kwargs)
 
-    def delete(self, redirect=None):
+    def delete(self, template=None, redirect=None, **kwargs):
         """Delete an entry from the database."""
-        self.session.delete(self.data)
-        self.session.commit()
-        return flask.redirect(flask.url_for(redirect))
+        if flask.request.method == 'POST':
+            self.session.delete(self.data)
+            self.session.commit()
+            return flask.redirect(flask.url_for(redirect))
+        return flask.render_template(template, obj=self, **kwargs)
 
-    def view(self, template=None, *args, **kwargs):
+    def view(self, template=None, **kwargs):
         """Return the view_template."""
         self.form.process(obj=self.data)
-        return flask.render_template(
-            template, obj=self, *args, **kwargs)
+        return flask.render_template(template, obj=self, **kwargs)
 
     # Misc methods
     @property
     def primary_keys(self):
-        """Return a primary_keys/value dict."""
+        """Primary_keys/value dict."""
         return {
             column.key: getattr(self.data, column.key)
             for column in self._mapping.primary_key}
+
+    @property
+    def name(self):
+        """Common name."""
+        return getattr(self.data, self.list_column)
