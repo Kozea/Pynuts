@@ -5,6 +5,8 @@ import docutils.core
 from tempfile import NamedTemporaryFile
 from flask import send_file
 import jinja2
+import os
+import shutil
 
 
 class MetaDocument(type):
@@ -24,23 +26,43 @@ class Document(object):
     folder = None
     environment = None
     path = None
+    model = None
 
-    def generate_HTML(self, part, **kwargs):
-        source = self.environment.get_template(
-            self.path.format(**kwargs)).render(
+    @classmethod
+    def generate_HTML(cls, part, **kwargs):
+        source = cls.environment.get_template(
+            cls.path.format(**kwargs), parent=cls.folder).render(
             **kwargs).encode('utf-8')
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
-            settings_overrides=self.settings)
+            settings_overrides=cls.settings)
         text = parts[part].encode('utf-8')
         return text
 
-    def generate_PDF(self, **kwargs):
-        html = self.generate_HTML(part='whole', **kwargs)
-        return HTML(string=html).write_pdf(stylesheets=self.css)
+    @classmethod
+    def generate_PDF(cls, **kwargs):
+        html = cls.generate_HTML(part='whole', **kwargs)
+        return HTML(string=html).write_pdf(stylesheets=cls.css)
 
-    def download_PDF_attachment(self, attachment_filename=None, **kwargs):
+    @classmethod
+    def download_PDF_attachment(cls, attachment_filename=None, **kwargs):
         temp_file = NamedTemporaryFile(suffix='.pdf', delete=False)
-        temp_file.write(self.generate_PDF(**kwargs))
+        temp_file.write(cls.generate_PDF(**kwargs))
         return send_file(temp_file.name, as_attachment=True,
                          attachment_filename=attachment_filename)
+
+    @classmethod
+    def create(cls, **kwargs):
+        path = cls.path.format(**kwargs)
+
+        # Don't allow paths to go one layer up
+        # TODO: make this work on non-POSIX environments
+        while path.startswith('../'):
+            path = path[3:]
+        while path.startswith('/'):
+            path = path[1:]
+
+        path = os.path.join(cls.folder, path)
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+        shutil.copy(cls.model, path)
