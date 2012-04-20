@@ -97,9 +97,9 @@ class ModelView(object):
         self.form = self.Form(flask.request.form, obj=self.data)
 
     @classmethod
-    def all(cls):
+    def query(cls, query=None):
         """Return all the elements of the SQLAlchemy class."""
-        for data in cls.model.query.all():
+        for data in (query or cls.model.query).all():
             yield cls(data=data)
 
     @classproperty
@@ -171,10 +171,10 @@ class ModelView(object):
 
     # View methods
     @classmethod
-    def view_list(cls):
+    def view_list(cls, query=None):
         """Render the HTML for list_template."""
         template = JINJA2_ENVIRONMENT.get_template(cls.list_template)
-        return jinja2.Markup(template.render(cls=cls))
+        return jinja2.Markup(template.render(cls=cls, query=query))
 
     def view_object(self):
         """Render the HTML for view_template."""
@@ -182,10 +182,10 @@ class ModelView(object):
         return jinja2.Markup(template.render(obj=self))
 
     @classmethod
-    def view_table(cls):
+    def view_table(cls, query=None):
         """Render the HTML for table_template."""
         template = JINJA2_ENVIRONMENT.get_template(cls.table_template)
-        return jinja2.Markup(template.render(cls=cls))
+        return jinja2.Markup(template.render(cls=cls, query=query))
 
     def view_create(self):
         """Render the HTML for create_template."""
@@ -204,14 +204,14 @@ class ModelView(object):
 
     # CRUD methods
     @classmethod
-    def list(cls, template=None, **kwargs):
+    def list(cls, template=None, query=None, **kwargs):
         """Return the list_template."""
-        return flask.render_template(template, cls=cls, **kwargs)
+        return flask.render_template(template, cls=cls, query=query, **kwargs)
 
     @classmethod
-    def table(cls, template=None, **kwargs):
+    def table(cls, template=None, query=None, **kwargs):
         """Return the table_template."""
-        return flask.render_template(template, cls=cls, **kwargs)
+        return flask.render_template(template, cls=cls, query=query, **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method.

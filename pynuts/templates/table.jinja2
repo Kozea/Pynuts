@@ -8,7 +8,7 @@
     <th>Delete</th>
   </tr>
   
-  {% for obj in cls.all() %}
+  {% for obj in cls.query(query) %}
     <tr>
       {% for column in cls.table_columns %}
         <td>{{ obj.data[column] }}</td>

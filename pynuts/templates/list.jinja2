@@ -1,5 +1,5 @@
 <ul>
-  {% for obj in cls.all() %}
+  {% for obj in cls.query(query) %}
     <li>
       {% if obj.view_endpoint %}
         <a href="{{ obj.action_url_for('view') }}">
