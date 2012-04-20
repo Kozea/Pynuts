@@ -53,13 +53,7 @@ class Document(object):
 
     @classmethod
     def create(cls, **kwargs):
-        path = cls.path.format(**kwargs)
-
-        try:
-            path = safe_join(cls.folder, path)
-        except:
-            raise Exception()
-
+        path = safe_join(cls.folder, cls.path.format(**kwargs))
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
         shutil.copytree(cls.model, path)
