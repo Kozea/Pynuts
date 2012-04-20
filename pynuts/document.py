@@ -3,7 +3,7 @@ from weasyprint import HTML
 from docutils.writers.html4css1 import Writer
 import docutils.core
 from tempfile import NamedTemporaryFile
-from flask import send_file
+from flask import send_file, safe_join
 import jinja2
 import os
 import shutil
@@ -55,14 +55,11 @@ class Document(object):
     def create(cls, **kwargs):
         path = cls.path.format(**kwargs)
 
-        # Don't allow paths to go one layer up
-        # TODO: make this work on non-POSIX environments
-        while path.startswith('../'):
-            path = path[3:]
-        while path.startswith('/'):
-            path = path[1:]
+        try:
+            path = safe_join(cls.folder, path)
+        except:
+            raise Exception()
 
-        path = os.path.join(cls.folder, path)
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
-        shutil.copy(cls.model, path)
+        shutil.copytree(cls.model, path)
