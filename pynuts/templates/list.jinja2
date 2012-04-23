@@ -6,8 +6,8 @@
       {% elif obj.view_endpoint %}
         <a href="{{ obj.action_url_for('view') }}">
       {% endif %}
-        {{ obj.data[obj.list_column] }}
-      {% if obj.view_endpoint %}
+      {{ obj.data[obj.list_column] }}
+      {% if endpoint or obj.view_endpoint %}
         </a>
       {% endif %}
     </li>
