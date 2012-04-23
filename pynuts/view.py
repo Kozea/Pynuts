@@ -171,10 +171,11 @@ class ModelView(object):
 
     # View methods
     @classmethod
-    def view_list(cls, query=None):
+    def view_list(cls, query=None, endpoint=None):
         """Render the HTML for list_template."""
         template = JINJA2_ENVIRONMENT.get_template(cls.list_template)
-        return jinja2.Markup(template.render(cls=cls, query=query))
+        return jinja2.Markup(template.render(
+            cls=cls, query=query, endpoint=endpoint))
 
     def view_object(self):
         """Render the HTML for view_template."""
@@ -182,10 +183,11 @@ class ModelView(object):
         return jinja2.Markup(template.render(obj=self))
 
     @classmethod
-    def view_table(cls, query=None):
+    def view_table(cls, query=None, endpoint=None):
         """Render the HTML for table_template."""
         template = JINJA2_ENVIRONMENT.get_template(cls.table_template)
-        return jinja2.Markup(template.render(cls=cls, query=query))
+        return jinja2.Markup(template.render(
+            cls=cls, query=query, endpoint=endpoint))
 
     def view_create(self):
         """Render the HTML for create_template."""
