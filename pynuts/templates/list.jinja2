@@ -1,15 +1,17 @@
-<ul>
-  {% for obj in cls.query(query) %}
-    <li>
-      {% if endpoint %}
-        <a href="{{ endpoint(obj=obj) }}">
-      {% elif obj.view_endpoint %}
-        <a href="{{ obj.action_url_for('view') }}">
-      {% endif %}
-      {{ obj.data[obj.list_column] }}
-      {% if endpoint or obj.view_endpoint %}
-        </a>
-      {% endif %}
-    </li>
-  {% endfor %}
-</ul>
+{% showonmatch 'ul li' %}
+    <ul>
+      {% for obj in cls.query(query) %}
+        <li>
+          {% if endpoint %}
+            <a href="{{ endpoint(obj=obj) }}">
+          {% elif obj.view_endpoint %}
+            <a href="{{ obj.action_url_for('view') }}">
+          {% endif %}
+          {{ obj.data[obj.list_column] }}
+          {% if endpoint or obj.view_endpoint %}
+            </a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+{% endshowonmatch %}

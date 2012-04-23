@@ -4,11 +4,7 @@ import flask
 import jinja2
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
-
-# Set the jinja2 environment by defining templates location and globals.
-JINJA2_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.PackageLoader('pynuts', 'templates'))
-JINJA2_ENVIRONMENT.globals.update({'url_for': flask.url_for})
+from environment import JINJA2_ENVIRONMENT
 
 
 class MetaView(type):

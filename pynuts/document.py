@@ -8,7 +8,7 @@ from flask import (
 import jinja2
 import os
 import shutil
-from pynuts.view import JINJA2_ENVIRONMENT
+from environment import JINJA2_ENVIRONMENT
 
 
 class MetaDocument(type):
@@ -129,7 +129,7 @@ class Document(object):
            You can choose which part of the document you want
 
            (check docutils writer publish parts)
- 
+
         """
         template = JINJA2_ENVIRONMENT.get_template(cls.html_document)
         text = cls.generate_HTML(part=part, **kwargs).decode('utf-8')

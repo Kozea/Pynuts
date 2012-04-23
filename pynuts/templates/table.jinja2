@@ -1,30 +1,32 @@
-<table>
-  <tr>
-    {% for column in cls.table_columns %}
-      {% set field = cls.Form()[column] %}
-      <th>{{ field.label() }}</th>
-    {% endfor %}
-    <th>Edit</th>
-    <th>Delete</th>
-  </tr>
-  
-  {% for obj in cls.query(query) %}
-    <tr>
-      {% for column in cls.table_columns %}
-        <td>
-          {% if endpoint %}
-            <a href="{{ endpoint(obj=obj) }}">
-          {% elif obj.view_endpoint %}
-            <a href="{{ obj.action_url_for('view') }}">
-          {% endif %}
-          {{ obj.data[column] }}
-          {% if endpoint or obj.view_endpoint %}
-            </a>
-          {% endif %}
-        </td>
+{% showonmatch 'tr td' %}
+    <table>
+      <tr>
+        {% for column in cls.table_columns %}
+          {% set field = cls.Form()[column] %}
+          <th>{{ field.label() }}</th>
+        {% endfor %}
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+      
+      {% for obj in cls.query(query) %}
+        <tr>
+          {% for column in cls.table_columns %}
+            <td>
+              {% if endpoint %}
+                <a href="{{ endpoint(obj=obj) }}">
+              {% elif obj.view_endpoint %}
+                <a href="{{ obj.action_url_for('view') }}">
+              {% endif %}
+              {{ obj.data[column] }}
+              {% if endpoint or obj.view_endpoint %}
+                </a>
+              {% endif %}
+            </td>
+          {% endfor %}
+          <td><a href="{{ obj.action_url_for('edit') }}">></a></td>
+          <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>
+        </tr>
       {% endfor %}
-      <td><a href="{{ obj.action_url_for('edit') }}">></a></td>
-      <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>
-    </tr>
-  {% endfor %}
-</table>
+    </table>
+{% endshowonmatch %}
