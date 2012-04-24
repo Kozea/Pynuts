@@ -7,5 +7,5 @@ setup(
     platforms="Any",
     packages=["pynuts"],
     package_data={'pynuts': ['templates/*.jinja2']},
-    provides=["pynuts"]
+    install_requires=['flask-sqlalchemy', 'flask-wtf', 'weasyprint', 'docutils']
 )
