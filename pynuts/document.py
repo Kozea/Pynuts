@@ -47,6 +47,7 @@ class Document(object):
 
     @classmethod
     def create_environment(cls, **kwargs):
+        """Create a Jinja environment related to a document."""
         environment = create_environment()
         environment.loader = ChoiceLoader((
             FileSystemLoader(safe_join(cls.folder, cls.path.format(**kwargs))),
@@ -67,6 +68,7 @@ class Document(object):
 
     @classmethod
     def static_route(cls, folder, filename):
+        """Serve static files for documents."""
         return send_file(safe_join(safe_join(cls.folder, folder), filename))
 
     @classmethod
