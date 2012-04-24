@@ -1,22 +1,30 @@
+import os
+import shutil
 import docutils
-from weasyprint import HTML
-from docutils.writers.html4css1 import Writer
+import jinja2
 import docutils.core
 from tempfile import NamedTemporaryFile
 from flask import (
-    send_file, safe_join, render_template, request, redirect, flash)
-import jinja2
-import os
-import shutil
-from environment import JINJA2_ENVIRONMENT
+    send_file, safe_join, render_template, request, redirect, flash, url_for)
+from jinja2 import ChoiceLoader, FileSystemLoader
+from weasyprint import HTML
+from docutils.writers.html4css1 import Writer
+
+from .environment import create_environment
 
 
 class MetaDocument(type):
     """Metaclass for document classes."""
     def __init__(metacls, name, bases, dict_):
         if metacls.folder:
-            metacls.environment = jinja2.Environment(
-                 loader=jinja2.FileSystemLoader(metacls.folder))
+            # TODO: find a better endpoint name than the name of the class
+            metacls._resource = metacls.__name__
+            metacls._pynuts.add_url_rule(
+                '/_resource/%s/<path:folder>/_get/<path:filename>' % (
+                    metacls._resource),
+                metacls._resource, metacls.static_route)
+            if metacls.settings is None:
+                metacls.settings = {}
         super(MetaDocument, metacls).__init__(name, bases, dict_)
 
 
@@ -24,10 +32,11 @@ class Document(object):
     """Class Document."""
     __metaclass__ = MetaDocument
 
-    settings = {}
+    _resource = None
+
+    settings = None
     css = None
     folder = None
-    environment = None
     path = None
     model = None
     index = 'index.rst.jinja2'
@@ -35,6 +44,30 @@ class Document(object):
     # Templates
     edit_template = 'edit_document.jinja2'
     html_document = 'html_document.jinja2'
+
+    @classmethod
+    def create_environment(cls, **kwargs):
+        environment = create_environment()
+        environment.loader = ChoiceLoader((
+            FileSystemLoader(safe_join(cls.folder, cls.path.format(**kwargs))),
+            environment.loader))
+        return environment
+
+    @classmethod
+    def resource_filename(cls, filename, **kwargs):
+        """Absolute resource filename."""
+        return u'file://%s' % os.path.join(cls.folder,
+            safe_join(cls.path.format(**kwargs), filename))
+
+    @classmethod
+    def resource_url(cls, filename, **kwargs):
+        """Resource URL for the application."""
+        return url_for(
+            cls._resource, folder=cls.path.format(**kwargs), filename=filename)
+
+    @classmethod
+    def static_route(cls, folder, filename):
+        return send_file(safe_join(safe_join(cls.folder, folder), filename))
 
     @classmethod
     def get_path(cls, **kwargs):
@@ -49,7 +82,7 @@ class Document(object):
             return stream.read()
 
     @classmethod
-    def generate_HTML(cls, part, **kwargs):
+    def generate_HTML(cls, part, resource, **kwargs):
         """Generate the HTML of the document.
 
            You can choose which part of the document you want
@@ -57,20 +90,21 @@ class Document(object):
            (check docutils writer publish parts)
 
         """
-        source = cls.environment.get_template(
-            safe_join(cls.path.format(**kwargs), cls.index),
-            parent=cls.folder).render(
-            **kwargs).encode('utf-8')
+        environment = cls.create_environment(**kwargs)
+        template = environment.get_template(cls.index)
+        source = template.render(resource=resource, **kwargs).encode('utf-8')
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
             settings_overrides=cls.settings)
-        text = parts[part].encode('utf-8')
-        return text
+        return parts[part].encode('utf-8')
 
     @classmethod
     def generate_PDF(cls, **kwargs):
         """Generate PDF from the document."""
-        html = cls.generate_HTML(part='whole', **kwargs)
+        resource_function = \
+            lambda filename: cls.resource_filename(filename, **kwargs)
+        html = cls.generate_HTML(
+            part='whole', resource=resource_function, **kwargs)
         return HTML(string=html).write_pdf(stylesheets=cls.css)
 
     @classmethod
@@ -113,7 +147,8 @@ class Document(object):
     @classmethod
     def view_edit(cls, **kwargs):
         """Render the HTML for edit_template."""
-        template = JINJA2_ENVIRONMENT.get_template(cls.edit_template)
+        environment = cls.create_environment(**kwargs)
+        template = environment.get_template(cls.edit_template)
         text = cls.get_rst(**kwargs).decode('utf-8')
         return jinja2.Markup(template.render(cls=cls, text=text, **kwargs))
 
@@ -131,6 +166,10 @@ class Document(object):
            (check docutils writer publish parts)
 
         """
-        template = JINJA2_ENVIRONMENT.get_template(cls.html_document)
-        text = cls.generate_HTML(part=part, **kwargs).decode('utf-8')
+        environment = cls.create_environment(**kwargs)
+        resource_function = \
+            lambda filename: cls.resource_url(filename, **kwargs)
+        template = environment.get_template(cls.html_document)
+        text = cls.generate_HTML(
+            part=part, resource=resource_function, **kwargs).decode('utf-8')
         return jinja2.Markup(template.render(cls=cls, text=text, **kwargs))

@@ -4,7 +4,8 @@ import flask
 import jinja2
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
-from environment import JINJA2_ENVIRONMENT
+
+from .environment import create_environment
 
 
 class MetaView(type):
@@ -54,6 +55,9 @@ class ModelView(object):
 
     # Mapper
     _mapping = None
+
+    # Jinja2 environment
+    environment = create_environment()
 
     # SQLAlchemy model
     model = None
@@ -169,35 +173,35 @@ class ModelView(object):
     @classmethod
     def view_list(cls, query=None, endpoint=None):
         """Render the HTML for list_template."""
-        template = JINJA2_ENVIRONMENT.get_template(cls.list_template)
+        template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
             cls=cls, query=query, endpoint=endpoint))
 
     def view_object(self):
         """Render the HTML for view_template."""
-        template = JINJA2_ENVIRONMENT.get_template(self.view_template)
+        template = self.environment.get_template(self.view_template)
         return jinja2.Markup(template.render(obj=self))
 
     @classmethod
     def view_table(cls, query=None, endpoint=None):
         """Render the HTML for table_template."""
-        template = JINJA2_ENVIRONMENT.get_template(cls.table_template)
+        template = cls.environment.get_template(cls.table_template)
         return jinja2.Markup(template.render(
             cls=cls, query=query, endpoint=endpoint))
 
     def view_create(self):
         """Render the HTML for create_template."""
-        template = JINJA2_ENVIRONMENT.get_template(self.create_template)
+        template = self.environment.get_template(self.create_template)
         return jinja2.Markup(template.render(obj=self))
 
     def view_edit(self):
         """Render the HTML for edit_template."""
-        template = JINJA2_ENVIRONMENT.get_template(self.edit_template)
+        template = self.environment.get_template(self.edit_template)
         return jinja2.Markup(template.render(obj=self))
 
     def view_delete(self):
         """Render the HTML for edit_template."""
-        template = JINJA2_ENVIRONMENT.get_template(self.delete_template)
+        template = self.environment.get_template(self.delete_template)
         return jinja2.Markup(template.render(obj=self))
 
     # CRUD methods
