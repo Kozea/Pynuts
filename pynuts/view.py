@@ -10,15 +10,15 @@ from .environment import create_environment
 
 class MetaView(type):
     """Metaclass for view classes."""
-    def __init__(metacls, name, bases, dict_):
-        if metacls.model:
-            metacls._mapping = metacls._mapping or class_mapper(metacls.model)
-            column_names = (column.key for column in metacls._mapping.columns)
-            metacls.view_columns = metacls.view_columns or column_names
-            metacls.table_columns = metacls.table_columns or column_names
-            metacls.edit_columns = metacls.edit_columns or column_names
-            metacls.create_columns = metacls.create_columns or column_names
-        super(MetaView, metacls).__init__(name, bases, dict_)
+    def __init__(cls, name, bases, dict_):
+        if cls.model:
+            cls._mapping = cls._mapping or class_mapper(cls.model)
+            column_names = (column.key for column in cls._mapping.columns)
+            cls.view_columns = cls.view_columns or column_names
+            cls.table_columns = cls.table_columns or column_names
+            cls.edit_columns = cls.edit_columns or column_names
+            cls.create_columns = cls.create_columns or column_names
+        super(MetaView, cls).__init__(name, bases, dict_)
 
 
 class ModelView(object):

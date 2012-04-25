@@ -36,7 +36,6 @@ class TestFS(unittest.TestCase):
             with open(os.path.join(temp, 'hello.jinja'), 'w') as fd:
                 fd.write(self.hello2_content)
 
-            now = time.time()
             self._check_fs(directory=fs.RealFS(temp), now=time.time(),
                            hello_filename=os.path.join(temp, 'hello.jinja'))
 
