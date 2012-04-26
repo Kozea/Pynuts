@@ -190,7 +190,7 @@ class Document(object):
             document.branch, commit_id)
 
     @classmethod
-    def edit(cls, template, part='index.html.jinja2', redirect_url=None,
+    def edit(cls, template, part='index.rst.jinja2', redirect_url=None,
              **kwargs):
         """Return the template where you can edit the ReST document.
 
@@ -220,7 +220,7 @@ class Document(object):
         return render_template(template, cls=cls, **kwargs)
 
     @classmethod
-    def view_edit(cls, part='index.html.jinja2', **kwargs):
+    def view_edit(cls, part='index.rst.jinja2', **kwargs):
         """Render the HTML for edit_template."""
         document = cls.from_data(**kwargs)
         template = document.environment.get_template(cls.edit_template)
@@ -234,7 +234,7 @@ class Document(object):
         return render_template(template, cls=cls, **kwargs)
 
     @classmethod
-    def view_html(cls, part='index.html.jinja2', **kwargs):
+    def view_html(cls, part='index.rst.jinja2', **kwargs):
         """Generate a HTML document ready to include in Jinja templates.
 
         :param part: part of the HTML to render (check docutils writer).
