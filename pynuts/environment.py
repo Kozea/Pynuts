@@ -7,25 +7,24 @@ from jinja2.ext import Extension
 
 
 class ShowOnMatch(Extension):
-    """
-    This extension introduces a new tag ``showonmatch``, allowing conditional
-    output of a its body according to a css selector.
+    """This extension introduces a new tag ``showonmatch``, allowing\
+    conditional output of a its body according to a css selector.
 
-    Ex:
-
-    This will output an ul with lis if mylist is not empty, or no result
+    This will output an ul with lis if mylist is not empty, or no result\
     otherwise:
 
+    .. sourcecode:: html+jinja
 
-    {% showonmatch 'ul li' %}
-        <ul>
-        {% for a in mylist %}
+        {% showonmatch 'ul li' %}
+          <ul>
+          {% for a in mylist %}
             <li>{{a}}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No result</p>
-    {% endshowonmatch %}
+          {% endfor %}
+          </ul>
+          {% else %}
+            <p>No result</p>
+        {% endshowonmatch %}
+
     """
     tags = set(['showonmatch'])
 
