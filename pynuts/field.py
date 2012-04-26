@@ -1,3 +1,5 @@
+"""Wtforms fields created for Pynuts."""
+
 from wtforms import StringField
 from wtforms.widgets import html_params, HTMLString
 

@@ -1,0 +1,18 @@
+body            { font-family: sans-serif; background: #eee; margin: 0;
+                    padding: 0; width: 80%; margin-left: 10%; }
+a, h1, h2       { color: #377BA8; }
+h1, h2          { font-family: 'Georgia', serif; margin: 0; }
+h1              { border-bottom: 2px solid #eee; text-align: center; }
+h2              { font-size: 1.2em; }
+
+nav             { text-align: center; margin: 1em; }
+nav a           { margin: 1em; }
+
+section         { border: 1px solid #ddd; }
+
+form            { margin: 0.5em; }
+
+table, table td { border: thin solid #999; border-collapse: collapse; 
+                    width: 50%; text-align:center; }
+
+.error ul       { background: #F0D6D6; }

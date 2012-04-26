@@ -1,0 +1,351 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &mdash; Pynuts 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pynuts 0.1 documentation" href="index.html" />
+    <link rel="prev" title="API" href="API.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="API.html" title="API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pynuts 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The first part of this tutorial describes how to basically make CRUD with a Pynuts application.
+The second part explains</p>
+<div class="section" id="step-1-creating-the-files">
+<h2>Step 1: Creating the files<a class="headerlink" href="#step-1-creating-the-files" title="Permalink to this headline">¶</a></h2>
+<p>Create 4 files at the root of your application:</p>
+<ul class="simple">
+<li>application.py</li>
+<li>view.py</li>
+<li>database.py</li>
+<li>executable.py</li>
+</ul>
+<p>Then create the <cite>templates</cite> and <cite>static</cite> folders.</p>
+</div>
+<div class="section" id="step-2-defining-the-pynuts-application">
+<h2>Step 2: Defining the Pynuts application<a class="headerlink" href="#step-2-defining-the-pynuts-application" title="Permalink to this headline">¶</a></h2>
+<p>First, in <tt class="docutils literal"><span class="pre">application.py</span></tt> you have to import pynuts module by calling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pynuts</span>
+</pre></div>
+</div>
+<p>Then you have to specify the configuration like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;CSRF_ENABLED&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s">&#39;SQLALCHEMY_DATABASE_URI&#39;</span><span class="p">:</span> <span class="s">&#39;sqlite:////tmp/test.db&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><cite>CSRF_ENABLED</cite></dt>
+<dd>This is used by WTForms, see <a class="reference external" href="http://packages.python.org/Flask-WTF">WTForms documentation</a></dd>
+<dt><cite>SQLALCHEMY_DATABASE_URI</cite></dt>
+<dd>This is the database. In this tutorial we will use a SQLite database.</dd>
+</dl>
+<p>Finally you have to create your pynuts application with the configuration written before:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">app</span> <span class="o">=</span> <span class="n">pynuts</span><span class="o">.</span><span class="n">Pynuts</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-3-the-database-model">
+<h2>Step 3: The database model<a class="headerlink" href="#step-3-the-database-model" title="Permalink to this headline">¶</a></h2>
+<p>In <tt class="docutils literal"><span class="pre">database.py</span></tt> import the pynuts application:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">application</span> <span class="kn">import</span> <span class="n">app</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.hybrid</span> <span class="kn">import</span> <span class="n">hybrid_property</span>
+</pre></div>
+</div>
+<p>Then, create a SQLAlchemy class.
+<a class="reference external" href="http://www.sqlalchemy.org">Learn more about SQLAlchemy</a></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Employee</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s">&#39;Employee&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">())</span>
+    <span class="n">firstname</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">())</span>
+
+    <span class="nd">@hybrid_property</span>
+    <span class="k">def</span> <span class="nf">fullname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> - </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">firstname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We decided here to add a property in our model called <cite>fullname</cite>, which represents better the employee than a simple name or firstname.</p>
+<p>It will be useful to easily display the employees&#8217; list later.</p>
+</div>
+<div class="section" id="step-4-the-view-model">
+<h2>Step 4: The view model<a class="headerlink" href="#step-4-the-view-model" title="Permalink to this headline">¶</a></h2>
+<p>In <tt class="docutils literal"><span class="pre">view.py</span></tt> you have to import some things from WTForms, the pynuts application and the database model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">flaskext.wtf</span> <span class="kn">import</span> <span class="n">Form</span><span class="p">,</span> <span class="n">TextField</span><span class="p">,</span> <span class="n">Required</span>
+
+<span class="kn">import</span> <span class="nn">database</span>
+<span class="kn">from</span> <span class="nn">application</span> <span class="kn">import</span> <span class="n">app</span>
+</pre></div>
+</div>
+<p>Now you have to create the view class that represents the Employee class. It extends the pynuts ModelView:</p>
+<div class="highlight-python"><pre>class EmployeeView(app.ModelView):</pre>
+</div>
+<p>Then you have to specify the class attributes.</p>
+<p>Our database model class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">Employee</span>
+</pre></div>
+</div>
+<p>The column which represents the class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">list_column</span> <span class="o">=</span> <span class="s">&#39;fullname&#39;</span>
+</pre></div>
+</div>
+<p><em>Warning : This must be a String not a Tuple</em></p>
+<p>The create_columns are the columns displayed in the view.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">create_columns</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;firstname&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To finish we have to create a form for our view class. The form is extended form the Flask-WTForms Form.
+See <a class="reference external" href="http://packages.python.org/Flask-WTF">Flask-WTForms</a> for more information.</p>
+<p>This form is used for representing the columns from the Employee class into HTML field using WTForms fields. Those fields will be displayed in CRUD views.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Form</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">TextField</span><span class="p">(</span><span class="s">u&#39;Surname&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Required</span><span class="p">()])</span>
+    <span class="n">firstname</span> <span class="o">=</span> <span class="n">TextField</span><span class="p">(</span><span class="s">u&#39;Firstname&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Required</span><span class="p">()])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-5-the-executable">
+<h2>Step 5: The executable<a class="headerlink" href="#step-5-the-executable" title="Permalink to this headline">¶</a></h2>
+<p>The executable file provides all the routes.</p>
+<p>In this file you have to import your pynuts application and your database by calling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">application</span> <span class="kn">import</span> <span class="n">app</span>
+<span class="kn">from</span> <span class="nn">pynuts</span> <span class="kn">import</span> <span class="n">view</span>
+</pre></div>
+</div>
+<div class="section" id="the-list-view">
+<h3>The List View<a class="headerlink" href="#the-list-view" title="Permalink to this headline">¶</a></h3>
+<p>All the employees are listed in this view.
+To list them we call the method <cite>list</cite> which takes the template name as first parameter.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/employees/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">employees</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">view</span><span class="o">.</span><span class="n">EmployeeView</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s">&#39;list_employees.html&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-add-view">
+<h3>The Add View<a class="headerlink" href="#the-add-view" title="Permalink to this headline">¶</a></h3>
+<p>This view allows the <cite>POST</cite> and <cite>GET</cite> methods. The <cite>POST</cite> one is used for adding a new entry in the database. The <cite>GET</cite> one is used for displaying the create form acording to the <cite>create_columns</cite> you specified in <tt class="docutils literal"><span class="pre">view.py</span></tt>. The method create takes the template as first parameter and the view returned if the adding went well as second parameter. In our turorial we redirect to the list view.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/employee/add/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;POST&#39;</span><span class="p">,</span> <span class="s">&#39;GET&#39;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">add_employee</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">view</span><span class="o">.</span><span class="n">EmployeeView</span><span class="p">()</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s">&#39;add_employee.html&#39;</span><span class="p">,</span>
+                                      <span class="n">redirect</span><span class="o">=</span><span class="s">&#39;employees&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-main">
+<h3>The Main<a class="headerlink" href="#the-main" title="Permalink to this headline">¶</a></h3>
+<p>The main looks like that:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="s">&#39;Azerty&#39;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the main, we initialize the SQLite database and then run the server.
+Since the application is a Flask one, you have to set a <cite>secret_key</cite> if you want the server to run properly.</p>
+</div>
+</div>
+<div class="section" id="step-6-the-templates">
+<h2>Step 6: The Templates<a class="headerlink" href="#step-6-the-templates" title="Permalink to this headline">¶</a></h2>
+<p>For more information about the templates, you can see the <a class="reference external" href="http://jinja.pocoo.org/docs/templates">Jinja2 documentation</a></p>
+<div class="section" id="layout-html">
+<h3>layout.html<a class="headerlink" href="#layout-html" title="Permalink to this headline">¶</a></h3>
+<p>This template contains the HTML skeleton.</p>
+<div class="highlight-html+jinja"><div class="highlight"><pre><span class="cp">&lt;!Doctype html&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+  <span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;section&gt;</span>
+    <span class="cp">{%</span> <span class="k">block</span> <span class="nv">main</span> <span class="cp">%}</span>
+    <span class="cp">{%</span> <span class="k">endblock</span> <span class="nv">main</span> <span class="cp">%}</span>
+    <span class="nt">&lt;/section&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="list-employees-html">
+<h3>list_employees.html<a class="headerlink" href="#list-employees-html" title="Permalink to this headline">¶</a></h3>
+<p>This template show a list of all employees present in the database.</p>
+<p><cite>cls</cite> stands for the EmployeeView class.</p>
+<div class="highlight-html+jinja"><div class="highlight"><pre><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;_layout.html&quot;</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">main</span> <span class="cp">%}</span>
+  <span class="nt">&lt;h2&gt;</span>Employee List<span class="nt">&lt;/h2&gt;</span>
+  <span class="cp">{{</span> <span class="nv">cls.view_list</span><span class="o">()</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="nv">main</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-employee-html">
+<h3>add_employee.html<a class="headerlink" href="#add-employee-html" title="Permalink to this headline">¶</a></h3>
+<p>This template shows a form to create an employee.</p>
+<p><cite>obj</cite> stands_for an instance of EmployeeView.</p>
+<div class="highlight-html+jinja"><div class="highlight"><pre><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;_layout.html&quot;</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">block</span> <span class="nv">main</span> <span class="cp">%}</span>
+  <span class="nt">&lt;h2&gt;</span>Add New Employee<span class="nt">&lt;/h2&gt;</span>
+  <span class="cp">{{</span> <span class="nv">obj.view_create</span><span class="o">()</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="nv">main</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="handling-form-errors">
+<h3>Handling form errors<a class="headerlink" href="#handling-form-errors" title="Permalink to this headline">¶</a></h3>
+<p>Handling errors is really simple. Just add this code to your <tt class="docutils literal"><span class="pre">layout.html</span></tt></p>
+<div class="highlight-html+jinja"><div class="highlight"><pre><span class="cp">{%</span> <span class="k">with</span> <span class="nv">messages</span> <span class="o">=</span> <span class="nv">get_flashed_messages</span><span class="o">(</span><span class="nv">with_categories</span><span class="o">=</span><span class="kp">true</span><span class="o">)</span> <span class="cp">%}</span>
+  <span class="cp">{%</span> <span class="k">for</span> <span class="nv">style</span><span class="o">,</span> <span class="nv">messages</span> <span class="k">in</span> <span class="nv">messages</span> <span class="o">|</span> <span class="nf">groupby</span><span class="o">(</span><span class="m">0</span><span class="o">)</span> <span class="cp">%}</span>
+    <span class="nt">&lt;aside</span> <span class="na">class=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">style</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;ul&gt;</span>
+        <span class="cp">{%</span> <span class="k">for</span> <span class="nv">message</span> <span class="k">in</span> <span class="nv">messages</span> <span class="cp">%}</span>
+          <span class="nt">&lt;li&gt;</span><span class="cp">{{</span> <span class="nv">message</span><span class="o">[</span><span class="m">1</span><span class="o">]</span> <span class="cp">}}</span><span class="nt">&lt;/li&gt;</span>
+        <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+      <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/aside&gt;</span>
+  <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">endwith</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="step-7-adding-style">
+<h2>Step 7: Adding Style<a class="headerlink" href="#step-7-adding-style" title="Permalink to this headline">¶</a></h2>
+<p>The final step to your little application. Everything should be working fine, it&#8217;s time to add some style !</p>
+<p>Create a file <cite>style.css</cite> in the static folder, you can use the css below:</p>
+<div class="highlight-css"><div class="highlight"><pre><span class="nt">body</span>            <span class="p">{</span> <span class="k">font-family</span><span class="o">:</span> <span class="k">sans-serif</span><span class="p">;</span> <span class="k">background</span><span class="o">:</span> <span class="m">#eee</span><span class="p">;</span>
+                    <span class="k">margin</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span> <span class="k">padding</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span> <span class="k">width</span><span class="o">:</span> <span class="m">80</span><span class="o">%</span><span class="p">;</span> <span class="k">margin-left</span><span class="o">:</span> <span class="m">10</span><span class="o">%</span><span class="p">;</span> <span class="p">}</span>
+<span class="nt">a</span><span class="o">,</span> <span class="nt">h1</span><span class="o">,</span> <span class="nt">h2</span>       <span class="p">{</span> <span class="k">color</span><span class="o">:</span> <span class="m">#377BA8</span><span class="p">;</span> <span class="p">}</span>
+<span class="nt">h1</span><span class="o">,</span> <span class="nt">h2</span>          <span class="p">{</span> <span class="k">font-family</span><span class="o">:</span> <span class="s1">&#39;Georgia&#39;</span><span class="o">,</span> <span class="k">serif</span><span class="p">;</span> <span class="k">margin</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span> <span class="p">}</span>
+<span class="nt">h1</span>              <span class="p">{</span> <span class="k">border-bottom</span><span class="o">:</span> <span class="m">2px</span> <span class="k">solid</span> <span class="m">#eee</span><span class="p">;</span> <span class="k">text-align</span><span class="o">:</span> <span class="k">center</span><span class="p">;</span> <span class="p">}</span>
+<span class="nt">h2</span>              <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="nt">nav</span>             <span class="p">{</span> <span class="k">text-align</span><span class="o">:</span> <span class="k">center</span><span class="p">;</span> <span class="k">margin</span><span class="o">:</span> <span class="m">1em</span><span class="p">;</span> <span class="p">}</span>
+<span class="nt">nav</span> <span class="nt">a</span>           <span class="p">{</span> <span class="k">margin</span><span class="o">:</span> <span class="m">1em</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="nt">section</span>         <span class="p">{</span> <span class="k">border</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#ddd</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="nt">form</span>            <span class="p">{</span> <span class="k">margin</span><span class="o">:</span> <span class="m">0.5em</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="nc">.error</span> <span class="nt">ul</span>       <span class="p">{</span> <span class="k">background</span><span class="o">:</span> <span class="m">#F0D6D6</span><span class="p">;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<hr class="docutils" />
+<p>-&gt; <a class="reference external" href="https://github.com/Kozea/Pynuts">Get the whole tutorial application</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#step-1-creating-the-files">Step 1: Creating the files</a></li>
+<li><a class="reference internal" href="#step-2-defining-the-pynuts-application">Step 2: Defining the Pynuts application</a></li>
+<li><a class="reference internal" href="#step-3-the-database-model">Step 3: The database model</a></li>
+<li><a class="reference internal" href="#step-4-the-view-model">Step 4: The view model</a></li>
+<li><a class="reference internal" href="#step-5-the-executable">Step 5: The executable</a><ul>
+<li><a class="reference internal" href="#the-list-view">The List View</a></li>
+<li><a class="reference internal" href="#the-add-view">The Add View</a></li>
+<li><a class="reference internal" href="#the-main">The Main</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#step-6-the-templates">Step 6: The Templates</a><ul>
+<li><a class="reference internal" href="#layout-html">layout.html</a></li>
+<li><a class="reference internal" href="#list-employees-html">list_employees.html</a></li>
+<li><a class="reference internal" href="#add-employee-html">add_employee.html</a></li>
+<li><a class="reference internal" href="#handling-form-errors">Handling form errors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#step-7-adding-style">Step 7: Adding Style</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="API.html" title="previous chapter">API</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/Tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2012, Kozea.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pynuts.document &mdash; Pynuts 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Pynuts 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="pynuts" href="../pynuts.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../../index.html">Pynuts 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pynuts.html" accesskey="U">pynuts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pynuts.document</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Document file for Pynuts.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">docutils</span>
+<span class="kn">from</span> <span class="nn">weasyprint</span> <span class="kn">import</span> <span class="n">HTML</span>
+<span class="kn">from</span> <span class="nn">docutils.writers.html4css1</span> <span class="kn">import</span> <span class="n">Writer</span>
+<span class="kn">import</span> <span class="nn">docutils.core</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">send_file</span><span class="p">,</span> <span class="n">safe_join</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">flash</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">jinja2</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">environment</span> <span class="kn">import</span> <span class="n">JINJA2_ENVIRONMENT</span>
+
+
+<div class="viewcode-block" id="MetaDocument"><a class="viewcode-back" href="../../API.html#pynuts.document.MetaDocument">[docs]</a><span class="k">class</span> <span class="nc">MetaDocument</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for document classes.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">metacls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">metacls</span><span class="o">.</span><span class="n">folder</span><span class="p">:</span>
+            <span class="n">metacls</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>
+                 <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">metacls</span><span class="o">.</span><span class="n">folder</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MetaDocument</span><span class="p">,</span> <span class="n">metacls</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Document"><a class="viewcode-back" href="../../API.html#pynuts.document.Document">[docs]</a><span class="k">class</span> <span class="nc">Document</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class represents a document object. &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">MetaDocument</span>
+
+    <span class="n">environment</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: Docutils settings</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c">#: Document Stylesheet</span>
+    <span class="n">css</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: Path to the source model</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: Destination folder of instance document</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: Path to the model filename. Could be a python string format</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: Name of the model</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="s">&#39;index.rst.jinja2&#39;</span>
+
+    <span class="c"># Templates</span>
+    <span class="n">edit_template</span> <span class="o">=</span> <span class="s">&#39;edit_document.jinja2&#39;</span>
+    <span class="n">html_document</span> <span class="o">=</span> <span class="s">&#39;html_document.jinja2&#39;</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.get_path"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.get_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the complete path to the filename with safety.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span>
+            <span class="n">safe_join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">cls</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.get_rst"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.get_rst">[docs]</a>    <span class="k">def</span> <span class="nf">get_rst</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the ReST content of the document.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.generate_HTML"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.generate_HTML">[docs]</a>    <span class="k">def</span> <span class="nf">generate_HTML</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate the HTML of the document.</span>
+
+<span class="sd">        :param part: part of the document to generate</span>
+<span class="sd">        :type part: String</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            `Docutils writer publish parts \</span>
+<span class="sd">            &lt;http://docutils.sourceforge.net/docs/api/publisher.html\</span>
+<span class="sd">            #publish-parts-details&gt;`_</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span>
+            <span class="n">safe_join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">cls</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">docutils</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">publish_parts</span><span class="p">(</span>
+            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">Writer</span><span class="p">(),</span>
+            <span class="n">settings_overrides</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="n">part</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.generate_PDF"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.generate_PDF">[docs]</a>    <span class="k">def</span> <span class="nf">generate_PDF</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate PDF from the document.&quot;&quot;&quot;</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">generate_HTML</span><span class="p">(</span><span class="n">part</span><span class="o">=</span><span class="s">&#39;whole&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HTML</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">html</span><span class="p">)</span><span class="o">.</span><span class="n">write_pdf</span><span class="p">(</span><span class="n">stylesheets</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">css</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.download_PDF"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.download_PDF">[docs]</a>    <span class="k">def</span> <span class="nf">download_PDF</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return PDF file in attachment.</span>
+
+<span class="sd">        :param filename: set the filname attachment.</span>
+<span class="sd">        :type filename: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.pdf&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">temp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">generate_PDF</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">send_file</span><span class="p">(</span><span class="n">temp_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">as_attachment</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">attachment_filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.create"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create instance ReST model document and its resources.&quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">safe_join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.edit"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.edit">[docs]</a>    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redirect_url</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the template where you can edit the ReST document.</span>
+
+<span class="sd">        :param template: the view application template</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        :param redirect_url: the route to go after saving</span>
+<span class="sd">        :type redirect_url: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;document&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="n">flash</span><span class="p">(</span><span class="s">&#39;Document was saved.&#39;</span><span class="p">,</span> <span class="s">&#39;ok&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">redirect_url</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirect_url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.view_edit"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.view_edit">[docs]</a>    <span class="k">def</span> <span class="nf">view_edit</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for edit_template.&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">edit_template</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_rst</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.html"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.html">[docs]</a>    <span class="k">def</span> <span class="nf">html</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the HTML document template.</span>
+
+<span class="sd">        :param template: the view application template</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Document.view_html"><a class="viewcode-back" href="../../API.html#pynuts.document.Document.view_html">[docs]</a>    <span class="k">def</span> <span class="nf">view_html</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">part</span><span class="o">=</span><span class="s">&#39;html_body&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for html_document.</span>
+
+<span class="sd">        :param part: part of the document to generate</span>
+<span class="sd">        :type part: String</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            `Docutils writer publish parts \</span>
+<span class="sd">            &lt;http://docutils.sourceforge.net/docs/api/publisher.html\</span>
+<span class="sd">            #publish-parts-details&gt;`_</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">html_document</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">generate_HTML</span><span class="p">(</span><span class="n">part</span><span class="o">=</span><span class="n">part</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../pynuts.html">pynuts</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2012, Kozea.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

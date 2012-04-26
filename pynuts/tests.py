@@ -79,7 +79,6 @@ class TestFS(unittest.TestCase):
             store.add_object(commit2)
             repo.refs['refs/heads/master'] = commit2.id
             del repo
-            now = time.time()
 
             repo_bis = Repo(temp)
             assert repo_bis.ref('refs/heads/master') == repo_bis.head()
