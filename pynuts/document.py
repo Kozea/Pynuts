@@ -3,7 +3,6 @@ import docutils
 import jinja2
 import docutils.core
 import mimetypes
-from tempfile import NamedTemporaryFile
 from flask import Response, render_template, request, redirect, flash, url_for
 from werkzeug.datastructures import Headers
 from jinja2 import ChoiceLoader
@@ -49,18 +48,24 @@ class Document(object):
 
     def __init__(self, document_id, version=None):
         self.document_id = document_id
-        self.git = GitFS(self.repository, branch=document_id, commit=version)
+        self.git = GitFS(self.repository, branch=self.branch, commit=version)
         self.version = self.git.commit.id if self.git.commit else None
         self.environment = create_environment()
         self.environment.loader = ChoiceLoader((
             GitLoader(self.git), self.environment.loader))
 
+    @property
+    def branch(self):
+        """Branch name of the document."""
+        return 'refs/documents/%s' % self.document_id
+
     @classmethod
     def from_data(cls, version=None, **kwargs):
+        """Create an instance of the class from the given data."""
         return cls(cls.document_id_template.format(**kwargs), version=version)
 
     def resource_base64(self, filename, **kwargs):
-        """Absolute resource filename."""
+        """Resource content encoded in base64."""
         mimetype, _ = mimetypes.guess_type(filename)
         return 'data:%s;base64,%s' % (
             mimetype or '',
@@ -80,17 +85,16 @@ class Document(object):
             cls(document_id, version).git.read(filename), mimetype=mimetype)
 
     @classmethod
-    def generate_HTML(cls, part, resource_function='url', **kwargs):
+    def generate_HTML(cls, part, resource_type='url', **kwargs):
         """Generate the HTML of the document.
 
-           You can choose which part of the document you want
-
-           (check docutils writer publish parts)
+        :param part: part of the HTML to render (check docutils writer).
+        :param resource_type: external resource type: 'url' or 'base64'
 
         """
         document = cls.from_data(**kwargs)
         template = document.environment.get_template(document.index)
-        resource = getattr(document, 'resource_%s' % resource_function)
+        resource = getattr(document, 'resource_%s' % resource_type)
         source = template.render(resource=resource, **kwargs)
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
@@ -100,31 +104,17 @@ class Document(object):
     @classmethod
     def generate_PDF(cls, **kwargs):
         """Generate PDF from the document."""
-        html = cls.generate_HTML(
-            part='whole', resource_function='base64', **kwargs)
+        html = cls.generate_HTML('whole', 'base64', **kwargs)
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
     @classmethod
-    def view_html(cls, part='html_body', **kwargs):
-        """Render the HTML for html_document.
-
-           You can choose which part of the document you want
-
-           (check docutils writer publish parts)
-
-        """
-        return jinja2.Markup(cls.generate_HTML(part=part, **kwargs))
-
-    @classmethod
     def download_PDF(cls, filename=None, **kwargs):
-        """Return PDF file in attachment.
+        """Return a HTTP response with PDF document as file in attachment.
 
-           You can set the filname attachment.
+        :param filename: filename of the attached document.
 
         """
-        temp_file = NamedTemporaryFile(suffix='.pdf', delete=False)
-        temp_file.write(cls.generate_PDF(**kwargs))
         headers = Headers()
         headers.add('Content-Disposition', 'attachment', filename=filename)
         return Response(
@@ -144,7 +134,7 @@ class Document(object):
         commit_id = document.git.store_commit(
             tree_id, 'Pynuts', 'Create %s' % document.document_id)
         return document.git.repository.refs.add_if_new(
-            'refs/documents/%s' % document.document_id, commit_id)
+            document.branch, commit_id)
 
     @classmethod
     def edit(cls, template, redirect_url=None, **kwargs):
@@ -166,8 +156,7 @@ class Document(object):
             commit_id = document.git.store_commit(
                 tree_id, 'Pynuts', 'Edit %s' % document.document_id)
             if document.git.repository.refs.set_if_equals(
-                'refs/documents/%s' % document.document_id, document.version,
-                commit_id):
+                document.branch, document.version, commit_id):
                 flash('The document was saved.', 'ok')
                 if redirect_url:
                     return redirect(redirect_url)
@@ -183,3 +172,17 @@ class Document(object):
         text = document.git.read(cls.index).decode('utf-8')
         return jinja2.Markup(template.render(
             cls=cls, text=text, old_commit=document.git.commit.id, **kwargs))
+
+    @classmethod
+    def html(cls, template, **kwargs):
+        """Return the HTML document template."""
+        return render_template(template, cls=cls, **kwargs)
+
+    @classmethod
+    def view_html(cls, part='html_body', **kwargs):
+        """Generate a HTML document ready to include in Jinja templates.
+
+        :param part: part of the HTML to render (check docutils writer).
+
+        """
+        return jinja2.Markup(cls.generate_HTML(part=part, **kwargs))

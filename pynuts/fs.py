@@ -2,10 +2,8 @@ import os
 import time
 import errno
 import functools
-from io import BytesIO
 
 from dulwich.repo import Repo, Blob, Tree, Commit
-from flask import safe_join
 from werkzeug.exceptions import NotFound as werkzeug_NotFound
 from jinja2 import BaseLoader, TemplateNotFound
 
@@ -16,6 +14,7 @@ class FileNotFound(IOError):
 
 class NotAFile(IOError):
     """open() on a directory or other non-file object."""
+
 
 class NotADirectory(IOError):
     """listdir() on a file or other non-directory object."""
@@ -45,7 +44,6 @@ class GitFS(object):
         self.repository = Repo(repository)
         self.store = self.repository.object_store
         if not commit:
-            branch = 'refs/documents/%s' % branch
             if branch not in self.repository.refs:
                 # The branch does not exist yet
                 self.commit = self.tree = None
