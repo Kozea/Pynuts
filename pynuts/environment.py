@@ -1,3 +1,5 @@
+"""Jinja2 environment for pynuts."""
+
 # Set the jinja2 environment by defining templates location and globals.
 import flask
 from jinja2 import nodes, Environment, PackageLoader

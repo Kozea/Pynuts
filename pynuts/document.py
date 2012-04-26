@@ -1,3 +1,5 @@
+"""Document file for Pynuts."""
+
 import docutils
 from weasyprint import HTML
 from docutils.writers.html4css1 import Writer
@@ -21,15 +23,27 @@ class MetaDocument(type):
 
 
 class Document(object):
-    """Class Document."""
+    """This class represents a document object. """
     __metaclass__ = MetaDocument
 
-    settings = {}
-    css = None
-    folder = None
     environment = None
-    path = None
+
+    #: Docutils settings
+    settings = {}
+
+    #: Document Stylesheet
+    css = None
+
+    #: Path to the source model
     model = None
+
+    #: Destination folder of instance document
+    folder = None
+
+    #: Path to the model filename. Could be a python string format
+    path = None
+
+    #: Name of the model
     index = 'index.rst.jinja2'
 
     # Templates
@@ -38,7 +52,7 @@ class Document(object):
 
     @classmethod
     def get_path(cls, **kwargs):
-        """Return the report filename."""
+        """Return the complete path to the filename with safety."""
         return os.path.join(cls.folder,
             safe_join(cls.path.format(**kwargs), cls.index))
 
@@ -52,9 +66,13 @@ class Document(object):
     def generate_HTML(cls, part, **kwargs):
         """Generate the HTML of the document.
 
-           You can choose which part of the document you want
+        :param part: part of the document to generate
+        :type part: String
 
-           (check docutils writer publish parts)
+        .. seealso::
+            `Docutils writer publish parts \
+            <http://docutils.sourceforge.net/docs/api/publisher.html\
+            #publish-parts-details>`_
 
         """
         source = cls.environment.get_template(
@@ -77,7 +95,8 @@ class Document(object):
     def download_PDF(cls, filename=None, **kwargs):
         """Return PDF file in attachment.
 
-           You can set the filname attachment.
+        :param filename: set the filname attachment.
+        :type filename: String
 
         """
         temp_file = NamedTemporaryFile(suffix='.pdf', delete=False)
@@ -87,7 +106,7 @@ class Document(object):
 
     @classmethod
     def create(cls, **kwargs):
-        """Create the ReST document."""
+        """Create instance ReST model document and its resources."""
         path = safe_join(cls.folder, cls.path.format(**kwargs))
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
@@ -97,9 +116,11 @@ class Document(object):
     def edit(cls, template=None, redirect_url=None, **kwargs):
         """Return the template where you can edit the ReST document.
 
-           template: your application template
+        :param template: the view application template
+        :type template: String
 
-           redirect_url: the route you want to go after saving.
+        :param redirect_url: the route to go after saving
+        :type redirect_url: String
 
         """
         if request.method == 'POST':
@@ -119,16 +140,25 @@ class Document(object):
 
     @classmethod
     def html(cls, template=None, **kwargs):
-        """Return the HTML document template."""
+        """Return the HTML document template.
+
+        :param template: the view application template
+        :type template: String
+
+        """
         return render_template(template, cls=cls, **kwargs)
 
     @classmethod
     def view_html(cls, part='html_body', **kwargs):
         """Render the HTML for html_document.
 
-           You can choose which part of the document you want
+        :param part: part of the document to generate
+        :type part: String
 
-           (check docutils writer publish parts)
+        .. seealso::
+            `Docutils writer publish parts \
+            <http://docutils.sourceforge.net/docs/api/publisher.html\
+            #publish-parts-details>`_
 
         """
         template = JINJA2_ENVIRONMENT.get_template(cls.html_document)

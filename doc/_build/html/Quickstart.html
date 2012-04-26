@@ -1,0 +1,193 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quickstart &mdash; Pynuts 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pynuts 0.1 documentation" href="index.html" />
+    <link rel="next" title="API" href="API.html" />
+    <link rel="prev" title="Installation" href="Installation.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="API.html" title="API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Pynuts 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="a-minimal-application">
+<h2>A Minimal application<a class="headerlink" href="#a-minimal-application" title="Permalink to this headline">¶</a></h2>
+<p>A minimal Pynuts application looks something like this:</p>
+<p>A basic Pynuts application required 4 parts:</p>
+<ul class="simple">
+<li>An executable</li>
+<li>An application file which provides a Flask application</li>
+<li>A view class extended from pynuts ModelView</li>
+<li>A SQLAlchemy class</li>
+</ul>
+<p><tt class="docutils literal"><span class="pre">executable.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">flask</span>
+
+<span class="kn">from</span> <span class="nn">.application</span> <span class="kn">import</span> <span class="n">app</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/employees/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">employees</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">view</span><span class="o">.</span><span class="n">EmployeeView</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s">&#39;list_employees.html&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="s">&#39;Azerty&#39;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">application.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pynuts</span>
+
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;CSRF_ENABLED&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s">&#39;SQLALCHEMY_DATABASE_URI&#39;</span><span class="p">:</span> <span class="s">&#39;sqlite:////tmp/test.db&#39;</span><span class="p">}</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">pynuts</span><span class="o">.</span><span class="n">Pynuts</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">CONFIG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">view.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pynuts.field</span> <span class="kn">import</span> <span class="n">EditableField</span>
+<span class="kn">from</span> <span class="nn">flask.ext.wtf</span> <span class="kn">import</span> <span class="n">Form</span><span class="p">,</span> <span class="n">TextField</span><span class="p">,</span> <span class="n">IntegerField</span><span class="p">,</span> <span class="n">Required</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">database</span>
+<span class="kn">from</span> <span class="nn">.application</span> <span class="kn">import</span> <span class="n">app</span>
+
+<span class="k">class</span> <span class="nc">EmployeeView</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ModelView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">Employee</span>
+
+    <span class="n">view_columns</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Form</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">IntegerField</span><span class="p">(</span><span class="s">u&#39;ID&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Required</span><span class="p">()])</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">TextField</span><span class="p">(</span><span class="s">u&#39;Surname&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Required</span><span class="p">()])</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">database.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">.application</span> <span class="kn">import</span> <span class="n">app</span>
+
+
+<span class="k">class</span> <span class="nc">Employee</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s">&#39;Employee&#39;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">(),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Then run the server</p>
+<div class="highlight-python"><pre>$ python executable.py
+* Running on http://127.0.0.1:5000/</pre>
+</div>
+<p>Now head over to <a class="reference external" href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a>, and you should see your list of employees.</p>
+<p>So what did that code do?</p>
+<blockquote>
+<div>First we imported the Flask class. An instance of this class will be our WSGI application. The first argument is the name of the application’s module. If you are using a single module (as in this example), you should use __name__ because depending on if it’s started as application or imported as module the name will be different (&#8216;__main__&#8217; versus the actual import name). For more information, have a look at the Flask documentation.
+Next we create an instance of this class. We pass it the name of the module or package. This is needed so that Flask knows where to look for templates, static files, and so on.
+We then use the route() decorator to tell Flask what URL should trigger our function.
+The function is given a name which is also used to generate URLs for that particular function, and returns the message we want to display in the user’s browser.
+Finally we use the run() function to run the local server with our application. The if __name__ == &#8216;__main__&#8217;: makes sure the server only runs if the script is executed directly from the Python interpreter and not used as imported module.</div></blockquote>
+<p>To stop the server, hit control-C.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quickstart</a><ul>
+<li><a class="reference internal" href="#a-minimal-application">A Minimal application</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Installation.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="API.html" title="next chapter">API</a></li>
+  </ul></li>
+</ul>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/Quickstart.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2012, Kozea.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>

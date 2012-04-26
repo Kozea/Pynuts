@@ -36,7 +36,6 @@ class TestFS(unittest.TestCase):
             with open(os.path.join(temp, 'hello.jinja'), 'w') as fd:
                 fd.write(self.hello2_content)
 
-            now = time.time()
             self._check_fs(directory=fs.RealFS(temp), now=time.time(),
                            hello_filename=os.path.join(temp, 'hello.jinja'))
 
@@ -80,7 +79,6 @@ class TestFS(unittest.TestCase):
             store.add_object(commit2)
             repo.refs['refs/heads/master'] = commit2.id
             del repo
-            now = time.time()
 
             repo_bis = Repo(temp)
             assert repo_bis.ref('refs/heads/master') == repo_bis.head()

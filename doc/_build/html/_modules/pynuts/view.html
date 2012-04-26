@@ -1,0 +1,441 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pynuts.view &mdash; Pynuts 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Pynuts 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="pynuts" href="../pynuts.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Pynuts 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pynuts.html" accesskey="U">pynuts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pynuts.view</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;View file for Pynuts.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">flask</span>
+<span class="kn">import</span> <span class="nn">jinja2</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">class_mapper</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.util</span> <span class="kn">import</span> <span class="n">classproperty</span>
+<span class="kn">from</span> <span class="nn">environment</span> <span class="kn">import</span> <span class="n">JINJA2_ENVIRONMENT</span>
+
+
+<div class="viewcode-block" id="MetaView"><a class="viewcode-back" href="../../API.html#pynuts.view.MetaView">[docs]</a><span class="k">class</span> <span class="nc">MetaView</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for view classes.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">metacls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">metacls</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="n">metacls</span><span class="o">.</span><span class="n">_mapping</span> <span class="o">=</span> <span class="n">metacls</span><span class="o">.</span><span class="n">_mapping</span> <span class="ow">or</span> <span class="n">class_mapper</span><span class="p">(</span><span class="n">metacls</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">key</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">metacls</span><span class="o">.</span><span class="n">_mapping</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="n">metacls</span><span class="o">.</span><span class="n">view_columns</span> <span class="o">=</span> <span class="n">metacls</span><span class="o">.</span><span class="n">view_columns</span> <span class="ow">or</span> <span class="n">column_names</span>
+            <span class="n">metacls</span><span class="o">.</span><span class="n">table_columns</span> <span class="o">=</span> <span class="n">metacls</span><span class="o">.</span><span class="n">table_columns</span> <span class="ow">or</span> <span class="n">column_names</span>
+            <span class="n">metacls</span><span class="o">.</span><span class="n">edit_columns</span> <span class="o">=</span> <span class="n">metacls</span><span class="o">.</span><span class="n">edit_columns</span> <span class="ow">or</span> <span class="n">column_names</span>
+            <span class="n">metacls</span><span class="o">.</span><span class="n">create_columns</span> <span class="o">=</span> <span class="n">metacls</span><span class="o">.</span><span class="n">create_columns</span> <span class="ow">or</span> <span class="n">column_names</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MetaView</span><span class="p">,</span> <span class="n">metacls</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ModelView"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView">[docs]</a><span class="k">class</span> <span class="nc">ModelView</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class represents the view of a SQLAlchemy model class.</span>
+
+<span class="sd">    It grants CRUD operations and offers the view corresponding.</span>
+
+<span class="sd">    :param keys: Your model primary keys</span>
+<span class="sd">    :type keys: String, Tuple</span>
+
+<span class="sd">    :param data: Your model data</span>
+<span class="sd">    :type data: Dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Metaclass</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">MetaView</span>
+
+    <span class="c"># Mapper</span>
+    <span class="n">_mapping</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: SQLAlchemy model</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    WTForms view form. Declare it in your view like this:</span>
+
+<span class="sd">    &gt;&gt;&gt; MyView(ModelView):</span>
+<span class="sd">    ...     class Form(Form):</span>
+<span class="sd">    ...         id = IntegerField(u&#39;Id&#39;, validators=[Required()])</span>
+<span class="sd">    ...         name = TextField(u&#39;Last name&#39;, validators=[Required()])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Endpoints</span>
+    <span class="n">add_endpoint</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">edit_endpoint</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">delete_endpoint</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">view_endpoint</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># Templates</span>
+    <span class="n">view_template</span> <span class="o">=</span> <span class="s">&#39;view.jinja2&#39;</span>
+    <span class="n">list_template</span> <span class="o">=</span> <span class="s">&#39;list.jinja2&#39;</span>
+    <span class="n">table_template</span> <span class="o">=</span> <span class="s">&#39;table.jinja2&#39;</span>
+    <span class="n">edit_template</span> <span class="o">=</span> <span class="s">&#39;edit.jinja2&#39;</span>
+    <span class="n">create_template</span> <span class="o">=</span> <span class="s">&#39;create.jinja2&#39;</span>
+    <span class="n">delete_template</span> <span class="o">=</span> <span class="s">&#39;delete.jinja2&#39;</span>
+
+    <span class="c">#: The column which represents your class</span>
+    <span class="n">list_column</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: The columns displayed in the view list</span>
+    <span class="n">view_columns</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: The columns displayed in the table</span>
+    <span class="n">table_columns</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: The columns you can edit</span>
+    <span class="n">edit_columns</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">#: The column you can set when creating an instance</span>
+    <span class="n">create_columns</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># Properties</span>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ModelView.primary_keys"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.primary_keys">[docs]</a>    <span class="k">def</span> <span class="nf">primary_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Primary keys/value dict.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">column</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">primary_key</span><span class="p">}</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="ModelView.name"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Common name.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_column</span><span class="p">)</span>
+
+    <span class="c"># Methods</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Form</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classproperty</span>
+    <span class="k">def</span> <span class="nf">mapping</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Table mapping.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_mapping</span>
+
+    <span class="nd">@classproperty</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Database session.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">session</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.query"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all the model elements according to a query..</span>
+
+<span class="sd">        :param query: The SQLAlchemy query</span>
+<span class="sd">        :type query: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="p">(</span><span class="n">query</span> <span class="ow">or</span> <span class="n">cls</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_form_attributes</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the form attributes.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">form</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">}</span>
+
+<div class="viewcode-block" id="ModelView.handle_errors"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.handle_errors">[docs]</a>    <span class="k">def</span> <span class="nf">handle_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flash all the errors contained in the form.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">errors</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">flask</span><span class="o">.</span><span class="n">flash</span><span class="p">(</span><span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span>
+                    <span class="s">u&#39;&lt;label for=&quot;</span><span class="si">%s</span><span class="s">&quot;&gt;</span><span class="si">%s</span><span class="s">&lt;/label&gt;: </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">))),</span>
+                <span class="s">&#39;error&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ModelView.template_url_for"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.template_url_for">[docs]</a>    <span class="k">def</span> <span class="nf">template_url_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return endpoint if callable, url_for this endpoint else.</span>
+
+<span class="sd">        :param endpoint: The endpoint for the registered URL rule</span>
+<span class="sd">        :type endpoint: String, func(lambda)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">endpoint</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">primary_keys</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">endpoint</span>
+</div>
+<div class="viewcode-block" id="ModelView.action_url_for"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.action_url_for">[docs]</a>    <span class="k">def</span> <span class="nf">action_url_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return url_for for CRUD operation.</span>
+
+<span class="sd">        :param action: Endpoint name</span>
+<span class="sd">        :type action: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_url_for</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_endpoint&#39;</span> <span class="o">%</span> <span class="n">action</span><span class="p">))</span>
+
+    <span class="c"># Endpoints methods</span></div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.edit_page"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.edit_page">[docs]</a>    <span class="k">def</span> <span class="nf">edit_page</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the edit_endpoint according to the function name.&quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">edit_endpoint</span> <span class="o">=</span> \
+            <span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">primary_keys</span><span class="p">:</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span>
+                <span class="n">function</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="o">**</span><span class="n">primary_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">function</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.add_page"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.add_page">[docs]</a>    <span class="k">def</span> <span class="nf">add_page</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the add_endpoint according to the function name.&quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">add_endpoint</span> <span class="o">=</span> <span class="n">function</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">return</span> <span class="n">function</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.delete_page"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.delete_page">[docs]</a>    <span class="k">def</span> <span class="nf">delete_page</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the delete_endpoint according to the function name.&quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">delete_endpoint</span> <span class="o">=</span> \
+            <span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">primary_keys</span><span class="p">:</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span>
+                <span class="n">function</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="o">**</span><span class="n">primary_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">function</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.view_page"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_page">[docs]</a>    <span class="k">def</span> <span class="nf">view_page</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the view_endpoint according to the function name.&quot;&quot;&quot;</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">view_endpoint</span> <span class="o">=</span> \
+            <span class="k">lambda</span> <span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">primary_keys</span><span class="p">:</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span>
+                <span class="n">function</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="o">**</span><span class="n">primary_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">function</span>
+
+    <span class="c"># View methods</span></div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.view_list"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_list">[docs]</a>    <span class="k">def</span> <span class="nf">view_list</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for list_template.</span>
+
+<span class="sd">        :param query: The SQLAlchemy query</span>
+<span class="sd">        :type query: String</span>
+
+<span class="sd">        :param endpoint: The endpoint for the registered URL rule</span>
+<span class="sd">        :type endpoint: String, func(lambda)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">list_template</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+            <span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">))</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.view_table"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_table">[docs]</a>    <span class="k">def</span> <span class="nf">view_table</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for table_template.</span>
+
+<span class="sd">        :param query: The SQLAlchemy query</span>
+<span class="sd">        :type query: String</span>
+
+<span class="sd">        :param endpoint: The endpoint for the registered URL rule</span>
+<span class="sd">        :type endpoint: String, func(lambda)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">table_template</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+            <span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ModelView.view_object"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_object">[docs]</a>    <span class="k">def</span> <span class="nf">view_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for view_template.&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">view_template</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ModelView.view_create"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_create">[docs]</a>    <span class="k">def</span> <span class="nf">view_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for create_template.&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_template</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ModelView.view_edit"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_edit">[docs]</a>    <span class="k">def</span> <span class="nf">view_edit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for edit_template.&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_template</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ModelView.view_delete"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view_delete">[docs]</a>    <span class="k">def</span> <span class="nf">view_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render the HTML for edit_template.&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_template</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Markup</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="c"># CRUD methods</span></div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.list"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the list_template.</span>
+
+<span class="sd">        :param template: The template you want to render</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        :param endpoint: The endpoint for the registered URL rule</span>
+<span class="sd">        :type endpoint: String, func(lambda)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="ModelView.table"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.table">[docs]</a>    <span class="k">def</span> <span class="nf">table</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the table_template.</span>
+
+<span class="sd">        :param template: The template you want to render</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        :param endpoint: The endpoint for the registered URL rule</span>
+<span class="sd">        :type endpoint: String, func(lambda)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">cls</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ModelView.create"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Define the create method. Also check the values in the form: \</span>
+
+<span class="sd">        If the values are OK : commit the form with its data; \</span>
+
+<span class="sd">        Else : Display the form with errors.</span>
+
+<span class="sd">        :param template: The template you want to render</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        :param redirect: The URL where you want to redirect after the function</span>
+<span class="sd">        :type redirect: String</span>
+
+<span class="sd">        :param values: The values of the object you want to create</span>
+<span class="sd">        :type values: Dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+            <span class="n">form_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_form_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">form_values</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">form_values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_url_for</span><span class="p">(</span><span class="n">redirect</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_errors</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ModelView.edit"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.edit">[docs]</a>    <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the edit_template. See the create method for more details.</span>
+
+<span class="sd">        :param template: The template you want to render</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        :param redirect: The URL where you want to redirect after the function</span>
+<span class="sd">        :type redirect: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_form_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_url_for</span><span class="p">(</span><span class="n">redirect</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_errors</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ModelView.delete"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redirect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete an entry from the database.</span>
+
+<span class="sd">        :param template: The template you want to render</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        :param redirect: The URL where you want to redirect after the function</span>
+<span class="sd">        :type redirect: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">redirect</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="n">redirect</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ModelView.view"><a class="viewcode-back" href="../../API.html#pynuts.view.ModelView.view">[docs]</a>    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the view_template.</span>
+
+<span class="sd">        :param template: The template you want to render</span>
+<span class="sd">        :type template: String</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../pynuts.html">pynuts</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2012, Kozea.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </body>
+</html>
