@@ -213,7 +213,7 @@ class Document(object):
                 request.form['document'].encode('utf-8'))
             tree_id = document.git.tree.add(part, 0100644, blob_id)
             commit_id = document.git.store_commit(
-                tree_id, [document.version.commit],
+                tree_id, [document.git.commit],
                 'Pynuts', 'Edit %s' % document.document_id)
             if document.git.repository.refs.set_if_equals(
                 document.branch, document.version, commit_id):
