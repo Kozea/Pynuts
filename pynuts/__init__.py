@@ -14,6 +14,7 @@ class Pynuts(flask.Flask):
         super(Pynuts, self).__init__(import_name, *args, **kwargs)
         self.config.update(config or {})
         self.db = SQLAlchemy(self)
+        self.documents = {}
         if reflect:
             self.db.metadata.reflect(bind=self.db.get_engine(self))
 
@@ -28,3 +29,7 @@ class Pynuts(flask.Flask):
             _pynuts = self
 
         self.ModelView = ModelView
+
+    def render_document(self, document_type, part='index.rst.jinja2',
+                        **kwargs):
+        return self.documents[document_type].view_html(part, **kwargs)

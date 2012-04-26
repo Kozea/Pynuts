@@ -52,6 +52,14 @@ class GitFS(object):
         self.commit = self.repository.commit(commit)
         self.tree = self.repository.tree(self.commit.tree)
 
+    def history(self):
+        commit = self.commit
+        while 1:
+            yield commit.id
+            if not commit.parents:
+                break
+            commit = self.repository.commit(commit.parents[0])
+
     def filename(self, path):
         return '<commit %s>/%s' % (self.commit.id, path)
 
@@ -70,7 +78,7 @@ class GitFS(object):
                 raise FileNotFound(path)
         return self.repository.get_object(sha)
 
-    def store_commit(self, tree_id, author, message):
+    def store_commit(self, tree_id, parents, author, message):
         commit = Commit()
         commit.author = author
         commit.committer = 'Pynuts'
@@ -78,6 +86,7 @@ class GitFS(object):
         commit.author_timezone = commit.commit_timezone = 0
         commit.message = message
         commit.tree = tree_id
+        commit.parents = parents or []
         self.store.add_object(commit)
         return commit.id
 

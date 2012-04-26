@@ -19,6 +19,7 @@ class MetaDocument(type):
         if cls.repository:
             # TODO: find a better endpoint name than the name of the class
             cls._resource = cls.__name__
+            cls._pynuts.documents[cls._resource] = cls
             cls._pynuts.add_url_rule(
                 '/_resource/%s/<document_id>/<version>/<path:filename>' % (
                     cls._resource),
@@ -37,11 +38,11 @@ class Document(object):
     _resource = None
 
     settings = None
-    css = None
+    pdf_css = None
+    html_css = None
     repository = None
     document_id_template = None
     model = None
-    index = 'index.rst.jinja2'
 
     # Templates
     edit_template = 'edit_document.jinja2'
@@ -49,7 +50,6 @@ class Document(object):
     def __init__(self, document_id, version=None):
         self.document_id = document_id
         self.git = GitFS(self.repository, branch=self.branch, commit=version)
-        self.version = self.git.commit.id if self.git.commit else None
         self.environment = create_environment()
         self.environment.loader = ChoiceLoader((
             GitLoader(self.git), self.environment.loader))
@@ -58,6 +58,28 @@ class Document(object):
     def branch(self):
         """Branch name of the document."""
         return 'refs/documents/%s' % self.document_id
+
+    @property
+    def archive_branch(self):
+        """Branch name of the document archives."""
+        return 'refs/documents/%s' % self.document_id
+
+    @property
+    def version(self):
+        """Actual git version of the document."""
+        return self.git.commit.id
+
+    def history(self):
+        """Yield the parent documents."""
+        git = GitFS(self.repository, branch=self.branch)
+        for version in git.history():
+            yield type(self)(self.document_id, version=version)
+
+    def archive_history(self):
+        """Yield the parent documents stored as archives."""
+        git = GitFS(self.repository, branch=self.archive_branch)
+        for version in git.history():
+            yield type(self)(self.document_id, version=version)
 
     @classmethod
     def from_data(cls, version=None, **kwargs):
@@ -85,26 +107,27 @@ class Document(object):
             cls(document_id, version).git.read(filename), mimetype=mimetype)
 
     @classmethod
-    def generate_HTML(cls, part, resource_type='url', **kwargs):
+    def generate_HTML(cls, part='index.rst.jinja2', resource_type='url',
+                      **kwargs):
         """Generate the HTML of the document.
 
-        :param part: part of the HTML to render (check docutils writer).
-        :param resource_type: external resource type: 'url' or 'base64'
+        :param part: part of the document to render.
+        :param resource_type: external resource type: 'url' or 'base64'.
 
         """
         document = cls.from_data(**kwargs)
-        template = document.environment.get_template(document.index)
+        template = document.environment.get_template(part)
         resource = getattr(document, 'resource_%s' % resource_type)
         source = template.render(resource=resource, **kwargs)
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
             settings_overrides=document.settings)
-        return parts[part]
+        return parts
 
     @classmethod
     def generate_PDF(cls, **kwargs):
         """Generate PDF from the document."""
-        html = cls.generate_HTML('whole', 'base64', **kwargs)
+        html = cls.generate_HTML('base64', **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
@@ -122,6 +145,17 @@ class Document(object):
             headers=headers)
 
     @classmethod
+    def archive(cls, **kwargs):
+        """Archive the current version of the document."""
+        document = cls.from_data(**kwargs)
+        tree_id = document.git.commit.tree
+        # TODO: add data into the tree
+        commit_id = document.git.store_commit(
+            tree_id, [document.git.repository.refs[document.archive_branch]],
+            'Pynuts', 'Archive %s' % document.document_id)
+        document.git.repository.refs[document.archive_branch] = commit_id
+
+    @classmethod
     def create(cls, **kwargs):
         """Create the ReST document.
 
@@ -132,12 +166,13 @@ class Document(object):
         document = cls.from_data(**kwargs)
         tree_id = document.git.store_directory(cls.model)
         commit_id = document.git.store_commit(
-            tree_id, 'Pynuts', 'Create %s' % document.document_id)
+            tree_id, None, 'Pynuts', 'Create %s' % document.document_id)
         return document.git.repository.refs.add_if_new(
             document.branch, commit_id)
 
     @classmethod
-    def edit(cls, template, redirect_url=None, **kwargs):
+    def edit(cls, template, part='index.html.jinja2', redirect_url=None,
+             **kwargs):
         """Return the template where you can edit the ReST document.
 
         :param template: your application template.
@@ -152,9 +187,10 @@ class Document(object):
                 version=request.form['_old_commit'], **kwargs)
             blob_id = document.git.store_string(
                 request.form['document'].encode('utf-8'))
-            tree_id = document.git.tree.add(cls.index, 0100644, blob_id)
+            tree_id = document.git.tree.add(part, 0100644, blob_id)
             commit_id = document.git.store_commit(
-                tree_id, 'Pynuts', 'Edit %s' % document.document_id)
+                tree_id, [document.version.commit],
+                'Pynuts', 'Edit %s' % document.document_id)
             if document.git.repository.refs.set_if_equals(
                 document.branch, document.version, commit_id):
                 flash('The document was saved.', 'ok')
@@ -165,11 +201,11 @@ class Document(object):
         return render_template(template, cls=cls, **kwargs)
 
     @classmethod
-    def view_edit(cls, **kwargs):
+    def view_edit(cls, part='index.html.jinja2', **kwargs):
         """Render the HTML for edit_template."""
         document = cls.from_data(**kwargs)
         template = document.environment.get_template(cls.edit_template)
-        text = document.git.read(cls.index).decode('utf-8')
+        text = document.git.read(part).decode('utf-8')
         return jinja2.Markup(template.render(
             cls=cls, text=text, old_commit=document.git.commit.id, **kwargs))
 
@@ -179,10 +215,10 @@ class Document(object):
         return render_template(template, cls=cls, **kwargs)
 
     @classmethod
-    def view_html(cls, part='html_body', **kwargs):
+    def view_html(cls, part='index.html.jinja2', **kwargs):
         """Generate a HTML document ready to include in Jinja templates.
 
         :param part: part of the HTML to render (check docutils writer).
 
         """
-        return jinja2.Markup(cls.generate_HTML(part=part, **kwargs))
+        return jinja2.Markup(cls.generate_HTML(**kwargs)['html_body'])
