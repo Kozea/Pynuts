@@ -117,6 +117,14 @@ class Document(object):
             cls(document_id, version).git.read(filename), mimetype=mimetype)
 
     @classmethod
+    def generate_ReST(cls, part='index.rst.jinja2', resource_type='url',
+                      **kwargs):
+        document = cls.from_data(**kwargs)
+        template = document.environment.get_template(part)
+        resource = getattr(document, 'resource_%s' % resource_type)
+        return template.render(resource=resource, **kwargs)
+
+    @classmethod
     def generate_HTML(cls, part='index.rst.jinja2', resource_type='url',
                       **kwargs):
         """Generate the HTML samples of the document.
@@ -133,13 +141,10 @@ class Document(object):
         :param resource_type: external resource type: 'url' or 'base64'.
 
         """
-        document = cls.from_data(**kwargs)
-        template = document.environment.get_template(part)
-        resource = getattr(document, 'resource_%s' % resource_type)
-        source = template.render(resource=resource, **kwargs)
+        source = cls.generate_ReST(part, resource_type, **kwargs)
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
-            settings_overrides=document.settings)
+            settings_overrides=cls.settings)
         return parts
 
     @classmethod
