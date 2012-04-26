@@ -212,6 +212,7 @@ class Document(object):
             blob_id = document.git.store_string(
                 request.form['document'].encode('utf-8'))
             document.git.tree.add(part, 0100644, blob_id)
+            document.git.store.add_object(document.git.tree)
             commit_id = document.git.store_commit(
                 document.git.tree.id, [document.git.commit.id],
                 'Pynuts', 'Edit %s' % document.document_id)
