@@ -39,6 +39,6 @@ class Pynuts(flask.Flask):
 
         self.ModelView = ModelView
 
-    def render_ReST(self, document_type, part='index.rst.jinja2',
+    def render_rest(self, document_type, part='index.rst.jinja2',
                     **kwargs):
-        return self.documents[document_type].generate_ReST(part, **kwargs)
+        return self.documents[document_type].generate_rest(part, **kwargs)

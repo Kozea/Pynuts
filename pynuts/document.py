@@ -63,6 +63,7 @@ class Document(object):
         self.environment = create_environment()
         self.environment.loader = ChoiceLoader((
             GitLoader(self.git), self.environment.loader))
+        self.environment.globals['render_rest'] = self._pynuts.render_rest
 
     @property
     def branch(self):
@@ -117,7 +118,7 @@ class Document(object):
             cls(document_id, version).git.read(filename), mimetype=mimetype)
 
     @classmethod
-    def generate_ReST(cls, part='index.rst.jinja2', resource_type='url',
+    def generate_rest(cls, part='index.rst.jinja2', resource_type='url',
                       **kwargs):
         document = cls.from_data(**kwargs)
         template = document.environment.get_template(part)
@@ -125,7 +126,7 @@ class Document(object):
         return template.render(resource=resource, **kwargs)
 
     @classmethod
-    def generate_HTML(cls, part='index.rst.jinja2', resource_type='url',
+    def generate_html(cls, part='index.rst.jinja2', resource_type='url',
                       **kwargs):
         """Generate the HTML samples of the document.
 
@@ -141,21 +142,21 @@ class Document(object):
         :param resource_type: external resource type: 'url' or 'base64'.
 
         """
-        source = cls.generate_ReST(part, resource_type, **kwargs)
+        source = cls.generate_rest(part, resource_type, **kwargs)
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
             settings_overrides=cls.settings)
         return parts
 
     @classmethod
-    def generate_PDF(cls, part='index.rst.jinja2', **kwargs):
+    def generate_pdf(cls, part='index.rst.jinja2', **kwargs):
         """Generate PDF from the document."""
-        html = cls.generate_HTML(part, 'base64', **kwargs)['whole']
+        html = cls.generate_html(part, 'base64', **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
     @classmethod
-    def download_PDF(cls, filename=None, **kwargs):
+    def download_pdf(cls, filename=None, **kwargs):
         """Return a HTTP response with PDF document as file in attachment.
 
         :param filename: set the filname attachment.
@@ -165,7 +166,7 @@ class Document(object):
         headers = Headers()
         headers.add('Content-Disposition', 'attachment', filename=filename)
         return Response(
-            cls.generate_PDF(**kwargs), mimetype='application/pdf',
+            cls.generate_pdf(**kwargs), mimetype='application/pdf',
             headers=headers)
 
     @classmethod
@@ -246,4 +247,4 @@ class Document(object):
         :param part: part of the HTML to render (check docutils writer).
 
         """
-        return jinja2.Markup(cls.generate_HTML(**kwargs)['html_body'])
+        return jinja2.Markup(cls.generate_html(**kwargs)['html_body'])
