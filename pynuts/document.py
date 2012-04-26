@@ -143,9 +143,9 @@ class Document(object):
         return parts
 
     @classmethod
-    def generate_PDF(cls, **kwargs):
+    def generate_PDF(cls, part='index.rst.jinja2', **kwargs):
         """Generate PDF from the document."""
-        html = cls.generate_HTML('base64', **kwargs)['whole']
+        html = cls.generate_HTML(part, 'base64', **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
