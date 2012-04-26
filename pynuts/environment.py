@@ -77,7 +77,10 @@ class ShowOnMatch(Extension):
         return [body_expr, assign_node, if_node]
 
 
-JINJA2_ENVIRONMENT = Environment(
-    loader=PackageLoader('pynuts', 'templates'),
+def create_environment():
+    """Create a new Jinja2 environment with Pynuts helpers."""
+    environment = Environment(
+        loader=PackageLoader('pynuts', 'templates'),
     extensions=[ShowOnMatch])
-JINJA2_ENVIRONMENT.globals.update({'url_for': flask.url_for})
+    environment.globals.update({'url_for': flask.url_for})
+    return environment

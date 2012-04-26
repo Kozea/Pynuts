@@ -1,7 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name="Pynuts",
+    version="0.1",
     url="http://www.pynuts.org/",
     license="GNU GPL v3",
     platforms="Any",

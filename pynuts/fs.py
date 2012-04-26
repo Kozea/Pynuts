@@ -1,10 +1,9 @@
 import os
+import time
 import errno
 import functools
-from io import BytesIO
 
-from dulwich.repo import Repo
-from flask import safe_join
+from dulwich.repo import Repo, Blob, Tree, Commit
 from werkzeug.exceptions import NotFound as werkzeug_NotFound
 from jinja2 import BaseLoader, TemplateNotFound
 
@@ -15,6 +14,7 @@ class FileNotFound(IOError):
 
 class NotAFile(IOError):
     """open() on a directory or other non-file object."""
+
 
 class NotADirectory(IOError):
     """listdir() on a file or other non-directory object."""
@@ -39,45 +39,17 @@ def convert_errors(function):
     return wrapper
 
 
-class RealFS(object):
-    def __init__(self, root):
-        self.root = root
-
-    def _absolute_path(self, path):
-        if path.startswith('/'):
-            path = path[1:]
-        return safe_join(self.root, path)
-
-    @convert_errors
-    def filename(self, path):
-        return self._absolute_path(path)
-
-    @convert_errors
-    def listdir(self, path):
-        return os.listdir(self._absolute_path(path))
-
-    @convert_errors
-    def open(self, path):
-        # Read-only
-        return open(self._absolute_path(path), 'rb')
-
-    @convert_errors
-    def getmtime(self, path):
-        return os.path.getmtime(self._absolute_path(path))
-
-    @convert_errors
-    def isdir(self, path):
-        return os.path.isdir(self._absolute_path(path))
-
-    @convert_errors
-    def isfile(self, path):
-        return os.path.isfile(self._absolute_path(path))
-
-
 class GitFS(object):
-    def __init__(self, repository, commit_sha):
+    def __init__(self, repository, branch, commit=None):
         self.repository = Repo(repository)
-        self.commit = self.repository.commit(commit_sha)
+        self.store = self.repository.object_store
+        if not commit:
+            if branch not in self.repository.refs:
+                # The branch does not exist yet
+                self.commit = self.tree = None
+                return
+            commit = self.repository.refs[branch]
+        self.commit = self.repository.commit(commit)
         self.tree = self.repository.tree(self.commit.tree)
 
     def filename(self, path):
@@ -98,19 +70,54 @@ class GitFS(object):
                 raise FileNotFound(path)
         return self.repository.get_object(sha)
 
+    def store_commit(self, tree_id, author, message):
+        commit = Commit()
+        commit.author = author
+        commit.committer = 'Pynuts'
+        commit.author_time = commit.commit_time = int(time.time())
+        commit.author_timezone = commit.commit_timezone = 0
+        commit.message = message
+        commit.tree = tree_id
+        self.store.add_object(commit)
+        return commit.id
+
+    def store_directory(self, root):
+        tree = Tree()
+        for name in os.listdir(root):
+            fullname = os.path.join(root, name)
+            if os.path.isdir(fullname):
+                sub_id = self.store_directory(fullname)
+                mode = 040000
+            elif os.path.isfile(fullname):
+                sub_id = self.store_file(fullname)
+                mode = 0100644
+            else:
+                continue
+            tree.add(name, mode, sub_id)
+        self.store.add_object(tree)
+        return tree.id
+
+    def store_file(self, filename):
+        blob = Blob.from_string(open(filename).read())
+        self.store.add_object(blob)
+        return blob.id
+
+    def store_string(self, bytestring):
+        blob = Blob.from_string(bytestring)
+        self.store.add_object(blob)
+        return blob.id
+
     def listdir(self, path):
         tree = self._lookup(path)
         if tree.type_name != 'tree':
             raise NotADirectory(path)
         return list(tree)
 
-    def open(self, path):
+    def read(self, path):
         blob = self._lookup(path)
         if blob.type_name != 'blob':
             raise NotAFile(path)
-        # TODO: find a way to make a file-like without reading everything
-        # in memory?
-        return BytesIO(blob.data)
+        return blob.data
 
     def isdir(self, path):
         try:
@@ -129,16 +136,15 @@ class GitFS(object):
         return self.commit.commit_time
 
 
-class JinjaAbstractFSLoader(BaseLoader):
-    def __init__(self, fs):
-        self.fs = fs
+class GitLoader(BaseLoader):
+    def __init__(self, git):
+        self.git = git
 
     def get_source(self, environment, template):
-        if not self.fs.isfile(template):
+        if not self.git.isfile(template):
             raise TemplateNotFound(template)
-        mtime = self.fs.getmtime(template)
-        with self.fs.open(template) as fd:
-            source = fd.read().decode('utf-8')
+        mtime = self.git.getmtime(template)
+        source = self.git.read(template).decode('utf-8')
         # filename might be None
-        return source, self.fs.filename(template), lambda: \
-            self.fs.getmtime(template) == mtime
+        return source, self.git.filename(template), lambda: \
+            self.git.getmtime(template) == mtime
