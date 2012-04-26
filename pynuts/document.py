@@ -211,9 +211,9 @@ class Document(object):
                 version=request.form['_old_commit'], **kwargs)
             blob_id = document.git.store_string(
                 request.form['document'].encode('utf-8'))
-            tree_id = document.git.tree.add(part, 0100644, blob_id)
+            document.git.tree.add(part, 0100644, blob_id)
             commit_id = document.git.store_commit(
-                tree_id, [document.git.commit.id],
+                document.git.tree.id, [document.git.commit.id],
                 'Pynuts', 'Edit %s' % document.document_id)
             if document.git.repository.refs.set_if_equals(
                 document.branch, document.version, commit_id):
