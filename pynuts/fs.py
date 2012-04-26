@@ -48,6 +48,7 @@ class GitFS(object):
             branch = 'refs/documents/%s' % branch
             if branch not in self.repository.refs:
                 # The branch does not exist yet
+                self.commit = self.tree = None
                 return
             commit = self.repository.refs[branch]
         self.commit = self.repository.commit(commit)

@@ -50,7 +50,7 @@ class Document(object):
     def __init__(self, document_id, version=None):
         self.document_id = document_id
         self.git = GitFS(self.repository, branch=document_id, commit=version)
-        self.version = self.git.commit.id
+        self.version = self.git.commit.id if self.git.commit else None
         self.environment = create_environment()
         self.environment.loader = ChoiceLoader((
             GitLoader(self.git), self.environment.loader))
