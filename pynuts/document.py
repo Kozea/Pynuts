@@ -176,7 +176,7 @@ class Document(object):
         part = 'index.rst' if archive else part
         html = cls.generate_html(
             part=part, resource_type='base64', archive=archive,
-            **kwargs)['whole']
+            version=version, **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
