@@ -249,7 +249,8 @@ class Document(object):
                     return redirect(redirect_url)
             else:
                 flash('A conflict happened.', 'error')
-        return render_template(template, cls=cls, version=version, **kwargs)
+        return render_template(
+            template, cls=cls, part=part, version=version, **kwargs)
 
     @classmethod
     def view_edit(cls, part='index.rst.jinja2', version=None, **kwargs):
