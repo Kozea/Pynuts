@@ -185,7 +185,8 @@ class Document(object):
             mimetype='application/pdf', headers=headers)
 
     @classmethod
-    def archive(cls, part='index.rst.jinja2', version=None, **kwargs):
+    def archive(cls, part='index.rst.jinja2', version=None, message=None,
+                **kwargs):
         """Archive the given version of the document.
 
         :param part: part of the document to archive.
@@ -197,10 +198,12 @@ class Document(object):
             document.generate_rest(part=part, **kwargs))
         document.git.tree.add(os.path.splitext(part)[0], 0100644, blob_id)
         document.git.store.add_object(document.git.tree)
+        parent = document.git.repository.refs.get(document.archive_branch)
+        if message is None:
+            message = 'Archive %s' % document.document_id
         commit_id = document.git.store_commit(
-            document.git.tree.id,
-            [document.git.repository.refs[document.archive_branch]],
-            'Pynuts', 'Archive %s' % document.document_id)
+            document.git.tree.id, ([parent] if parent else []), 'Pynuts',
+            message)
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
