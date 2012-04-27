@@ -120,6 +120,13 @@ class Document(object):
     @classmethod
     def generate_rest(cls, part='index.rst.jinja2', resource_type='url',
                       version=None, **kwargs):
+        """Generate the ReStructuredText version of the document.
+
+        :param part: part of the document to render.
+        :param version: version of the document to render.
+        :param resource_type: external resource type: 'url' or 'base64'.
+
+        """
         document = cls.from_data(version=version, **kwargs)
         template = document.environment.get_template(part)
         resource = getattr(document, 'resource_%s' % resource_type)
@@ -139,6 +146,7 @@ class Document(object):
            #publish-parts-details>`_
 
         :param part: part of the document to render.
+        :param version: version of the document to render.
         :param resource_type: external resource type: 'url' or 'base64'.
 
         """
@@ -150,7 +158,12 @@ class Document(object):
 
     @classmethod
     def generate_pdf(cls, part='index.rst.jinja2', version=None, **kwargs):
-        """Generate PDF from the document."""
+        """Generate the PDF version from the document.
+
+        :param part: part of the document to render.
+        :param version: version of the document to render.
+
+        """
         html = cls.generate_html(part, 'base64', **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
@@ -158,10 +171,11 @@ class Document(object):
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, filename=None,
                      **kwargs):
-        """Return a HTTP response with PDF document as file in attachment.
+        """Get a HTTP response with PDF document as file in attachment.
 
-        :param filename: set the filname attachment.
-        :type filename: String
+        :param part: part of the document to render.
+        :param version: version of the document to render.
+        :param filename: attachment filename.
 
         """
         headers = Headers()
@@ -172,7 +186,12 @@ class Document(object):
 
     @classmethod
     def archive(cls, part='index.rst.jinja2', version=None, **kwargs):
-        """Archive the given version of the document."""
+        """Archive the given version of the document.
+
+        :param part: part of the document to archive.
+        :param version: version of the document to archive.
+
+        """
         document = cls.from_data(version=version, **kwargs)
         blob_id = document.git.store_string(
             document.generate_rest(part=part, **kwargs))
@@ -200,12 +219,14 @@ class Document(object):
             document.branch, commit_id)
 
     @classmethod
-    def edit(cls, template, part='index.rst.jinja2', redirect_url=None,
-             **kwargs):
-        """Return the template where you can edit the ReST document.
+    def edit(cls, template, part='index.rst.jinja2', version=None,
+             redirect_url=None, **kwargs):
+        """Edit the document.
 
-        :param template: your application template.
-        :param redirect_url: the route you want to go after saving.
+        :param template: application template with edition form.
+        :param part: part of the document to edit.
+        :param version: version of the document to edit.
+        :param redirect_url: route to go after saving.
 
         Return ``True`` if the document has been edited, ``False`` if the
         document id was already used.
@@ -228,27 +249,40 @@ class Document(object):
                     return redirect(redirect_url)
             else:
                 flash('A conflict happened.', 'error')
-        return render_template(template, cls=cls, **kwargs)
+        return render_template(template, cls=cls, version=version, **kwargs)
 
     @classmethod
-    def view_edit(cls, part='index.rst.jinja2', **kwargs):
-        """Render the HTML for edit_template."""
-        document = cls.from_data(**kwargs)
+    def view_edit(cls, part='index.rst.jinja2', version=None, **kwargs):
+        """View the document edition form.
+
+        :param part: part of the document to edit.
+        :param version: version of the document to edit.
+
+        """
+        document = cls.from_data(version=version, **kwargs)
         template = document.environment.get_template(cls.edit_template)
         text = document.git.read(part).decode('utf-8')
         return jinja2.Markup(template.render(
             cls=cls, text=text, old_commit=document.git.commit.id, **kwargs))
 
     @classmethod
-    def html(cls, template, **kwargs):
-        """Return the HTML document template."""
-        return render_template(template, cls=cls, **kwargs)
+    def html(cls, template, part='index.rst.jinja2', version=None, **kwargs):
+        """Render the HTML version of the document.
 
-    @classmethod
-    def view_html(cls, part='index.rst.jinja2', **kwargs):
-        """Generate a HTML document ready to include in Jinja templates.
-
-        :param part: part of the HTML to render (check docutils writer).
+        :param template: application template including the render.
+        :param part: part of the document to render.
+        :param version: version of the document to render.
 
         """
-        return jinja2.Markup(cls.generate_html(**kwargs)['html_body'])
+        return render_template(template, cls=cls, version=version, **kwargs)
+
+    @classmethod
+    def view_html(cls, part='index.rst.jinja2', version=None, **kwargs):
+        """View the HTML document ready to include in Jinja templates.
+
+        :param part: part of the document to render.
+        :param version: version of the document to render.
+
+        """
+        return jinja2.Markup(
+            cls.generate_html(version=version, **kwargs)['html_body'])
