@@ -1,1 +1,0 @@
-{{ Markup(employee.view_object()) | safe }}
