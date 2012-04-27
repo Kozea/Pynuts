@@ -150,7 +150,13 @@ Step 3: Creating Documents
 
 When an employee is added in database and everything went well, we create an employee document.
 So We go back to the adding route in ``executable.py``.
+
 - First create an instance of EmployeeView
+- Then we call the create method of EmployeeView. 
+- If the employee addition form is validated we create a new document.
+- Finally we redirect to the list of employees
+
+::
 
   @app.route('/employee/add/', methods=('POST', 'GET'))
   def add_employee():
@@ -161,14 +167,13 @@ So We go back to the adding route in ``executable.py``.
           document.EmployeeDoc.create(employee=employee)
       return response
 
+What happen exactly ... Coming soon ;)
 
-Step 4: 
-~~~~~~~~~~~~~~~~~~~~~~
-
-Edit template
+Step 4: Document rendering
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Edit document
-~~~~~~~~~~~~~
+`````````````
 Since the document has been created, you may want to edit it and add some information for one specific employee.
 
 Thanks to pynuts document handling, it's possible and quite easy to do.
@@ -197,7 +202,7 @@ Then, in your ``executable.py``, you have to:
                         employee=employee)
 
 Render document HTML
-~~~~~~~~~~~~~~~~~~~~
+````````````````````
 Create the file ``employee_report.html``:
 
 .. sourcecode:: html+jinja
@@ -215,7 +220,7 @@ Create the file ``employee_report.html``:
         return doc.html('employee_report.html', employee=view.EmployeeView(id))
 
 Generate PDF document
-~~~~~~~~~~~~~~~~~~~~~
+`````````````````````
 To get the PDF document, call the `download_pdf` function on a EmployeeDoc instance.
 
 ``executable.py``::
@@ -226,8 +231,8 @@ To get the PDF document, call the `download_pdf` function on a EmployeeDoc insta
         return doc.download_pdf(filename='Employee %s report' % (id),
                                 employee=view.EmployeeView(id))
 
-Archive
-~~~~~~~
+Archiving
+~~~~~~~~~
 
 
 Rights
