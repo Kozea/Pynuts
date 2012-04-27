@@ -216,9 +216,9 @@ class Document(object):
             parents.append(
                 document.git.repository.refs[document.archive_branch])
         if message is None:
-            message = 'Archive %s' % document.document_id
+            message = u'Archive %s' % document.document_id
         commit_id = document.git.store_commit(
-            document.git.tree.id, parents, 'Pynuts', message)
+            document.git.tree.id, parents, 'Pynuts', message.encode('utf-8'))
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
@@ -261,10 +261,10 @@ class Document(object):
             if message is None:
                 message = (
                     request.form.get('message') or
-                    'Edit %s' % document.document_id)
+                    u'Edit %s' % document.document_id)
             commit_id = document.git.store_commit(
                 document.git.tree.id, [document.git.commit.id], 'Pynuts',
-                message)
+                message.encode('utf-8'))
             branch = document.archive_branch if archive else document.branch
             if document.git.repository.refs.set_if_equals(
                 branch, document.version, commit_id):
