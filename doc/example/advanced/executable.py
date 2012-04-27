@@ -60,7 +60,7 @@ def html_employee(id):
     return doc.html('employee_report.html', employee=view.EmployeeView(id))
 
 
-@app.route('/employee/download/<id>', methods=('POST', 'GET'))
+@app.route('/employee/download/<id>')
 def download_employee(id):
     doc = document.EmployeeDoc
     return doc.download_pdf(filename='Employee %s report' % (id),
