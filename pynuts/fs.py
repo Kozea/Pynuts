@@ -53,12 +53,13 @@ class GitFS(object):
         self.tree = self.repository.tree(self.commit.tree)
 
     def history(self):
-        commit = self.commit
-        while 1:
-            yield commit.id
-            if not commit.parents:
-                break
-            commit = self.repository.commit(commit.parents[0])
+        if self.commit:
+            commit = self.commit
+            while 1:
+                yield commit.id
+                if not commit.parents:
+                    break
+                commit = self.repository.commit(commit.parents[0])
 
     def filename(self, path):
         return '<commit %s>/%s' % (self.commit.id, path)

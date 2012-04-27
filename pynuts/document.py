@@ -73,19 +73,21 @@ class Document(object):
     @property
     def archive_branch(self):
         """Branch name of the document archives."""
-        return 'refs/documents/%s' % self.document_id
+        return 'refs/archives/%s' % self.document_id
 
     @property
     def version(self):
         """Actual git version of the document."""
         return self.git.commit.id
 
+    @property
     def history(self):
         """Yield the parent documents."""
         git = GitFS(self.repository, branch=self.branch)
         for version in git.history():
             yield type(self)(self.document_id, version=version)
 
+    @property
     def archive_history(self):
         """Yield the parent documents stored as archives."""
         git = GitFS(self.repository, branch=self.archive_branch)
