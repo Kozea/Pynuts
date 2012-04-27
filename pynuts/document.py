@@ -197,15 +197,17 @@ class Document(object):
         """
         document = cls.from_data(version=version, **kwargs)
         blob_id = document.git.store_string(
-            document.generate_rest(part=part, **kwargs))
+            document.generate_rest(part=part, **kwargs).encode('utf-8'))
         document.git.tree.add(os.path.splitext(part)[0], 0100644, blob_id)
         document.git.store.add_object(document.git.tree)
-        parent = document.git.repository.refs.get(document.archive_branch)
+        parents = []
+        if document.archive_branch in document.git.repository.refs:
+            parents.append(
+                document.git.repository.refs[document.archive_branch])
         if message is None:
             message = 'Archive %s' % document.document_id
         commit_id = document.git.store_commit(
-            document.git.tree.id, ([parent] if parent else []), 'Pynuts',
-            message)
+            document.git.tree.id, parents, 'Pynuts', message)
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
@@ -225,7 +227,7 @@ class Document(object):
 
     @classmethod
     def edit(cls, template, part='index.rst.jinja2', version=None,
-             redirect_url=None, **kwargs):
+             archive=False, redirect_url=None, **kwargs):
         """Edit the document.
 
         :param template: application template with edition form.
@@ -247,8 +249,9 @@ class Document(object):
             commit_id = document.git.store_commit(
                 document.git.tree.id, [document.git.commit.id],
                 'Pynuts', 'Edit %s' % document.document_id)
+            branch = document.archive_branch if archive else document.branch
             if document.git.repository.refs.set_if_equals(
-                document.branch, document.version, commit_id):
+                branch, document.version, commit_id):
                 flash('The document was saved.', 'ok')
                 if redirect_url:
                     return redirect(redirect_url)
