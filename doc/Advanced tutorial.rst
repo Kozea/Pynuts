@@ -106,6 +106,67 @@ Then put this code in ``executable.py``::
 Document
 --------
 
+
+This part will discribe how to make documents, make version and generate beautiful PDF report with Pynuts.
+
+Step 1: Creating Our Document Class
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We start by creating our ``document.py`` which will contain our Pynuts document class. 
+
+::
+
+    from application import app
+
+
+    class EmployeeDoc(app.Document):
+        model = 'model/'
+        document_id_template = '{employee.data.id}'
+        repository = '/tmp/employees.git'
+
+
+`model` 
+ That's the path to the folder where our model is. We have to create this folder. Open `model/`. Now create a file named `index.rst.jinja2`.
+
+`document_id_template`
+ In this tutorial the document_id_template is the employee id.
+
+`repository`
+ It's the path where is our git repository where the documents versions will be stored.
+ 
+ 
+Step 2: Git Repository
+~~~~~~~~~~~~~~~~~~~~~~
+
+Now we have to create our git repository.
+
+::
+
+    $ git init --bare /tmp/employees.git
+    
+
+Step 3: Creating Documents
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When an employee is added in database and everything went well, we create an employee document.
+So We go back to the adding route in ``executable.py``.
+- First create an instance of EmployeeView
+
+  @app.route('/employee/add/', methods=('POST', 'GET'))
+  def add_employee():
+      employee = view.EmployeeView()
+      response = employee.create('add_employee.html',
+                                 redirect='employees')
+      if employee.form.validate_on_submit():
+          document.EmployeeDoc.create(employee=employee)
+      return response
+
+
+Step 4: 
+~~~~~~~~~~~~~~~~~~~~~~
+
+Edit template
+
 Edit document
 ~~~~~~~~~~~~~
 Since the document has been created, you may want to edit it and add some information for one specific employee.
