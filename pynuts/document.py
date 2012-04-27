@@ -227,7 +227,7 @@ class Document(object):
 
     @classmethod
     def edit(cls, template, part='index.rst.jinja2', version=None,
-             redirect_url=None, **kwargs):
+             archive=False, redirect_url=None, **kwargs):
         """Edit the document.
 
         :param template: application template with edition form.
@@ -249,8 +249,9 @@ class Document(object):
             commit_id = document.git.store_commit(
                 document.git.tree.id, [document.git.commit.id],
                 'Pynuts', 'Edit %s' % document.document_id)
+            branch = document.archive_branch if archive else document.branch
             if document.git.repository.refs.set_if_equals(
-                document.branch, document.version, commit_id):
+                branch, document.version, commit_id):
                 flash('The document was saved.', 'ok')
                 if redirect_url:
                     return redirect(redirect_url)
