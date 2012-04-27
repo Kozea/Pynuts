@@ -274,7 +274,8 @@ class Document(object):
             else:
                 flash('A conflict happened.', 'error')
         return render_template(
-            template, cls=cls, part=part, version=version, **kwargs)
+            template, cls=cls, part=part, version=version, archive=archive,
+            **kwargs)
 
     @classmethod
     def view_edit(cls, part='index.rst.jinja2', version=None, archive=False,
