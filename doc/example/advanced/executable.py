@@ -50,9 +50,7 @@ def delete_employee(id):
 def edit_employee_report(id):
     employee = view.EmployeeView(id)
     doc = document.EmployeeDoc
-    redirect_url = flask.url_for('view_employee', id=id)
     return doc.edit('edit_employee_template.html',
-                    redirect_url=redirect_url,
                     employee=employee)
 
 
