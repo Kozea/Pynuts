@@ -1,7 +1,8 @@
+import flask
+
 from application import app
 import view
 import document
-import flask
 
 
 @app.route('/')
