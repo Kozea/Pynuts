@@ -200,12 +200,14 @@ class Document(object):
             document.generate_rest(part=part, **kwargs).encode('utf-8'))
         document.git.tree.add(os.path.splitext(part)[0], 0100644, blob_id)
         document.git.store.add_object(document.git.tree)
-        parent = document.git.repository.refs.get(document.archive_branch)
+        parents = []
+        if document.archive_branch in document.git.repository.refs:
+            parents.append(
+                document.git.repository.refs[document.archive_branch])
         if message is None:
             message = 'Archive %s' % document.document_id
         commit_id = document.git.store_commit(
-            document.git.tree.id, ([parent] if parent else []), 'Pynuts',
-            message)
+            document.git.tree.id, parents, 'Pynuts', message)
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
