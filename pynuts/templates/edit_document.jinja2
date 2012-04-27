@@ -1,5 +1,8 @@
 <form action="" method="post">
   <input type="hidden" value="{{ old_commit }}" name="_old_commit" />
-  <textarea name="document" cols="100" rows="20">{{ text }}</textarea>
-  <input type=submit value="Save">
+  <label for="document">Content</label>
+  <textarea name="document" id="message">{{ text }}</textarea>
+  <label for="message">Message</label>
+  <input type="text" name="message" id="message" />
+  <input type="submit" value="Save">
 </form>
