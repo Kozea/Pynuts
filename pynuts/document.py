@@ -197,7 +197,7 @@ class Document(object):
         """
         document = cls.from_data(version=version, **kwargs)
         blob_id = document.git.store_string(
-            document.generate_rest(part=part, **kwargs))
+            document.generate_rest(part=part, **kwargs).encode('utf-8'))
         document.git.tree.add(os.path.splitext(part)[0], 0100644, blob_id)
         document.git.store.add_object(document.git.tree)
         parent = document.git.repository.refs.get(document.archive_branch)
