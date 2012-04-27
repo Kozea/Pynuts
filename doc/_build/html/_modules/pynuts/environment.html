@@ -65,25 +65,24 @@
 
 
 <div class="viewcode-block" id="ShowOnMatch"><a class="viewcode-back" href="../../API.html#pynuts.environment.ShowOnMatch">[docs]</a><span class="k">class</span> <span class="nc">ShowOnMatch</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This extension introduces a new tag ``showonmatch``, allowing conditional</span>
-<span class="sd">    output of a its body according to a css selector.</span>
+    <span class="sd">&quot;&quot;&quot;This extension introduces a new tag ``showonmatch``, allowing\</span>
+<span class="sd">    conditional output of a its body according to a css selector.</span>
 
-<span class="sd">    Ex:</span>
-
-<span class="sd">    This will output an ul with lis if mylist is not empty, or no result</span>
+<span class="sd">    This will output an ul with lis if mylist is not empty, or no result\</span>
 <span class="sd">    otherwise:</span>
 
+<span class="sd">    .. sourcecode:: html+jinja</span>
 
-<span class="sd">    {% showonmatch &#39;ul li&#39; %}</span>
-<span class="sd">        &lt;ul&gt;</span>
-<span class="sd">        {% for a in mylist %}</span>
+<span class="sd">        {% showonmatch &#39;ul li&#39; %}</span>
+<span class="sd">          &lt;ul&gt;</span>
+<span class="sd">          {% for a in mylist %}</span>
 <span class="sd">            &lt;li&gt;{{a}}&lt;/li&gt;</span>
-<span class="sd">        {% endfor %}</span>
-<span class="sd">        &lt;/ul&gt;</span>
-<span class="sd">    {% else %}</span>
-<span class="sd">        &lt;p&gt;No result&lt;/p&gt;</span>
-<span class="sd">    {% endshowonmatch %}</span>
+<span class="sd">          {% endfor %}</span>
+<span class="sd">          &lt;/ul&gt;</span>
+<span class="sd">          {% else %}</span>
+<span class="sd">            &lt;p&gt;No result&lt;/p&gt;</span>
+<span class="sd">        {% endshowonmatch %}</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">tags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;showonmatch&#39;</span><span class="p">])</span>
 
@@ -135,10 +134,13 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">body_expr</span><span class="p">,</span> <span class="n">assign_node</span><span class="p">,</span> <span class="n">if_node</span><span class="p">]</span>
 
 </div>
-<span class="n">JINJA2_ENVIRONMENT</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span>
-    <span class="n">loader</span><span class="o">=</span><span class="n">PackageLoader</span><span class="p">(</span><span class="s">&#39;pynuts&#39;</span><span class="p">,</span> <span class="s">&#39;templates&#39;</span><span class="p">),</span>
+<div class="viewcode-block" id="create_environment"><a class="viewcode-back" href="../../API.html#pynuts.environment.create_environment">[docs]</a><span class="k">def</span> <span class="nf">create_environment</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Create a new Jinja2 environment with Pynuts helpers.&quot;&quot;&quot;</span>
+    <span class="n">environment</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span>
+        <span class="n">loader</span><span class="o">=</span><span class="n">PackageLoader</span><span class="p">(</span><span class="s">&#39;pynuts&#39;</span><span class="p">,</span> <span class="s">&#39;templates&#39;</span><span class="p">),</span>
     <span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="n">ShowOnMatch</span><span class="p">])</span>
-<span class="n">JINJA2_ENVIRONMENT</span><span class="o">.</span><span class="n">globals</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;url_for&#39;</span><span class="p">:</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">})</span>
+    <span class="n">environment</span><span class="o">.</span><span class="n">globals</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;url_for&#39;</span><span class="p">:</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">environment</span></div>
 </pre></div>
 
           </div>

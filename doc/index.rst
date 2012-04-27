@@ -18,11 +18,4 @@ Contents:
     Quickstart
     API
     Tutorial
-    
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+    Advanced tutorial

@@ -3,4 +3,5 @@
 {% block main %}
   <h2>Employee</h2>
   {{ obj.view_object() }}
+  <a href="{{ url_for('edit_template', **obj.primary_keys) }}">Edit the template</a>
 {% endblock main %}

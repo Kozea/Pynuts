@@ -18,7 +18,7 @@ Then create the `templates` and `static` folders.
 
 
 Step 2: Defining the Pynuts application
--------------------------------------
+---------------------------------------
 
 First, in ``application.py`` you have to import pynuts module by calling::
 
@@ -42,7 +42,7 @@ Finally you have to create your pynuts application with the configuration writte
 
 
 Step 3: The database model
----------------------------------
+--------------------------
 
 In ``database.py`` import the pynuts application::
 
@@ -69,7 +69,7 @@ We decided here to add a property in our model called `fullname`, which represen
 It will be useful to easily display the employees' list later.
 
 Step 4: The view model
------------------------------
+----------------------
 
 In ``view.py`` you have to import some things from WTForms, the pynuts application and the database model::
 
@@ -113,7 +113,7 @@ This form is used for representing the columns from the Employee class into HTML
 
 
 Step 5: The executable
------------------------------
+-----------------------
 
 The executable file provides all the routes.
 

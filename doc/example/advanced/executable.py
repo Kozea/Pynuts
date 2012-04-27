@@ -1,5 +1,6 @@
 from application import app
 import view
+import document
 
 
 @app.route('/')
@@ -15,8 +16,12 @@ def table_employees():
 
 @app.route('/employee/add/', methods=('POST', 'GET'))
 def add_employee():
-    return view.EmployeeView().create('add_employee.html',
-                                      redirect='employees')
+    employee = view.EmployeeView()
+    response = employee.create(
+        'add_employee.html', redirect='employees')
+    if employee.form.validate_on_submit():
+        document.EmployeeDoc.create(employee=employee)
+    return response
 
 
 @view.EmployeeView.edit_page
@@ -27,7 +32,7 @@ def edit_employee(id):
 
 
 @view.EmployeeView.view_page
-@app.route('/employee/view/<id>', methods=('POST', 'GET'))
+@app.route('/employee/view/<id>')
 def view_employee(id):
     return view.EmployeeView(id).view('view_employee.html')
 
@@ -38,6 +43,23 @@ def delete_employee(id):
     return view.EmployeeView(id).delete('delete_employee.html',
                                         redirect='employees')
 
+
+@app.route('/employee/html/<id>')
+def generate_html(id):
+    doc = document.EmployeeDoc
+    return doc.generate_html(employee=view.EmployeeView(id))['whole']
+
+
+@app.route('/employee/download/<id>')
+def download_employee(id):
+    doc = document.EmployeeDoc
+    return doc.download_pdf(employee=view.EmployeeView(id))
+
+
+@app.route('/employee/edit_template/<id>', methods=('POST', 'GET'))
+def edit_template(id):
+    doc = document.EmployeeDoc
+    return doc.edit('edit_template.html', employee=view.EmployeeView(id))
 
 if __name__ == '__main__':
     app.db.create_all()
