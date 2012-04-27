@@ -1,30 +1,30 @@
 <!Doctype html>
 <html>
-<head>
-  <title>Pynuts'</title>
-  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-<h1>Pynuts'</h1>
-<nav>
-  <a href="{{ url_for('employees') }}">Employee list</a>
-  <a href="{{ url_for('add_employee') }}">Add a new employee</a>
-  <a href="{{ url_for('table_employees') }}">Employees</a>
-</nav>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% for style, messages in messages | groupby(0) %}
-    <aside class="{{ style }}">
-      <ul>
-        {% for message in messages %}
-          <li>{{ message[1] }}</li>
-        {% endfor %}
-      </ul>
-    </aside>
-  {% endfor %}
-{% endwith %}
-<section>
-{% block main %}
-{% endblock main %}
-</section>
-</body>
+  <head>
+    <title>Pynuts'</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <h1>Pynuts'</h1>
+    <nav>
+      <a href="{{ url_for('employees') }}">Employee list</a>
+      <a href="{{ url_for('add_employee') }}">Add a new employee</a>
+      <a href="{{ url_for('table_employees') }}">Edit Employees</a>
+    </nav>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for style, messages in messages | groupby(0) %}
+        <aside class="{{ style }}">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message[1] }}</li>
+            {% endfor %}
+          </ul>
+        </aside>
+      {% endfor %}
+    {% endwith %}
+    <section>
+    {% block main %}
+    {% endblock main %}
+    </section>
+  </body>
 </html>
