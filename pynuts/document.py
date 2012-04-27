@@ -227,7 +227,7 @@ class Document(object):
 
     @classmethod
     def edit(cls, template, part='index.rst.jinja2', version=None,
-             archive=False, redirect_url=None, **kwargs):
+             message=None, archive=False, redirect_url=None, **kwargs):
         """Edit the document.
 
         :param template: application template with edition form.
@@ -246,9 +246,11 @@ class Document(object):
                 request.form['document'].encode('utf-8'))
             document.git.tree.add(part, 0100644, blob_id)
             document.git.store.add_object(document.git.tree)
+            if message is None:
+                message = 'Edit %s' % document.document_id
             commit_id = document.git.store_commit(
-                document.git.tree.id, [document.git.commit.id],
-                'Pynuts', 'Edit %s' % document.document_id)
+                document.git.tree.id, [document.git.commit.id], 'Pynuts',
+                message)
             branch = document.archive_branch if archive else document.branch
             if document.git.repository.refs.set_if_equals(
                 branch, document.version, commit_id):
