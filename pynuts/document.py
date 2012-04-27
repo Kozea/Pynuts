@@ -247,7 +247,9 @@ class Document(object):
             document.git.tree.add(part, 0100644, blob_id)
             document.git.store.add_object(document.git.tree)
             if message is None:
-                message = 'Edit %s' % document.document_id
+                message = (
+                    request.form.get('message') or
+                    'Edit %s' % document.document_id)
             commit_id = document.git.store_commit(
                 document.git.tree.id, [document.git.commit.id], 'Pynuts',
                 message)
