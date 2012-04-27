@@ -9,7 +9,7 @@
     <nav>
       <a href="{{ url_for('employees') }}">Employee list</a>
       <a href="{{ url_for('add_employee') }}">Add a new employee</a>
-      <a href="{{ url_for('table_employees') }}">Edit Employees</a>
+      <a href="{{ url_for('table_employees') }}">Employees</a>
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for style, messages in messages | groupby(0) %}

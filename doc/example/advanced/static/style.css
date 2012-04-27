@@ -16,3 +16,4 @@ table, table td { border: thin solid #999; border-collapse: collapse;
                     width: 50%; text-align:center; }
 
 .error ul       { background: #F0D6D6; }
+.ok ul          { background: #80B76F; }

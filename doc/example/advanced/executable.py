@@ -1,5 +1,8 @@
+import flask
+
 from application import app
 import view
+import document
 
 
 @app.route('/')
@@ -15,8 +18,12 @@ def table_employees():
 
 @app.route('/employee/add/', methods=('POST', 'GET'))
 def add_employee():
-    return view.EmployeeView().create('add_employee.html',
-                                      redirect='employees')
+    employee = view.EmployeeView()
+    response = employee.create('add_employee.html',
+                               redirect='employees')
+    if employee.form.validate_on_submit():
+        document.EmployeeDoc.create(employee=employee)
+    return response
 
 
 @view.EmployeeView.edit_page
@@ -27,7 +34,7 @@ def edit_employee(id):
 
 
 @view.EmployeeView.view_page
-@app.route('/employee/view/<id>', methods=('POST', 'GET'))
+@app.route('/employee/view/<id>')
 def view_employee(id):
     return view.EmployeeView(id).view('view_employee.html')
 
@@ -37,6 +44,29 @@ def view_employee(id):
 def delete_employee(id):
     return view.EmployeeView(id).delete('delete_employee.html',
                                         redirect='employees')
+
+
+@app.route('/employee/edit_template/<id>', methods=('POST', 'GET'))
+def edit_employee_report(id):
+    employee = view.EmployeeView(id)
+    doc = document.EmployeeDoc
+    redirect_url = flask.url_for('view_employee', id=id)
+    return doc.edit('edit_employee_template.html',
+                    redirect_url=redirect_url,
+                    employee=employee)
+
+
+@app.route('/employee/html/<id>', methods=('POST', 'GET'))
+def html_employee(id):
+    doc = document.EmployeeDoc
+    return doc.html('employee_report.html', employee=view.EmployeeView(id))
+
+
+@app.route('/employee/download/<id>', methods=('POST', 'GET'))
+def download_employee(id):
+    doc = document.EmployeeDoc
+    return doc.download_pdf(filename='Employee %s report' % (id),
+                            employee=view.EmployeeView(id))
 
 
 if __name__ == '__main__':
