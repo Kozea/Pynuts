@@ -1,3 +1,5 @@
+import flask
+
 from application import app
 import view
 import document
@@ -17,8 +19,8 @@ def table_employees():
 @app.route('/employee/add/', methods=('POST', 'GET'))
 def add_employee():
     employee = view.EmployeeView()
-    response = employee.create(
-        'add_employee.html', redirect='employees')
+    response = employee.create('add_employee.html',
+                               redirect='employees')
     if employee.form.validate_on_submit():
         document.EmployeeDoc.create(employee=employee)
     return response
@@ -44,22 +46,28 @@ def delete_employee(id):
                                         redirect='employees')
 
 
-@app.route('/employee/html/<id>')
-def generate_html(id):
+@app.route('/employee/edit_template/<id>', methods=('POST', 'GET'))
+def edit_employee_report(id):
+    employee = view.EmployeeView(id)
     doc = document.EmployeeDoc
-    return doc.generate_html(employee=view.EmployeeView(id))['whole']
+    redirect_url = flask.url_for('view_employee', id=id)
+    return doc.edit('edit_employee_template.html',
+                    redirect_url=redirect_url,
+                    employee=employee)
 
 
-@app.route('/employee/download/<id>')
+@app.route('/employee/html/<id>', methods=('POST', 'GET'))
+def html_employee(id):
+    doc = document.EmployeeDoc
+    return doc.html('employee_report.html', employee=view.EmployeeView(id))
+
+
+@app.route('/employee/download/<id>', methods=('POST', 'GET'))
 def download_employee(id):
     doc = document.EmployeeDoc
-    return doc.download_pdf(employee=view.EmployeeView(id))
+    return doc.download_pdf(filename='Employee %s report' % (id),
+                            employee=view.EmployeeView(id))
 
-
-@app.route('/employee/edit_template/<id>', methods=('POST', 'GET'))
-def edit_template(id):
-    doc = document.EmployeeDoc
-    return doc.edit('edit_template.html', employee=view.EmployeeView(id))
 
 if __name__ == '__main__':
     app.db.create_all()

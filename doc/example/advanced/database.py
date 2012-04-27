@@ -10,4 +10,4 @@ class Employee(app.db.Model):
 
         @hybrid_property
         def fullname(self):
-            return '%s - %s' % (self.firstname, self.name)
+            return '%s  %s' % (self.firstname, self.name)
