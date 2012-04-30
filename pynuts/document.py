@@ -349,4 +349,4 @@ class Document(object):
         return jinja2.Markup(
             cls.generate_html(
                 part=part, version=version, archive=archive,
-                **kwargs)['html_body'])
+                **kwargs)['article'])
