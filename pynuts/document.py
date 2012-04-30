@@ -84,7 +84,7 @@ class Document(object):
     @property
     def date(self):
         """Date of the document latest commit."""
-        return datetime.fromtimestamp(self.git.commit.commit_time)
+        return datetime.datetime.fromtimestamp(self.git.commit.commit_time)
 
     @property
     def author(self):
