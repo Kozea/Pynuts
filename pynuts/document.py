@@ -1,6 +1,7 @@
 """Document file for Pynuts."""
 
 import os
+import datetime
 import docutils
 import jinja2
 import docutils.core
@@ -79,6 +80,21 @@ class Document(object):
     def version(self):
         """Actual git version of the document."""
         return self.git.commit.id
+
+    @property
+    def date(self):
+        """Date of the document latest commit."""
+        return datetime.fromtimestamp(self.git.commit.commit_time)
+
+    @property
+    def author(self):
+        """Author of the document latest commit."""
+        return self.git.commit.author.decode('utf-8')
+
+    @property
+    def message(self):
+        """Message of the document latest commit."""
+        return self.git.commit.message.decode('utf-8')
 
     @property
     def history(self):
