@@ -198,8 +198,8 @@ class Document(object):
         return Response(pdf, mimetype='application/pdf', headers=headers)
 
     @classmethod
-    def archive(cls, part='index.rst.jinja2', version=None, message=None,
-                **kwargs):
+    def archive(cls, part='index.rst.jinja2', version=None, author=None,
+                message=None, **kwargs):
         """Archive the given version of the document.
 
         :param part: part of the document to archive.
@@ -217,8 +217,11 @@ class Document(object):
                 document.git.repository.refs[document.archive_branch])
         if message is None:
             message = u'Archive %s' % document.document_id
+        if author is None:
+            author = 'Pynuts <pynuts@pynuts.org>'
         commit_id = document.git.store_commit(
-            document.git.tree.id, parents, 'Pynuts', message.encode('utf-8'))
+            document.git.tree.id, parents, author.encode('utf-8'),
+            message.encode('utf-8'))
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
@@ -238,7 +241,8 @@ class Document(object):
 
     @classmethod
     def edit(cls, template, part='index.rst.jinja2', version=None,
-             message=None, archive=False, redirect_url=None, **kwargs):
+             author=None, message=None, archive=False, redirect_url=None,
+             **kwargs):
         """Edit the document.
 
         :param template: application template with edition form.
@@ -262,9 +266,11 @@ class Document(object):
                 message = (
                     request.form.get('message') or
                     u'Edit %s' % document.document_id)
+            if author is None:
+                author = 'Pynuts <pynuts@pynuts.org>'
             commit_id = document.git.store_commit(
-                document.git.tree.id, [document.git.commit.id], 'Pynuts',
-                message.encode('utf-8'))
+                document.git.tree.id, [document.git.commit.id],
+                author.encode('utf-8'), message.encode('utf-8'))
             branch = document.archive_branch if archive else document.branch
             if document.git.repository.refs.set_if_equals(
                 branch, document.version, commit_id):
