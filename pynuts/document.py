@@ -166,7 +166,7 @@ class Document(object):
         :param version: version of the document to render.
 
         """
-        html = cls.generate_html(part, 'base64', **kwargs)['whole']
+        html = cls.generate_html(part, 'base64', version=version, **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
