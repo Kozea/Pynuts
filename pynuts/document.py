@@ -10,7 +10,7 @@ from flask import Response, render_template, request, redirect, flash, url_for
 from werkzeug.datastructures import Headers
 from jinja2 import ChoiceLoader
 from weasyprint import HTML
-from docutils.writers.html4css1 import Writer
+from docutils_html5 import Writer
 
 from .environment import create_environment
 from .fs import GitFS, GitLoader
