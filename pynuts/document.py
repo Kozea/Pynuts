@@ -27,7 +27,7 @@ class MetaDocument(type):
                 '/_resource/%s/<document_id>/<version>/<path:filename>' % (
                     cls._resource),
                 cls._resource, cls.static_route)
-            if not os.path.isabs(cls.model):
+            if cls.model and not os.path.isabs(cls.model):
                 cls.model = os.path.join(cls._pynuts.root_path, cls.model)
             if cls.settings is None:
                 cls.settings = {}
@@ -191,6 +191,7 @@ class Document(object):
         :param version: version of the document to render.
 
         """
+
         part = 'index.rst' if archive else part
         html = cls.generate_html(
             part=part, resource_type='base64', archive=archive,
