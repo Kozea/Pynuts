@@ -218,14 +218,14 @@ class Document(object):
         if message is None:
             message = u'Archive %s' % document.document_id
         if author is None:
-            author = 'Pynuts <pynuts@pynuts.org>'
+            author = u'Pynuts <pynuts@pynuts.org>'
         commit_id = document.git.store_commit(
             document.git.tree.id, parents, author.encode('utf-8'),
             message.encode('utf-8'))
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
-    def create(cls, **kwargs):
+    def create(cls, author=None, message=None, **kwargs):
         """Create the ReST document.
 
         Return ``True`` if the document has been created, ``False`` if the
@@ -234,8 +234,12 @@ class Document(object):
         """
         document = cls.from_data(**kwargs)
         tree_id = document.git.store_directory(cls.model)
+        if message is None:
+            message = u'Create %s' % document.document_id
+        if author is None:
+            author = u'Pynuts <pynuts@pynuts.org>'
         commit_id = document.git.store_commit(
-            tree_id, None, 'Pynuts', 'Create %s' % document.document_id)
+            tree_id, None, author.encode('utf-8'), message.encode('utf-8'))
         return document.git.repository.refs.add_if_new(
             document.branch, commit_id)
 
