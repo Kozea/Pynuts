@@ -153,7 +153,8 @@ class Document(object):
         else:
             template = document.environment.get_template(part)
             resource = getattr(document, 'resource_%s' % resource_type)
-            return template.render(resource=resource, **kwargs)
+            return template.render(
+                resource=resource, document=document, **kwargs)
 
     @classmethod
     def generate_html(cls, part='index.rst.jinja2', resource_type='url',
