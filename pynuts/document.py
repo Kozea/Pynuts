@@ -121,7 +121,7 @@ class Document(object):
 
     @classmethod
     def generate_rest(cls, part='index.rst.jinja2', resource_type='url',
-                      version=None, **kwargs):
+                      archive=False, version=None, **kwargs):
         """Generate the ReStructuredText version of the document.
 
         :param part: part of the document to render.
@@ -129,14 +129,18 @@ class Document(object):
         :param resource_type: external resource type: 'url' or 'base64'.
 
         """
+        part = 'index.rst' if archive else part
         document = cls.from_data(version=version, **kwargs)
-        template = document.environment.get_template(part)
-        resource = getattr(document, 'resource_%s' % resource_type)
-        return template.render(resource=resource, **kwargs)
+        if archive:
+            return document.git.read(part)
+        else:
+            template = document.environment.get_template(part)
+            resource = getattr(document, 'resource_%s' % resource_type)
+            return template.render(resource=resource, **kwargs)
 
     @classmethod
     def generate_html(cls, part='index.rst.jinja2', resource_type='url',
-                      version=None, **kwargs):
+                      archive=False, version=None, **kwargs):
         """Generate the HTML samples of the document.
 
         The output is a dict corresponding to the different HTML samples as
@@ -152,27 +156,34 @@ class Document(object):
         :param resource_type: external resource type: 'url' or 'base64'.
 
         """
+        part = 'index.rst' if archive else part
         source = cls.generate_rest(
-            part=part, version=version, resource_type=resource_type, **kwargs)
+            part=part, version=version, archive=archive,
+            resource_type=resource_type, **kwargs)
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(), settings_overrides=cls.settings)
         return parts
 
     @classmethod
-    def generate_pdf(cls, part='index.rst.jinja2', version=None, **kwargs):
+    def generate_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
+                     **kwargs):
         """Generate the PDF version from the document.
 
         :param part: part of the document to render.
         :param version: version of the document to render.
 
         """
-        html = cls.generate_html(part, 'base64', version=version, **kwargs)['whole']
+
+        part = 'index.rst' if archive else part
+        html = cls.generate_html(
+            part=part, resource_type='base64', archive=archive,
+            version=version, **kwargs)['whole']
         # TODO: stylesheets
         return HTML(string=html.encode('utf-8')).write_pdf()
 
     @classmethod
-    def download_pdf(cls, part='index.rst.jinja2', version=None, filename=None,
-                     **kwargs):
+    def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
+                     filename=None, **kwargs):
         """Get a HTTP response with PDF document as file in attachment.
 
         :param part: part of the document to render.
@@ -180,15 +191,16 @@ class Document(object):
         :param filename: attachment filename.
 
         """
+        part = 'index.rst' if archive else part
         headers = Headers()
         headers.add('Content-Disposition', 'attachment', filename=filename)
-        return Response(
-            cls.generate_pdf(part=part, version=version, **kwargs),
-            mimetype='application/pdf', headers=headers)
+        pdf = cls.generate_pdf(
+            part=part, version=version, archive=archive, **kwargs)
+        return Response(pdf, mimetype='application/pdf', headers=headers)
 
     @classmethod
-    def archive(cls, part='index.rst.jinja2', version=None, message=None,
-                **kwargs):
+    def archive(cls, part='index.rst.jinja2', version=None, author=None,
+                message=None, **kwargs):
         """Archive the given version of the document.
 
         :param part: part of the document to archive.
@@ -205,9 +217,12 @@ class Document(object):
             parents.append(
                 document.git.repository.refs[document.archive_branch])
         if message is None:
-            message = 'Archive %s' % document.document_id
+            message = u'Archive %s' % document.document_id
+        if author is None:
+            author = 'Pynuts <pynuts@pynuts.org>'
         commit_id = document.git.store_commit(
-            document.git.tree.id, parents, 'Pynuts', message)
+            document.git.tree.id, parents, author.encode('utf-8'),
+            message.encode('utf-8'))
         document.git.repository.refs[document.archive_branch] = commit_id
 
     @classmethod
@@ -227,7 +242,8 @@ class Document(object):
 
     @classmethod
     def edit(cls, template, part='index.rst.jinja2', version=None,
-             message=None, archive=False, redirect_url=None, **kwargs):
+             author=None, message=None, archive=False, redirect_url=None,
+             **kwargs):
         """Edit the document.
 
         :param template: application template with edition form.
@@ -244,15 +260,18 @@ class Document(object):
                 version=request.form['_old_commit'], **kwargs)
             blob_id = document.git.store_string(
                 request.form['document'].encode('utf-8'))
+            part = 'index.rst' if archive else part
             document.git.tree.add(part, 0100644, blob_id)
             document.git.store.add_object(document.git.tree)
             if message is None:
                 message = (
                     request.form.get('message') or
-                    'Edit %s' % document.document_id)
+                    u'Edit %s' % document.document_id)
+            if author is None:
+                author = 'Pynuts <pynuts@pynuts.org>'
             commit_id = document.git.store_commit(
-                document.git.tree.id, [document.git.commit.id], 'Pynuts',
-                message)
+                document.git.tree.id, [document.git.commit.id],
+                author.encode('utf-8'), message.encode('utf-8'))
             branch = document.archive_branch if archive else document.branch
             if document.git.repository.refs.set_if_equals(
                 branch, document.version, commit_id):
@@ -262,16 +281,19 @@ class Document(object):
             else:
                 flash('A conflict happened.', 'error')
         return render_template(
-            template, cls=cls, part=part, version=version, **kwargs)
+            template, cls=cls, part=part, version=version, archive=archive,
+            **kwargs)
 
     @classmethod
-    def view_edit(cls, part='index.rst.jinja2', version=None, **kwargs):
+    def view_edit(cls, part='index.rst.jinja2', version=None, archive=False,
+                  **kwargs):
         """View the document edition form.
 
         :param part: part of the document to edit.
         :param version: version of the document to edit.
 
         """
+        part = 'index.rst' if archive else part
         document = cls.from_data(version=version, **kwargs)
         template = document.environment.get_template(cls.edit_template)
         text = document.git.read(part).decode('utf-8')
@@ -279,7 +301,8 @@ class Document(object):
             cls=cls, text=text, old_commit=document.git.commit.id, **kwargs))
 
     @classmethod
-    def html(cls, template, part='index.rst.jinja2', version=None, **kwargs):
+    def html(cls, template, part='index.rst.jinja2', version=None,
+             archive=False, **kwargs):
         """Render the HTML version of the document.
 
         :param template: application template including the render.
@@ -287,15 +310,22 @@ class Document(object):
         :param version: version of the document to render.
 
         """
-        return render_template(template, cls=cls, version=version, **kwargs)
+        part = 'index.rst' if archive else part
+        return render_template(
+            template, cls=cls, part=part, version=version, archive=archive,
+            **kwargs)
 
     @classmethod
-    def view_html(cls, part='index.rst.jinja2', version=None, **kwargs):
+    def view_html(cls, part='index.rst.jinja2', version=None, archive=False,
+                  **kwargs):
         """View the HTML document ready to include in Jinja templates.
 
         :param part: part of the document to render.
         :param version: version of the document to render.
 
         """
+        part = 'index.rst' if archive else part
         return jinja2.Markup(
-            cls.generate_html(version=version, **kwargs)['html_body'])
+            cls.generate_html(
+                part=part, version=version, archive=archive,
+                **kwargs)['html_body'])
