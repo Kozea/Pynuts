@@ -31,6 +31,7 @@ class MetaDocument(type):
                 cls.model = os.path.join(cls._pynuts.root_path, cls.model)
             if cls.settings is None:
                 cls.settings = {}
+            cls.settings['_pynuts'] = cls._pynuts
             super(MetaDocument, cls).__init__(name, bases, dict_)
 
 
