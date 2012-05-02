@@ -3,7 +3,13 @@ Advanced tutorial
 
 
 CRUD
------------
+------
+The CRUD part is explained in the first tutorial. 
+
+
+Employee Table
+~~~~~~~~~~~~~~
+
 With advanced pynuts features, you can easily create an admin table which will provide CRUD functions.
 
 First, create a template called ``table_employees.html`` as below:
@@ -16,7 +22,7 @@ First, create a template called ``table_employees.html`` as below:
       {{ cls.view_table() }}
     {% endblock main %}
 
-This template call the *view_table* function from pynuts, which display a table with your employees and an *edit* and *delete* function for each of them.
+This template call the *view_table* method from pynuts, which display a table with your employees and an *edit* and *delete* method for each of them.
 
 Then, you have to call this template in the function *table* in the file ``executable.py``::
 
@@ -26,7 +32,7 @@ Then, you have to call this template in the function *table* in the file ``execu
 
 
 
-Edit employee
+Edit Employee
 ~~~~~~~~~~~~~
 
 In your route you have to give the model primary keys in parameters in order to access your employee object. Our table Employee have `id` as primary key. So we can call an `EmployeeView` instance according to an `id`.
@@ -58,7 +64,7 @@ Then put this code in ``executable.py``::
 
 
 
-Delete employee
+Delete Employee
 ~~~~~~~~~~~~~~~
 Same as edit, but we decided here to use the decorator to set the endpoint.
 
@@ -81,8 +87,8 @@ Then put this code in ``executable.py``::
         return view.EmployeeView(id).delete('delete_employee.html',
                                             redirect='employees')
                                             
-View employees
-~~~~~~~~~~~~~~
+View Employee
+~~~~~~~~~~~~~
 Same as delete and edit.
 
 Create ``view_employee.html``:
@@ -153,7 +159,7 @@ So We go back to the adding route in ``executable.py``.
 
 - First create an instance of EmployeeView
 - Then we call the create method of EmployeeView. 
-- If the employee addition form is validated we create a new document.
+- If the employee adding form is validated we create a new document.
 - Finally we redirect to the list of employees
 
 ::
@@ -167,13 +173,11 @@ So We go back to the adding route in ``executable.py``.
           document.EmployeeDoc.create(employee=employee)
       return response
 
-What happen exactly ... Coming soon ;)
+At the Document creation, Pynuts make a first commit of the folder which contains the model in a new branch. 
 
-Step 4: Document rendering
-~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Edit document
-`````````````
+Step 4: Editing Document
+~~~~~~~~~~~~~~~~~~~~~~~~
 Since the document has been created, you may want to edit it and add some information for one specific employee.
 
 Thanks to pynuts document handling, it's possible and quite easy to do.
@@ -190,7 +194,7 @@ Create the file ``edit_employee_template.html``
 Then, in your ``executable.py``, you have to:
     - Declare an EmployeeView
     - Declare an EmployeeDoc
-    - Call the `edit` function with the template and theEmployeeView in parameters
+    - Call the `edit` function with the template and the EmployeeView in parameters
     
 ::
 
@@ -201,8 +205,8 @@ Then, in your ``executable.py``, you have to:
         return doc.edit('edit_employee_template.html',
                         employee=employee)
 
-Render document HTML
-````````````````````
+Step 5: Rendering Document in HTML
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Create the file ``employee_report.html``:
 
 .. sourcecode:: html+jinja
@@ -219,9 +223,9 @@ Create the file ``employee_report.html``:
         doc = document.EmployeeDoc
         return doc.html('employee_report.html', employee=view.EmployeeView(id))
 
-Generate PDF document
-`````````````````````
-To get the PDF document, call the `download_pdf` function on a EmployeeDoc instance.
+Step 6: Getting PDF Document
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To get the PDF document, call the `download_pdf` class method of a EmployeeDoc.
 
 ``executable.py``::
 
@@ -231,9 +235,71 @@ To get the PDF document, call the `download_pdf` function on a EmployeeDoc insta
         return doc.download_pdf(filename='Employee %s report' % (id),
                                 employee=view.EmployeeView(id))
 
-Archiving
-~~~~~~~~~
 
+Step 7: Archiving
+~~~~~~~~~~~~~~~~~
+
+Get the version list
+````````````````````
+In our view of an employee we decide to allow the user to access the version of the employee model description.
+Go back to the `view_employee` function. In the view of an employee we want to list all the existing versions of the archived document. To list them we just use the `history` property of a document instance. We create an instance by giving the `id` of an employee  which is also the id of the document.
+
+::
+  
+    history = document.EmployeeDoc(id).history 
+    
+Then we have to return the view template with the list of versions::
+
+    return view.EmployeeView(id).view('view_employee.html', history=history)
+    
+Now go to ``view_employee.html``. To use `history`, we loop on it and each element is a `EmployeeDoc` instance. So we can use the instance properties like the version of the document. In this example we make a table:
+
+1. The first column displays the document datetime by using the `datetime` property of `EmployeeDoc`. 
+2. The second create a link to edit the archived template by giving the version to `url_for`.
+3. The third create a link to view the html of the template
+4. The fourth create a link to the pdf download
+
+.. sourcecode:: html+jinja
+
+    <h3>Versions</h3>
+    <table>
+      <tr>
+        <th>Commit datetime</th>
+        <th>Commit message</th>
+        <th>Edit</th>
+        <th>HTML</th>
+        <th>PDF</th>
+      </tr>
+      {% for archive in history %}
+        <tr>
+          <td>{{ archive.datetime }}</td>
+          <td>{{ archive.message }}</td>
+          <td><a href="{{ url_for('edit_employee_report', version=archive.version, **obj.primary_keys) }}">></a></td>
+          <td><a href="{{ url_for('html_employee', version=archive.version, **obj.primary_keys) }}">></a></td>
+          <td><a href="{{ url_for('pdf_employee', version=archive.version, **obj.primary_keys) }}">></a></td>
+        </tr>
+      {% endfor %}
+    </table>
+
+I hope you noticed that the `edit_employee_report`, `html_employee` and `pdf_employee` view functions already exists. You just have to add a new route to those view function which takes the version in parameter. Something like that for the `html_employee` view::
+
+    @app.route('/employee/html/<id>')
+    @app.route('/employee/html/<id>/<version>')
+    def html_employee(id, version=None):
+        doc = document.EmployeeDoc
+        return doc.html('employee_report.html',
+                        employee=view.EmployeeView(id),
+                        version=version)
+                        
+Finally you have to go back to ``edit_employee_template.html`` and `.html` in order to add the version in parameter of the view classmethod of `EmployeeDoc`::
+ 
+    {% block main %}
+      {{ cls.view_edit(employee=employee, version=version) }}
+    {% endblock main %}
+    
+Do the same with ``employee_report.html``.
+
+Now you can run the server and see that works perfectly!
 
 Rights
 ------
