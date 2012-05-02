@@ -12,8 +12,10 @@ section         { border: 1px solid #ddd; }
 
 form            { margin: 0.5em; }
 
-table, table td { border: thin solid #999; border-collapse: collapse; 
-                    width: 50%; text-align:center; }
+table           { border: thin solid #999; width: 50%; text-align:center;
+                  border-collapse: collapse; }
+table td        { width: 5em; }
+th, td          { border: thin solid #999; }
 
 .error ul       { background: #F0D6D6; }
 .ok ul          { background: #80B76F; }

@@ -112,7 +112,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "logo-pynuts.png"
+#html_logo = "logo-pynuts.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -251,3 +251,9 @@ autodoc_member_order = 'bysource'
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
 html_theme = 'flask'
+html_sidebars = {
+    'index': ['sidebarintro.html', 'localtoc.html', 'relations.html',
+              'sourcelink.html', 'searchbox.html'],
+    '**': ['sidebarlogo.html', 'localtoc.html', 'relations.html',
+                 'sourcelink.html', 'searchbox.html']
+}
