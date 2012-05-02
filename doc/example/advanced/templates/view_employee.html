@@ -3,11 +3,6 @@
 {% block main %}
   <h2>Employee</h2>
   {{ obj.view_object() }}
-  <ul>
-    <li><a href="{{ url_for('edit_employee_report', **obj.primary_keys) }}">Edit the employee report</a></li>
-    <li><a href="{{ url_for('html_employee', **obj.primary_keys) }}">View the employee report</a></li>
-    <li><a href="{{ url_for('pdf_employee', **obj.primary_keys) }}">Download as PDF</a></li>
-  </ul>
   <h2>Document history</h2>
   <table>
     <tr>

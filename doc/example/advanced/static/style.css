@@ -14,7 +14,7 @@ form            { margin: 0.5em; }
 
 table           { border: thin solid #999; width: 50%; text-align:center;
                   border-collapse: collapse; }
-table td        { width: 5em; }
+
 th, td          { border: thin solid #999; }
 
 .error ul       { background: #F0D6D6; }
