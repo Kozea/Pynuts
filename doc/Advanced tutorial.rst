@@ -113,12 +113,12 @@ Document
 --------
 
 
-This part will discribe how to make documents, make version and generate beautiful PDF report with Pynuts.
+This part will describe how to make documents, make version and generate beautiful PDF report with Pynuts.
 
 Step 1: Creating Our Document Class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We start by creating our ``document.py`` which will contain our Pynuts document class. 
+Start by creating the file ``document.py`` which will contain the Pynuts document class. 
 
 ::
 
@@ -132,19 +132,19 @@ We start by creating our ``document.py`` which will contain our Pynuts document 
 
 
 `model` 
- That's the path to the folder where our model is. We have to create this folder. Open `model/`. Now create a file named `index.rst.jinja2`.
+ That's the path to the folder where the model is stored. You have to create a file named `index.rst.jinja2` in this folder, this will be your document template written in ReST/Jinja2.
 
 `document_id_template`
  In this tutorial the document_id_template is the employee id.
 
 `repository`
- It's the path where is our git repository where the documents versions will be stored.
+ It's the path where your git repository is. The documents versions will be stored here.
  
  
 Step 2: Git Repository
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Now we have to create our git repository.
+Simply create a bare git repository.
 
 ::
 
@@ -155,7 +155,7 @@ Step 3: Creating Documents
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When an employee is added in database and everything went well, we create an employee document.
-So We go back to the adding route in ``executable.py``.
+So you have to go back to the *add* route in ``executable.py``.
 
 - First create an instance of EmployeeView
 - Then we call the create method of EmployeeView. 
@@ -173,7 +173,7 @@ So We go back to the adding route in ``executable.py``.
           document.EmployeeDoc.create(employee=employee)
       return response
 
-At the Document creation, Pynuts make a first commit of the folder which contains the model in a new branch. 
+When the document is created for the first time, Pynuts make an initial commit of the folder which contains the model in a new branch. 
 
 
 Step 4: Editing Document
@@ -255,13 +255,19 @@ Then we have to return the view template with the list of versions::
 Now go to ``view_employee.html``. To use `history`, we loop on it and each element is a `EmployeeDoc` instance. So we can use the instance properties like the version of the document. In this example we make a table:
 
 1. The first column displays the document datetime by using the `datetime` property of `EmployeeDoc`. 
+2. This is the commit message.
 2. The second create a link to edit the archived template by giving the version to `url_for`.
 3. The third create a link to view the html of the template
 4. The fourth create a link to the pdf download
 
 .. sourcecode:: html+jinja
 
-    <h3>Versions</h3>
+  {% extends "_layout.html" %}
+
+  {% block main %}
+    <h2>Employee</h2>
+    {{ obj.view_object() }}
+    <h2>Document history</h2>
     <table>
       <tr>
         <th>Commit datetime</th>
@@ -272,7 +278,7 @@ Now go to ``view_employee.html``. To use `history`, we loop on it and each eleme
       </tr>
       {% for archive in history %}
         <tr>
-          <td>{{ archive.datetime }}</td>
+          <th>{{ archive.datetime }}</th>
           <td>{{ archive.message }}</td>
           <td><a href="{{ url_for('edit_employee_report', version=archive.version, **obj.primary_keys) }}">></a></td>
           <td><a href="{{ url_for('html_employee', version=archive.version, **obj.primary_keys) }}">></a></td>
@@ -280,6 +286,7 @@ Now go to ``view_employee.html``. To use `history`, we loop on it and each eleme
         </tr>
       {% endfor %}
     </table>
+  {% endblock main %}
 
 I hope you noticed that the `edit_employee_report`, `html_employee` and `pdf_employee` view functions already exists. You just have to add a new route to those view function which takes the version in parameter. Something like that for the `html_employee` view::
 
@@ -291,7 +298,9 @@ I hope you noticed that the `edit_employee_report`, `html_employee` and `pdf_emp
                         employee=view.EmployeeView(id),
                         version=version)
                         
-Finally you have to go back to ``edit_employee_template.html`` and `.html` in order to add the version in parameter of the view classmethod of `EmployeeDoc`::
+Finally you have to go back to ``edit_employee_template.html`` in order to add the version in parameter of the view classmethod of `EmployeeDoc`
+
+.. sourcecode:: html+jinja
  
     {% block main %}
       {{ cls.view_edit(employee=employee, version=version) }}
