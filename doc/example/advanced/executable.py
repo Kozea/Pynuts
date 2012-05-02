@@ -36,7 +36,8 @@ def edit_employee(id):
 @view.EmployeeView.view_page
 @app.route('/employee/view/<id>')
 def view_employee(id):
-    return view.EmployeeView(id).view('view_employee.html')
+    history = document.EmployeeDoc(id).history
+    return view.EmployeeView(id).view('view_employee.html', history=history)
 
 
 @view.EmployeeView.delete_page
@@ -47,27 +48,34 @@ def delete_employee(id):
 
 
 @app.route('/employee/edit_template/<id>', methods=('POST', 'GET'))
-def edit_employee_report(id):
+@app.route('/employee/edit_template/<id>/<version>', methods=('POST', 'GET'))
+def edit_employee_report(id, version=None):
     employee = view.EmployeeView(id)
     doc = document.EmployeeDoc
     return doc.edit('edit_employee_template.html',
-                    employee=employee)
+                    employee=employee,
+                    version=version)
 
 
-@app.route('/employee/html/<id>', methods=('POST', 'GET'))
-def html_employee(id):
+@app.route('/employee/html/<id>')
+@app.route('/employee/html/<id>/<version>')
+def html_employee(id, version=None):
     doc = document.EmployeeDoc
-    return doc.html('employee_report.html', employee=view.EmployeeView(id))
+    return doc.html('employee_report.html',
+                    employee=view.EmployeeView(id),
+                    version=version)
 
 
 @app.route('/employee/download/<id>')
-def download_employee(id):
+@app.route('/employee/download/<id>/<version>')
+def pdf_employee(id, version=None):
     doc = document.EmployeeDoc
     return doc.download_pdf(filename='Employee %s report' % (id),
-                            employee=view.EmployeeView(id))
+                            employee=view.EmployeeView(id),
+                            version=version)
 
 
 if __name__ == '__main__':
     app.db.create_all()
     app.secret_key = 'Azerty'
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=8000)
