@@ -246,7 +246,7 @@ class Document(object):
         document id was already used.
 
         """
-        document = cls.from_data(**kwargs).git
+        document = cls.from_data(**kwargs)
         git = document.git
         git.tree = git.store_directory(cls.model)
         git.commit(
