@@ -13,7 +13,7 @@ from weasyprint import HTML
 from docutils_html5 import Writer
 
 from .environment import create_environment
-from .fs import GitFS, GitLoader
+from .git import Git, ConflictError
 
 
 class MetaDocument(type):
@@ -61,54 +61,55 @@ class Document(object):
 
     def __init__(self, document_id, version=None):
         self.document_id = document_id
-        self.git = GitFS(self.repository, branch=self.branch, commit=version)
+        self.git = Git(self.repository, branch=self.branch, commit=version)
+        self.archive_git = Git(self.repository, branch=self.archive_branch)
+
         self.environment = create_environment()
         self.environment.loader = ChoiceLoader((
-            GitLoader(self.git), self.environment.loader))
+            self.git.jinja_loader(), self.environment.loader))
         self.environment.globals['render_rest'] = self._pynuts.render_rest
 
     @property
     def branch(self):
         """Branch name of the document."""
-        return 'refs/documents/%s' % self.document_id
+        return 'documents/%s' % self.document_id
 
     @property
     def archive_branch(self):
         """Branch name of the document archives."""
-        return 'refs/archives/%s' % self.document_id
+        return 'archives/%s' % self.document_id
 
     @property
     def version(self):
         """Actual git version of the document."""
-        return self.git.commit.id
+        return self.git.head.id
 
     @property
     def datetime(self):
         """Datetime of the document latest commit."""
-        return datetime.datetime.fromtimestamp(self.git.commit.commit_time)
+        return datetime.datetime.fromtimestamp(self.git.head.commit_time)
 
     @property
     def author(self):
         """Author of the document latest commit."""
-        return self.git.commit.author.decode('utf-8')
+        return self.git.head.author.decode('utf-8')
 
     @property
     def message(self):
         """Message of the document latest commit."""
-        return self.git.commit.message.decode('utf-8')
+        return self.git.head.message.decode('utf-8')
 
     @property
     def history(self):
         """Yield the parent documents."""
-        git = GitFS(self.repository, branch=self.branch)
+        git = Git(self.repository, branch=self.branch)
         for version in git.history():
             yield type(self)(self.document_id, version=version)
 
     @property
     def archive_history(self):
         """Yield the parent documents stored as archives."""
-        git = GitFS(self.repository, branch=self.archive_branch)
-        for version in git.history():
+        for version in self.archive_git.history():
             yield type(self)(self.document_id, version=version)
 
     @classmethod
@@ -217,8 +218,8 @@ class Document(object):
         return Response(pdf, mimetype='application/pdf', headers=headers)
 
     @classmethod
-    def archive(cls, part='index.rst.jinja2', version=None, author=None,
-                message=None, **kwargs):
+    def archive(cls, part='index.rst.jinja2', version=None,
+                author_name=None, author_email=None, message=None, **kwargs):
         """Archive the given version of the document.
 
         :param part: part of the document to archive.
@@ -226,46 +227,37 @@ class Document(object):
 
         """
         document = cls.from_data(version=version, **kwargs)
-        blob_id = document.git.store_string(
+        document.git.write(
+            os.path.splitext(part)[0],
             document.generate_rest(part=part, **kwargs).encode('utf-8'))
-        document.git.tree.add(os.path.splitext(part)[0], 0100644, blob_id)
-        document.git.store.add_object(document.git.tree)
-        parents = []
-        if document.archive_branch in document.git.repository.refs:
-            parents.append(
-                document.git.repository.refs[document.archive_branch])
-        if message is None:
-            message = u'Archive %s' % document.document_id
-        if author is None:
-            author = u'Pynuts <pynuts@pynuts.org>'
-        commit_id = document.git.store_commit(
-            document.git.tree.id, parents, author.encode('utf-8'),
-            message.encode('utf-8'))
-        document.git.repository.refs[document.archive_branch] = commit_id
+        git = document.archive_git
+        git.tree = document.git.tree
+        git.commit(
+            author_name or 'Pynuts',
+            author_email or 'pynut@pynuts.org',
+            message or 'Archive %s' % document.document_id)
 
     @classmethod
-    def create(cls, author=None, message=None, **kwargs):
+    def create(cls, author_name=None, author_email=None, message=None,
+               **kwargs):
         """Create the ReST document.
 
         Return ``True`` if the document has been created, ``False`` if the
         document id was already used.
 
         """
-        document = cls.from_data(**kwargs)
-        tree_id = document.git.store_directory(cls.model)
-        if message is None:
-            message = u'Create %s' % document.document_id
-        if author is None:
-            author = u'Pynuts <pynuts@pynuts.org>'
-        commit_id = document.git.store_commit(
-            tree_id, None, author.encode('utf-8'), message.encode('utf-8'))
-        return document.git.repository.refs.add_if_new(
-            document.branch, commit_id)
+        document = cls.from_data(**kwargs).git
+        git = document.git
+        git.tree = git.store_directory(cls.model)
+        git.commit(
+            author_name or 'Pynuts',
+            author_email or 'pynut@pynuts.org',
+            message or 'Create %s' % document.document_id)
 
     @classmethod
     def edit(cls, template, part='index.rst.jinja2', version=None,
-             author=None, message=None, archive=False, redirect_url=None,
-             **kwargs):
+             author_name=None, author_email=None, message=None, archive=False,
+             redirect_url=None, **kwargs):
         """Edit the document.
 
         :param template: application template with edition form.
@@ -280,28 +272,22 @@ class Document(object):
         if request.method == 'POST':
             document = cls.from_data(
                 version=request.form['_old_commit'], **kwargs)
-            blob_id = document.git.store_string(
+            git = document.archive_git if archive else document.git
+            git.write(
+                'index.rst' if archive else part,
                 request.form['document'].encode('utf-8'))
-            part = 'index.rst' if archive else part
-            document.git.tree.add(part, 0100644, blob_id)
-            document.git.store.add_object(document.git.tree)
-            if message is None:
-                message = (
-                    request.form.get('message') or
-                    u'Edit %s' % document.document_id)
-            if author is None:
-                author = 'Pynuts <pynuts@pynuts.org>'
-            commit_id = document.git.store_commit(
-                document.git.tree.id, [document.git.commit.id],
-                author.encode('utf-8'), message.encode('utf-8'))
-            branch = document.archive_branch if archive else document.branch
-            if document.git.repository.refs.set_if_equals(
-                branch, document.version, commit_id):
+            try:
+                git.commit(
+                    author_name or 'Pynuts',
+                    author_email or 'pynut@pynuts.org',
+                    message or 'Edit %s' % document.document_id)
+            except ConflictError:
+                flash('A conflict happened.', 'error')
+            else:
                 flash('The document was saved.', 'ok')
                 if redirect_url:
                     return redirect(redirect_url)
-            else:
-                flash('A conflict happened.', 'error')
+
         return render_template(
             template, cls=cls, part=part, version=version, archive=archive,
             **kwargs)
@@ -318,9 +304,10 @@ class Document(object):
         part = 'index.rst' if archive else part
         document = cls.from_data(version=version, **kwargs)
         template = document.environment.get_template(cls.edit_template)
+        # TODO: what if archive==True?
         text = document.git.read(part).decode('utf-8')
         return jinja2.Markup(template.render(
-            cls=cls, text=text, old_commit=document.git.commit.id, **kwargs))
+            cls=cls, text=text, old_commit=document.git.head.id, **kwargs))
 
     @classmethod
     def html(cls, template, part='index.rst.jinja2', version=None,

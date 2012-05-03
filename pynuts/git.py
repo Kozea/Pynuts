@@ -155,7 +155,7 @@ class Git(object):
             tree = sub_tree
 
         # TODO: This will also override trees. Raise instead?
-        tree[parts[-1]] = 0100644, self.store_bytes(bytestring)
+        tree[parts[-1]] = 0100644, self.store_bytes(bytestring).id
         self._add_object(tree)
 
         for tree, name, sub_tree in reversed(traversed_trees):
@@ -214,12 +214,12 @@ class Git(object):
         for name in os.listdir(root):
             fullname = os.path.join(root, name)
             if os.path.isdir(fullname):
-                tree.add(name, 040000, self.store_directory(fullname))
+                tree.add(name, 040000, self.store_directory(fullname).id)
             elif os.path.isfile(fullname):
-                tree.add(name, 0100644, self.store_file(fullname))
+                tree.add(name, 0100644, self.store_file(fullname).id)
             #else: Ignore special files.
         self._add_object(tree)
-        return tree.id
+        return tree
 
     def store_file(self, filename):
         """Store a file as a blob and return its ID."""
@@ -231,4 +231,4 @@ class Git(object):
         """Store a byte string as a blob and return its ID."""
         blob = Blob.from_string(bytestring)
         self._add_object(blob)
-        return blob.id
+        return blob
