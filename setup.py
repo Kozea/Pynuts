@@ -9,5 +9,6 @@ setup(
     packages=["pynuts"],
     package_data={'pynuts': ['templates/*.jinja2']},
     install_requires=[
-        'flask-sqlalchemy', 'flask-wtf', 'weasyprint', 'docutils', 'dulwich']
+        'flask-sqlalchemy', 'flask-wtf', 'weasyprint', 'docutils', 'dulwich',
+        'docutils_html5_writer']
 )

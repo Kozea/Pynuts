@@ -1,0 +1,2 @@
+git+git://github.com/Kozea/docutils-html5-writer.git
+-e .
