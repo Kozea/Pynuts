@@ -261,4 +261,4 @@ Create a file `style.css` in the static folder, you can use the css below:
 
 ------
  
--> `Get the whole tutorial application <https://github.com/Kozea/Pynuts>`_
+-> `Get the whole tutorial application <https://github.com/Kozea/Pynuts/tree/master/doc/example/simple>`_
