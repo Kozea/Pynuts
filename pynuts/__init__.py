@@ -5,6 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 import document
 import view
+import rights
 
 
 class Pynuts(flask.Flask):
@@ -32,6 +33,13 @@ class Pynuts(flask.Flask):
             _pynuts = self
 
         self.Document = Document
+
+        class Context(object):
+            """Context base class of the application."""
+            __metaclass__ = rights.MetaContext
+            _pynuts = self
+
+        self.Context = Context
 
         class ModelView(view.ModelView):
             """Model view base class of the application."""
