@@ -12,6 +12,8 @@ class MetaView(type):
     """Metaclass for view classes."""
     def __init__(cls, name, bases, dict_):
         if cls.model:
+            # TODO: find a better name than the name of the class
+            cls._pynuts.views[cls.__name__] = cls
             cls._mapping = cls._mapping or class_mapper(cls.model)
             column_names = (column.key for column in cls._mapping.columns)
             cls.view_columns = cls.view_columns or column_names

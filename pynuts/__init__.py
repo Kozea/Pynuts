@@ -25,6 +25,7 @@ class Pynuts(flask.Flask):
         self.config.update(config or {})
         self.db = SQLAlchemy(self)
         self.documents = {}
+        self.views = {}
         if reflect:
             self.db.metadata.reflect(bind=self.db.get_engine(self))
 

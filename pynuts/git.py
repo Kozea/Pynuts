@@ -19,10 +19,6 @@ class ObjectTypeError(GitException):
     """For example, found a blob where a tree was expected."""
 
 
-class NoSuchBranchError(GitException):
-    """Operation on a branch that does not exist."""
-
-
 class ConflictError(GitException):
     """Operation on a branch that does not exist."""
 
@@ -50,13 +46,14 @@ class Git(object):
 
     def __init__(self, repository_path, branch, commit=None):
         self.repository_path = repository_path
-        self.repository = Repo(repository_path)
-        self._add_object = self.repository.object_store.add_object
+        self.repository = repository = Repo(repository_path)
+        self._add_object = repository.object_store.add_object
+        self._get_object = repository.get_object
         self.ref = 'refs/heads/' + branch
-        commit = commit or self.repository.refs.read_ref(self.ref)
+        commit = commit or repository.refs.read_ref(self.ref)
         if commit:
-            self.head = self.repository.commit(commit)
-            self.tree = self.repository.tree(self.head.tree)
+            self.head = repository.commit(commit)
+            self.tree = repository.tree(self.head.tree)
         else:
             self.head = None
             self.tree = Tree()
@@ -68,7 +65,7 @@ class Git(object):
             path = prefix + template
             try:
                 source = self.read(path).decode('utf-8')
-            except NotFoundError as err:
+            except NotFoundError:
                 raise jinja2.TemplateNotFound(template)
             # Fake filename for tracebacks:
             filename = '%s/<git commit %s>/%s' % (
@@ -97,28 +94,30 @@ class Git(object):
                 break
             commit = self.repository.commit(commit.parents[0])
 
-    def _split_path(self, path):
-        return [part for part in path.encode('utf8').split('/') if part]
-
-    def _lookup(self, path):
-        """Recursively walk Tree objects and return the object at this path."""
-        parts = self._split_path(path)
-        tree = self.tree
+    def _lookup(self, path, create_trees=False):
+        parts = [part for part in path.encode('utf8').split('/') if part]
         if not parts:
-            return tree
-        get_object = self.repository.get_object
-        for i, part in enumerate(parts):
-            if i:
-                tree = get_object(sha)
-                if tree.type_name != 'tree':
-                    raise ObjectTypeError(
-                        'Expected a tree, found a %s at %s.'
-                        % (tree.type_name, '/'.join(parts[:i])))
-            try:
-                mode, sha = tree[part]
-            except KeyError:
+            raise ValueError('empty path: %r' % path)
+
+        last_i = len(parts) - 1
+        tree = self.tree
+        steps = []
+        for i, name in enumerate(parts):
+            if name in tree:
+                _mode, sha = tree[name]
+                obj = self._get_object(sha)
+                # All but the last part must be trees
+                if i < last_i and obj.type_name != 'tree':
+                    path = '/'.join(name for _, name, _ in steps)
+                    raise ObjectTypeError("'%s' is a %s, expected a tree."
+                                          % (path, obj.type_name))
+            elif create_trees:
+                obj = Tree() if i < last_i else None
+            else:
                 raise NotFoundError(path)
-        return get_object(sha)
+            steps.append((tree, name, obj))
+            tree = obj
+        return steps, obj
 
     def read(self, path):
         """Return as a byte string the content of the blob at ``path``.
@@ -126,41 +125,27 @@ class Git(object):
         :raises: NotFoundError, ObjectTypeError
 
         """
-        blob = self._lookup(path)
+        _, blob = self._lookup(path)
         if blob.type_name != 'blob':
-            raise ObjectTypeError(
-                'Expected a blob, found a %s at %s.' % (blob.type_name, path))
+            raise ObjectTypeError("'%s' is a %s, expected a blob."
+                                  % (path, blob.type_name))
         return blob.data
 
     def write(self, path, bytestring):
         """Update in place self.tree and make sure everything is stored."""
-        parts = self._split_path(path)
-        if not parts:
-            raise ValueError('Empty path: %r' % path)
-        tree = self.tree
-        traversed_trees = []
-        get_object = self.repository.get_object
-        for i, name in enumerate(parts[:-1]):
-            try:
-                mode, sha = tree[name]
-            except KeyError:
-                sub_tree = Tree()
-            else:
-                sub_tree = get_object(sha)
-                if tree.type_name != 'tree':
-                    raise ObjectTypeError(
-                        'Expected a tree, found a %s at %s.'
-                        % (tree.type_name, '/'.join(parts[:i])))
-            traversed_trees.append((tree, name, sub_tree))
-            tree = sub_tree
+        steps, _ = self._lookup(path, create_trees=True)
+        tree, name, obj = steps.pop()
+        if obj and obj.type_name != 'blob':
+            raise ObjectTypeError('Will not overwrite a %s at %s'
+                                  % (obj.type_name, path))
 
-        # TODO: This will also override trees. Raise instead?
-        tree[parts[-1]] = 0100644, self.store_bytes(bytestring).id
+        tree[name] = 0100644, self.store_bytes(bytestring).id
         self._add_object(tree)
 
-        for tree, name, sub_tree in reversed(traversed_trees):
+        for tree, name, sub_tree in reversed(steps):
             tree[name] = 040000, sub_tree.id
             self._add_object(tree)
+        # self.tree ends up updated in-place.
 
     def commit(self, author_name, author_email, message):
         """Add a new commit in the current branch with this one (if any)
