@@ -4,9 +4,11 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 class Employee(app.db.Model):
         __tablename__ = 'Employee'
-        id = app.db.Column(app.db.Integer(), primary_key=True)
+        person_id = app.db.Column(app.db.Integer(), primary_key=True)
         name = app.db.Column(app.db.String())
         firstname = app.db.Column(app.db.String())
+        login = app.db.Column(app.db.String())
+        password = app.db.Column(app.db.String())
 
         @hybrid_property
         def fullname(self):

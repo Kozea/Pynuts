@@ -1,6 +1,5 @@
 <dl>
-  {% for column in obj.view_columns %}
-    {% set field = obj.form[column] %}
+  {% for field in obj.read_fields %}
     <dt>{{ field.label.text }}</dt>
     <dd>{{ field.data | safe }}</dd>
   {% endfor %}

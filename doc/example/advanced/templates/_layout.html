@@ -8,8 +8,11 @@
     <h1>Pynuts'</h1>
     <nav>
       <a href="{{ url_for('employees') }}">Employee list</a>
-      <a href="{{ url_for('add_employee') }}">Add a new employee</a>
+      <a href="{{ url_for('create_employee') }}">Add a new employee</a>
       <a href="{{ url_for('table_employees') }}">Employees table</a>
+      {% if session.get('login') %}
+        <a href="{{ url_for('logout') }}">Logout</a> Logged as <strong>{{ session.get('login') }}</strong>
+      {% endif %}
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for style, messages in messages | groupby(0) %}

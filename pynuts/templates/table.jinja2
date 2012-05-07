@@ -1,11 +1,10 @@
 {% showonmatch 'tr td' %}
     <table>
       <tr>
-        {% for column in cls.table_columns %}
-          {% set field = cls.Form()[column] %}
+        {% for field in cls.table_fields %}
           <th>{{ field.label() }}</th>
         {% endfor %}
-        {% if cls.edit_endpoint %}
+        {% if cls.update_endpoint %}
           <th>Edit</th>
         {% endif %}
         {% if cls.delete_endpoint %}
@@ -19,17 +18,17 @@
             <td>
               {% if endpoint %}
                 <a href="{{ endpoint(obj=obj) }}">
-              {% elif obj.view_endpoint %}
-                <a href="{{ obj.action_url_for('view') }}">
+              {% elif obj.read_endpoint %}
+                <a href="{{ obj.action_url_for('read') }}">
               {% endif %}
               {{ obj.data[column] }}
-              {% if endpoint or obj.view_endpoint %}
+              {% if endpoint or obj.read_endpoint %}
                 </a>
               {% endif %}
             </td>
           {% endfor %}
-          {% if obj.edit_endpoint %}
-            <td><a href="{{ obj.action_url_for('edit') }}">></a></td>
+          {% if obj.update_endpoint %}
+            <td><a href="{{ obj.action_url_for('update') }}">></a></td>
           {% endif %}
           {% if obj.delete_endpoint %}
           <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>

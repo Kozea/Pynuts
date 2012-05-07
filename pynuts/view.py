@@ -2,6 +2,8 @@
 
 import flask
 import jinja2
+from flask.ext.wtf import Form
+from werkzeug import cached_property
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
 
@@ -16,10 +18,21 @@ class MetaView(type):
             cls._pynuts.views[cls.__name__] = cls
             cls._mapping = cls._mapping or class_mapper(cls.model)
             column_names = (column.key for column in cls._mapping.columns)
-            cls.view_columns = cls.view_columns or column_names
+            cls.list_columns = (cls.list_column,)
             cls.table_columns = cls.table_columns or column_names
-            cls.edit_columns = cls.edit_columns or column_names
             cls.create_columns = cls.create_columns or column_names
+            cls.read_columns = cls.read_columns or column_names
+            cls.update_columns = cls.update_columns or column_names
+
+            if cls.Form:
+                for action in ('list', 'table', 'create',
+                               'read', 'update'):
+                    class_name = '%sForm' % action.capitalize()
+                    setattr(cls, class_name, type(
+                        class_name, (Form,),
+                        {field_name: getattr(cls.Form, field_name)
+                         for field_name in getattr(
+                             cls, '%s_columns' % action)}))
         super(MetaView, cls).__init__(name, bases, dict_)
 
 
@@ -48,7 +61,7 @@ class ModelView(object):
     #: SQLAlchemy model
     model = None
 
-    form = None
+    Form = None
     """
     WTForms view form. Declare it in your view like this:
 
@@ -59,33 +72,33 @@ class ModelView(object):
     """
 
     # Endpoints
-    add_endpoint = None
-    edit_endpoint = None
+    create_endpoint = None
+    read_endpoint = None
+    update_endpoint = None
     delete_endpoint = None
-    view_endpoint = None
 
     # Templates
-    view_template = 'view.jinja2'
     list_template = 'list.jinja2'
     table_template = 'table.jinja2'
-    edit_template = 'edit.jinja2'
     create_template = 'create.jinja2'
+    read_template = 'read.jinja2'
+    update_template = 'update.jinja2'
     delete_template = 'delete.jinja2'
 
     #: The column which represents your class
     list_column = None
 
-    #: The columns displayed in the view list
-    view_columns = None
-
     #: The columns displayed in the table
     table_columns = None
 
-    #: The columns you can edit
-    edit_columns = None
-
     #: The column you can set when creating an instance
     create_columns = None
+
+    #: The columns displayed in the view list
+    read_columns = None
+
+    #: The columns you can edit
+    update_columns = None
 
     # Properties
     @property
@@ -100,7 +113,6 @@ class ModelView(object):
         """Common name."""
         return getattr(self.data, self.list_column)
 
-    # Methods
     def __init__(self, keys=None, data=None):
         if keys:
             self.data = self.model.query.get_or_404(keys)
@@ -108,7 +120,26 @@ class ModelView(object):
             self.data = data
         else:
             self.data = None
-        self.form = self.Form(flask.request.form, obj=self.data)
+
+    @classproperty
+    def list_field(cls):
+        return cls.ListForm.fields[cls.list_column]
+
+    @classproperty
+    def table_fields(cls):
+        return cls.TableForm.fields
+
+    @cached_property
+    def create_form(self):
+        return self.CreateForm()
+
+    @cached_property
+    def read_fields(self):
+        return self.ReadForm(obj=self.data)
+
+    @cached_property
+    def update_form(self):
+        return self.UpdateForm(obj=self.data)
 
     @classproperty
     def mapping(cls):
@@ -137,13 +168,13 @@ class ModelView(object):
         return {
             key: form[key].data for key in flask.request.form}
 
-    def handle_errors(self):
+    def handle_errors(self, form):
         """Flash all the errors contained in the form."""
-        if self.form.errors:
-            for key, errors in self.form.errors.items():
+        if form.errors:
+            for key, errors in form.errors.items():
                 flask.flash(jinja2.Markup(
                     u'<label for="%s">%s</label>: %s.' % (
-                        key, self.form[key].label.text, ', '.join(errors))),
+                        key, form[key].label.text, ', '.join(errors))),
                 'error')
 
     def template_url_for(self, endpoint):
@@ -170,31 +201,31 @@ class ModelView(object):
 
     # Endpoints methods
     @classmethod
-    def edit_page(cls, function):
-        """Set the edit_endpoint according to the function name."""
-        cls.edit_endpoint = \
+    def create_page(cls, function):
+        """Set the create_endpoint according to the function name."""
+        cls.create_endpoint = function.__name__
+        return function
+
+    @classmethod
+    def read_page(cls, function):
+        """Set the read_endpoint according to the function name."""
+        cls.read_endpoint = \
             lambda cls, **primary_keys: flask.url_for(
                 function.__name__, **primary_keys)
         return function
 
     @classmethod
-    def add_page(cls, function):
-        """Set the add_endpoint according to the function name."""
-        cls.add_endpoint = function.__name__
+    def update_page(cls, function):
+        """Set the update_endpoint according to the function name."""
+        cls.update_endpoint = \
+            lambda cls, **primary_keys: flask.url_for(
+                function.__name__, **primary_keys)
         return function
 
     @classmethod
     def delete_page(cls, function):
         """Set the delete_endpoint according to the function name."""
         cls.delete_endpoint = \
-            lambda cls, **primary_keys: flask.url_for(
-                function.__name__, **primary_keys)
-        return function
-
-    @classmethod
-    def view_page(cls, function):
-        """Set the view_endpoint according to the function name."""
-        cls.view_endpoint = \
             lambda cls, **primary_keys: flask.url_for(
                 function.__name__, **primary_keys)
         return function
@@ -206,11 +237,6 @@ class ModelView(object):
         template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
             cls=cls, query=query, endpoint=endpoint))
-
-    def view_object(self):
-        """Render the HTML for view_template."""
-        template = self.environment.get_template(self.view_template)
-        return jinja2.Markup(template.render(obj=self))
 
     @classmethod
     def view_table(cls, query=None, endpoint=None):
@@ -224,13 +250,18 @@ class ModelView(object):
         template = self.environment.get_template(self.create_template)
         return jinja2.Markup(template.render(obj=self))
 
-    def view_edit(self):
-        """Render the HTML for edit_template."""
-        template = self.environment.get_template(self.edit_template)
+    def view_read(self):
+        """Render the HTML for read_template."""
+        template = self.environment.get_template(self.read_template)
+        return jinja2.Markup(template.render(obj=self))
+
+    def view_update(self):
+        """Render the HTML for update_template."""
+        template = self.environment.get_template(self.update_template)
         return jinja2.Markup(template.render(obj=self))
 
     def view_delete(self):
-        """Render the HTML for edit_template."""
+        """Render the HTML for delete_template."""
         template = self.environment.get_template(self.delete_template)
         return jinja2.Markup(template.render(obj=self))
 
@@ -278,19 +309,19 @@ class ModelView(object):
         :type values: Dict
 
         """
-        if self.form.validate_on_submit():
-            form_values = self._get_form_attributes(self.form)
+        if self.create_form.validate_on_submit():
+            form_values = self._get_form_attributes(self.create_form)
             if values:
                 form_values.update(values)
             self.data = self.model(**form_values)
             self.session.add(self.data)
             self.session.commit()
             return flask.redirect(self.template_url_for(redirect))
-        self.handle_errors()
+        self.handle_errors(self.create_form)
         return flask.render_template(template, obj=self, **kwargs)
 
-    def edit(self, template=None, redirect=None, **kwargs):
-        """Return the edit_template. See the create method for more details.
+    def update(self, template=None, redirect=None, **kwargs):
+        """Return the update_template. See the create method for more details.
 
         :param template: The template you want to render
         :type template: String
@@ -299,12 +330,23 @@ class ModelView(object):
         :type redirect: String
 
         """
-        if self.form.validate_on_submit():
-            for key, value in self._get_form_attributes(self.form).items():
+        if self.update_form.validate_on_submit():
+            for key, value in self._get_form_attributes(
+                self.update_form).items():
                 setattr(self.data, key, value)
             self.session.commit()
             return flask.redirect(self.template_url_for(redirect))
-        self.handle_errors()
+        self.handle_errors(self.update_form)
+        return flask.render_template(template, obj=self, **kwargs)
+
+    def read(self, template=None, **kwargs):
+        """Return the view_template.
+
+        :param template: The template you want to render
+        :type template: String
+
+        """
+        self.read_fields.process(obj=self.data)
         return flask.render_template(template, obj=self, **kwargs)
 
     def delete(self, template=None, redirect=None, **kwargs):
@@ -321,14 +363,4 @@ class ModelView(object):
             self.session.delete(self.data)
             self.session.commit()
             return flask.redirect(flask.url_for(redirect))
-        return flask.render_template(template, obj=self, **kwargs)
-
-    def view(self, template=None, **kwargs):
-        """Return the view_template.
-
-        :param template: The template you want to render
-        :type template: String
-
-        """
-        self.form.process(obj=self.data)
         return flask.render_template(template, obj=self, **kwargs)
