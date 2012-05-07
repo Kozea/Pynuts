@@ -1,11 +1,10 @@
 """__init__ file for Pynuts."""
 
+import os
 import flask
 from flask.ext.sqlalchemy import SQLAlchemy
 
-import document
-import view
-import rights
+from . import document, git, rights, view
 
 
 class Pynuts(flask.Flask):
@@ -28,6 +27,10 @@ class Pynuts(flask.Flask):
         self.views = {}
         if reflect:
             self.db.metadata.reflect(bind=self.db.get_engine(self))
+
+        self.document_repository = git.Repo(
+            self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or
+            os.path.join(self.instance_path, 'documents.git'))
 
         class Document(document.Document):
             """Document base class of the application."""

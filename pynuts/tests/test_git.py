@@ -5,8 +5,6 @@ import tempfile
 
 import jinja2
 from dulwich.repo import Repo
-from dulwich.objects import Blob, Tree, Commit
-from dulwich.errors import NotGitRepository
 
 from ..git import Git, ObjectTypeError, NotFoundError, ConflictError
 
@@ -24,10 +22,9 @@ class TestGit(unittest.TestCase):
         shutil.rmtree(self.tempdir)
 
     def test_git(self):
-        self.assertRaises(NotGitRepository, Git, self.tempdir, branch='master')
-        Repo.init_bare(self.tempdir)
-        git = Git(self.tempdir, branch='master')
-        git2 = Git(self.tempdir, branch='master')
+        repo = Repo.init_bare(self.tempdir)
+        git = Git(repo, branch='master')
+        git2 = Git(repo, branch='master')
 
         def get_hello():
             env = jinja2.Environment(loader=git.jinja_loader('templates'))
@@ -59,7 +56,7 @@ class TestGit(unittest.TestCase):
         assert list(git.history()) == [commit_2, commit_1]
 
         # Make sure we read from the filesystem
-        git = Git(self.tempdir, branch='master', commit=commit_1)
+        git = Git(repo, branch='master', commit=commit_1)
 
         self.assertRaises(ConflictError, git.commit,
                           'Bob', 'bob@pynuts.org', '(not) Second commit')
@@ -80,7 +77,7 @@ class TestGit(unittest.TestCase):
             '/<git commit %s>/templates/hello.jinja' % commit_1)
         assert template.render() == 'Hello, World!'
 
-        git = Git(self.tempdir, branch='master')
+        git = Git(repo, branch='master')
         assert git.head.id == commit_2
         template = get_hello()
         assert template.filename.endswith(
@@ -88,6 +85,6 @@ class TestGit(unittest.TestCase):
         assert template.render() == 'Hello from Pynuts!'
 
 
-        git = Git(self.tempdir, branch='inexistent')
+        git = Git(repo, branch='inexistent')
         git.tree = git.store_directory(os.path.join(self.tempdir, 'refs'))
         assert git.read('heads/master').strip() == commit_2
