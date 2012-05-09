@@ -75,12 +75,12 @@ class Document(object):
     @property
     def branch(self):
         """Branch name of the document."""
-        return 'documents/%s/%s' % (self.document_type, self.document_id)
+        return 'documents/%s/%s' % (self.type_name, self.document_id)
 
     @property
     def archive_branch(self):
         """Branch name of the document archives."""
-        return 'archives/%s/%s' % (self.document_type, self.document_id)
+        return 'archives/%s/%s' % (self.type_name, self.document_id)
 
     @property
     def version(self):
