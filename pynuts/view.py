@@ -363,5 +363,5 @@ class ModelView(object):
         if flask.request.method == 'POST':
             self.session.delete(self.data)
             self.session.commit()
-            return flask.redirect(flask.url_for(redirect))
+            return flask.redirect(self.template_url_for(redirect))
         return flask.render_template(template, obj=self, **kwargs)

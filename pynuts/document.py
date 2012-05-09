@@ -19,19 +19,20 @@ from .git import Git, ConflictError
 class MetaDocument(type):
     """Metaclass for document classes."""
     def __init__(cls, name, bases, dict_):
-        if cls.repository:
+        if cls.document_id_template:
             # TODO: find a better endpoint name than the name of the class
-            cls._resource = cls.__name__
-            cls._pynuts.documents[cls._resource] = cls
+            if not cls.type_name:
+                cls.type_name = cls.__name__
+            cls._pynuts.documents[cls.type_name] = cls
             cls._pynuts.add_url_rule(
                 '/_resource/%s/<document_id>/<version>/<path:filename>' % (
-                    cls._resource),
-                cls._resource, cls.static_route)
-            if cls.model and not os.path.isabs(cls.model):
-                cls.model = os.path.join(cls._pynuts.root_path, cls.model)
-            if cls.settings is None:
-                cls.settings = {}
-            cls.settings['_pynuts'] = cls._pynuts
+                    cls.type_name), cls.type_name, cls.static_route)
+            if cls.model_path and not os.path.isabs(cls.model_path):
+                cls.model_path = os.path.join(
+                    cls._pynuts.root_path, cls.model_path)
+            if cls.docutils_settings is None:
+                cls.docutils_settings = {}
+            cls.docutils_settings['_pynuts'] = cls._pynuts
             super(MetaDocument, cls).__init__(name, bases, dict_)
 
 
@@ -39,35 +40,37 @@ class Document(object):
     """This class represents a document object. """
     __metaclass__ = MetaDocument
 
-    _resource = None
-
     #: Jinja Environment
-    environment = None
+    jinja_environment = None
 
     #: Docutils settings
-    settings = None
+    docutils_settings = None
 
-    #: Git repository
-    repository = None
-
-    #: Template id
+    #: Template generating the document id
     document_id_template = None
 
-    #: Model folder
-    model = None
+    #: Name identifying the document type, default is the class name
+    type_name = None
+
+    #: Model path, absolute or relative to the application root path
+    model_path = None
 
     # Templates
     edit_template = 'edit_document.jinja2'
 
     def __init__(self, document_id, version=None):
         self.document_id = document_id
-        self.git = Git(self.repository, branch=self.branch, commit=version)
-        self.archive_git = Git(self.repository, branch=self.archive_branch)
+        self.git = Git(
+            self._pynuts.document_repository, branch=self.branch,
+            commit=version)
+        self.archive_git = Git(
+            self._pynuts.document_repository, branch=self.archive_branch)
 
-        self.environment = create_environment()
-        self.environment.loader = ChoiceLoader((
-            self.git.jinja_loader(), self.environment.loader))
-        self.environment.globals['render_rest'] = self._pynuts.render_rest
+        self.jinja_environment = create_environment()
+        self.jinja_environment.loader = ChoiceLoader((
+            self.git.jinja_loader(), self.jinja_environment.loader))
+        self.jinja_environment.globals['render_rest'] = \
+            self._pynuts.render_rest
 
     @property
     def branch(self):
@@ -102,7 +105,7 @@ class Document(object):
     @property
     def history(self):
         """Yield the parent documents."""
-        git = Git(self.repository, branch=self.branch)
+        git = Git(self._pynuts.document_repository, branch=self.branch)
         for version in git.history():
             yield type(self)(self.document_id, version=version)
 
@@ -127,7 +130,7 @@ class Document(object):
     def resource_url(self, filename):
         """Resource URL for the application."""
         return url_for(
-            self._resource, document_id=self.document_id, filename=filename,
+            self.type_name, document_id=self.document_id, filename=filename,
             version=self.version)
 
     @classmethod
@@ -152,7 +155,7 @@ class Document(object):
         if archive:
             return document.git.read(part)
         else:
-            template = document.environment.get_template(part)
+            template = document.jinja_environment.get_template(part)
             resource = getattr(document, 'resource_%s' % resource_type)
             return template.render(
                 resource=resource, document=document, **kwargs)
@@ -248,7 +251,7 @@ class Document(object):
         """
         document = cls.from_data(**kwargs)
         git = document.git
-        git.tree = git.store_directory(cls.model)
+        git.tree = git.store_directory(cls.model_path)
         git.commit(
             author_name or 'Pynuts',
             author_email or 'pynut@pynuts.org',
@@ -303,7 +306,7 @@ class Document(object):
         """
         part = 'index.rst' if archive else part
         document = cls.from_data(version=version, **kwargs)
-        template = document.environment.get_template(cls.edit_template)
+        template = document.jinja_environment.get_template(cls.edit_template)
         # TODO: what if archive==True?
         text = document.git.read(part).decode('utf-8')
         return jinja2.Markup(template.render(

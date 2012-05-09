@@ -3,7 +3,6 @@ import os
 import time
 
 import jinja2
-from werkzeug.utils import cached_property
 from dulwich.repo import Repo, Blob, Tree, Commit
 
 
@@ -44,9 +43,8 @@ class Git(object):
 
     committer = 'Pynuts <pynuts@pynuts.org>'
 
-    def __init__(self, repository_path, branch, commit=None):
-        self.repository_path = repository_path
-        self.repository = repository = Repo(repository_path)
+    def __init__(self, repository, branch, commit=None):
+        self.repository = repository
         self._add_object = repository.object_store.add_object
         self._get_object = repository.get_object
         self.ref = 'refs/heads/' + branch
@@ -69,7 +67,7 @@ class Git(object):
                 raise jinja2.TemplateNotFound(template)
             # Fake filename for tracebacks:
             filename = '%s/<git commit %s>/%s' % (
-                self.repository_path, self.head.id, path)
+                self.repository.path, self.head.id, path)
             # Commits are immutable:
             is_uptodate = lambda: True
             return source, filename, is_uptodate
