@@ -1,39 +1,41 @@
 {% showonmatch 'tr td' %}
-    <table>
-      <tr>
-        {% for field in cls.table_fields %}
-          <th>{{ field.label() }}</th>
-        {% endfor %}
-        {% if cls.update_endpoint %}
-          <th>Edit</th>
+  <table>
+    <tr>
+      {% for field in cls.table_fields %}
+        {% if field != 'csrf_token' %}
+          <th>{{ field }}</th>
         {% endif %}
-        {% if cls.delete_endpoint %}
-          <th>Delete</th>
+      {% endfor %}
+      {% if cls.update_endpoint %}
+        <th>Edit</th>
+      {% endif %}
+      {% if cls.delete_endpoint %}
+        <th>Delete</th>
+      {% endif %}
+    </tr>
+    
+    {% for obj in cls.query(query) %}
+      <tr>
+        {% for column in cls.table_columns %}
+          <td>
+            {% if endpoint %}
+              <a href="{{ endpoint(obj=obj) }}">
+            {% elif obj.read_endpoint %}
+              <a href="{{ obj.action_url_for('read') }}">
+            {% endif %}
+            {{ obj.data[column] }}
+            {% if endpoint or obj.read_endpoint %}
+              </a>
+            {% endif %}
+          </td>
+        {% endfor %}
+        {% if obj.update_endpoint %}
+          <td><a href="{{ obj.action_url_for('update') }}">></a></td>
+        {% endif %}
+        {% if obj.delete_endpoint %}
+        <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>
         {% endif %}
       </tr>
-      
-      {% for obj in cls.query(query) %}
-        <tr>
-          {% for column in cls.table_columns %}
-            <td>
-              {% if endpoint %}
-                <a href="{{ endpoint(obj=obj) }}">
-              {% elif obj.read_endpoint %}
-                <a href="{{ obj.action_url_for('read') }}">
-              {% endif %}
-              {{ obj.data[column] }}
-              {% if endpoint or obj.read_endpoint %}
-                </a>
-              {% endif %}
-            </td>
-          {% endfor %}
-          {% if obj.update_endpoint %}
-            <td><a href="{{ obj.action_url_for('update') }}">></a></td>
-          {% endif %}
-          {% if obj.delete_endpoint %}
-          <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>
-          {% endif %}
-        </tr>
-      {% endfor %}
-    </table>
+    {% endfor %}
+  </table>
 {% endshowonmatch %}

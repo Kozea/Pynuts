@@ -123,11 +123,11 @@ class ModelView(object):
 
     @classproperty
     def list_field(cls):
-        return cls.ListForm.fields[cls.list_column]
+        return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
-        return cls.TableForm.fields
+        return cls.TableForm()._fields
 
     @cached_property
     def create_form(self):
@@ -162,11 +162,12 @@ class ModelView(object):
         for data in (query or cls.model.query).all():
             yield cls(data=data)
 
-    @staticmethod
-    def _get_form_attributes(form):
+    @classmethod
+    def _get_form_attributes(cls, form):
         """Return the form attributes."""
-        return {
-            key: form[key].data for key in flask.request.form}
+        return {key.name: key.data for key in form
+                if key.name != 'csrf_token' or
+                cls._pynuts.config.get('CSRF_ENABLED')}
 
     def handle_errors(self, form):
         """Flash all the errors contained in the form."""
