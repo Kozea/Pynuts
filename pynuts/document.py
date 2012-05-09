@@ -183,7 +183,8 @@ class Document(object):
             part=part, version=version, archive=archive,
             resource_type=resource_type, **kwargs)
         parts = docutils.core.publish_parts(
-            source=source, writer=Writer(), settings_overrides=cls.settings)
+            source=source, writer=Writer(),
+            settings_overrides=cls.docutils_settings)
         return parts
 
     @classmethod
