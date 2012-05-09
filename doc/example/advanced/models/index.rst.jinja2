@@ -1,5 +1,4 @@
-{% for column in employee.view_columns %}
-    {% set field = employee.form[column] %}
-    {{ field.label.text }}
-     {{ field.data | safe }}
+{% for field in employee.read_fields %}
+  {{ field.label.text }}
+   {{ field.data | safe }}
 {% endfor %}

@@ -3,6 +3,5 @@ from application import app
 
 class EmployeeDoc(app.Document):
 
-    model = 'models/'
+    model_path = 'models/'
     document_id_template = '{employee.data.person_id}'
-    repository = '/tmp/employees.git'
