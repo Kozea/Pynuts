@@ -144,11 +144,11 @@ Start by creating the file ``document.py`` which will contain the Pynuts documen
 
 
     class EmployeeDoc(app.Document):
-        model = 'model/'
+        model_path = 'models/'
         document_id_template = '{employee.data.id}'
 
 
-`model` 
+`model_path` 
  That's the path to the folder where the model is stored. You have to create a file named `index.rst.jinja2` in this folder, this will be your document template written in ReST/Jinja2.
 
 `document_id_template`
@@ -159,19 +159,19 @@ Creating Documents
 ~~~~~~~~~~~~~~~~~~
 
 When an employee is added in database and everything went well, we create an employee document.
-So you have to go back to the *add* route in ``executable.py``.
+So you have to go back to the *create* route in ``executable.py``.
 
 - First create an instance of EmployeeView
 - Then we call the create method of EmployeeView. 
-- If the employee adding form is validated we create a new document.
+- If the employee `create_form` is validated we create a new document.
 - Finally we redirect to the list of employees
 
 ::
 
-  @app.route('/employee/add/', methods=('POST', 'GET'))
-  def add_employee():
+  @app.route('/employee/create/', methods=('POST', 'GET'))
+  def create_employee():
       employee = view.EmployeeView()
-      response = employee.create('add_employee.html',
+      response = employee.create('create_employee.html',
                                  redirect='employees')
       if employee.create_form.validate_on_submit():
           document.EmployeeDoc.create(employee=employee)
@@ -250,23 +250,23 @@ Using versions
 Get the version list
 ````````````````````
 In our view of an employee we decide to allow the user to access the version of the employee model description.
-Go back to the `view_employee` function. In the view of an employee we want to list all the existing versions of the archived document. To list them we just use the `history` property of a document instance. We create an instance by giving the `id` of an employee  which is also the id of the document.
+Go back to the `read_employee` function. In the view of an employee we want to list all the existing versions of the archived document. To list them we just use the `history` property of a document instance. We create an instance by giving the `id` of an employee  which is also the id of the document.
 
 ::
   
     history = document.EmployeeDoc(id).history 
     
-Then we have to return the view template with the list of versions::
+Then we have to return the read template with the list of versions::
 
-    return view.EmployeeView(id).view('view_employee.html', history=history)
+    return view.EmployeeView(id).read('read_employee.html', history=history)
     
-Now go to ``view_employee.html``. To use `history`, we loop on it and each element is a `EmployeeDoc` instance. So we can use the instance properties like the version of the document. In this example we make a table:
+Now go to ``read_employee.html``. To use `history`, we loop on it and each element is a `EmployeeDoc` instance. So we can use the instance properties like the version of the document. In this example we make a table:
 
 1. The first column displays the document datetime by using the `datetime` property of `EmployeeDoc`. 
 2. This is the commit message.
-2. The second create a link to edit the archived template by giving the version to `url_for`.
-3. The third create a link to view the html of the template
-4. The fourth create a link to the pdf download
+3. The second create a link to edit the archived template by giving the version to `url_for`.
+4. The third create a link to view the html of the template
+5. The fourth create a link to the pdf download
 
 .. sourcecode:: html+jinja
 
@@ -274,7 +274,7 @@ Now go to ``view_employee.html``. To use `history`, we loop on it and each eleme
 
   {% block main %}
     <h2>Employee</h2>
-    {{ obj.view_object() }}
+    {{ obj.view_read() }}
     <h2>Document history</h2>
     <table>
       <tr>

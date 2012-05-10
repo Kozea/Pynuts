@@ -22,6 +22,14 @@ Document
 .. automodule:: pynuts.document
    :members:
 
+
+Git 
+---
+
+.. automodule:: pynuts.git
+   :members:
+
+
 Field
 -----
 

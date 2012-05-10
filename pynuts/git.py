@@ -33,11 +33,11 @@ class Git(object):
     :param repository_path:
         Full path to the repository’s directory in the filesystem.
     :param branch:
-        Which branch to use in the repository. (``refs/heads`` is implicit.)
+        Which branch to use in the repository. (`refs/heads` is implicit.)
     :param commit_id:
         The SHA1 hash of the commit to use. If given, no check is made that
-        the commit is actually reachable from ``branch``. If not given,
-        use the latest commit in ``branch``.
+        the commit is actually reachable from `branch`. If not given,
+        use the latest commit in `branch`.
 
     """
 
@@ -118,7 +118,7 @@ class Git(object):
         return steps, obj
 
     def read(self, path):
-        """Return as a byte string the content of the blob at ``path``.
+        """Return as a byte string the content of the blob at `path`.
 
         :raises: NotFoundError, ObjectTypeError
 
@@ -130,7 +130,12 @@ class Git(object):
         return blob.data
 
     def write(self, path, bytestring):
-        """Update in place self.tree and make sure everything is stored."""
+        """Update in place self.tree and make sure everything is stored.
+        
+        :param path: path to the file to write
+        :param bytestring: content of the file to write
+        
+        """
         steps, _ = self._lookup(path, create_trees=True)
         tree, name, obj = steps.pop()
         if obj and obj.type_name != 'blob':
@@ -148,6 +153,10 @@ class Git(object):
     def commit(self, author_name, author_email, message):
         """Add a new commit in the current branch with this one (if any)
         as a parent, and check that there is no conflict.
+
+        :param author_name: commit author name 
+        :param author_email: commit author email
+        :param message: commit message
 
         :raises: ConflictError
 
@@ -170,7 +179,14 @@ class Git(object):
         """Store a new commit and return its ID.
 
         Note that no branch will point to this commit. You may want to use
-        ``commit_into_branch`` instead.
+        `commit_into_branch` instead.
+        
+        :param tree_id: git tree id
+        :param author_name: commit author name 
+        :param author_email: commit author email
+        :param message: commit message
+        :param parents: parent commits
+        
 
         """
         author = '%s <%s>' % (author_name, author_email)
@@ -192,6 +208,8 @@ class Git(object):
 
         Symbolic links are followed. Other special files are ignored
 
+        :param root: git tree root
+
         """
         tree = Tree()
         for name in os.listdir(root):
@@ -205,13 +223,22 @@ class Git(object):
         return tree
 
     def store_file(self, filename):
-        """Store a file as a blob and return its ID."""
+        """Store a file as a blob and return its ID.
+        
+        :param filename: name of the file to store
+        
+        """
         # TODO: store by chunks without reading everything in memory?
+        
         with open(filename, 'rb') as fd:
             return self.store_bytes(fd.read())
 
     def store_bytes(self, bytestring):
-        """Store a byte string as a blob and return its ID."""
+        """Store a byte string as a blob and return its ID.
+        
+        :param bytestring: byte string to store
+        
+        """
         blob = Blob.from_string(bytestring)
         self._add_object(blob)
         return blob
