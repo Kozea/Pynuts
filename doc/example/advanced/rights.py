@@ -25,7 +25,7 @@ def connected():
 
 @acl
 def connected_user():
-    """Returns whether the user is connected."""
+    """Returns the connected user."""
     if app.context.person:
         return app.context.person == request.view_args.get('person_id')
 

@@ -320,4 +320,62 @@ Now you can run the server and see that works perfectly!
 
 Rights
 ------
-Coming soon...
+With pynuts, putting specific rights for the route you want is quite simple. First, you have to create a file ``rights.py``. In this file, you have to import two major things:
+ - Your application `from application import app`
+ - The pynuts ACL class `from pynuts.rights import acl`
+ 
+Then, create a `Context` class, inheriting from your application context. Here you can define some properties that will be used for the context of your rights.
+
+For example, we decided here to create a property called `person` which will stands for the current logged on user::
+
+    class Context(app.Context):
+    
+        @property
+        def person(self):
+            """Returns the current logged on person, or None."""
+            return session.get('id')
+            
+Once you're done with the context class, you can create your own rights thanks to the ACL you imported above. The ACL class is an utility decorator for access control in `allow_if` decorators. The `allow_if` decorator check that the global context matches a criteria.
+
+Your functions should look like the following::
+
+    @acl
+    def connected():
+        """Returns whether the user is connected."""
+        return app.context.person is not None
+        
+Then, import your rights in the file ``executable.py`` along with the `allow_if` function from `pynuts.rights` . You can import rights as `Is` to have a good syntax using the allow_if decorator: ``@allow_if(Is.connected)`` for example.
+
+All you have to do now is to put a decorator before your function to apply rights::
+
+    @app.route('/employees/')
+    @allow_if(Is.connected)
+    def employees():
+        return view.EmployeeView.list('list_employees.html')
+
+Here, the access to the list of employees won't be granted if you aren't connected.
+
+Of course, you can combine some rights, it implements the following operators:
+
++-------+--------+
+| a & b | a and b|
++-------+--------+
+| a | b | a or b |
++-------+--------+
+| a ^ b | a xor b|
++-------+--------+
+|  ~ a  |  not a |
++-------+--------+
+    
+You can write this for example: 
+
+``@allow_if((Is.connected & ~Is.blacklisted) | Is.admin)``
+
+This will grant the access for a connected person which isn't blacklisted or to the admin.
+
+Miscellaneous
+-------------
+
+You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/doc/example/advanced>`_.
+
+Something doesn't work ? You want a new feature ? Feel free to write some bug report or feature request on the `issue tracker <http://redmine.kozea.fr/projects/pynuts>`_.
