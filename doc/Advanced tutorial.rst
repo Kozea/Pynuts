@@ -7,8 +7,8 @@ CRUD
 The CRUD part is explained in the first tutorial. 
 
 
-Employee Table
-~~~~~~~~~~~~~~
+Table of Employees
+~~~~~~~~~~~~~~~~~~
 
 With advanced pynuts features, you can easily create an admin table which will provide CRUD functions.
 
@@ -22,9 +22,9 @@ First, create a template called ``table_employees.html`` as below:
       {{ cls.view_table() }}
     {% endblock main %}
 
-This template call the *view_table* method from pynuts, which display a table with your employees and an *edit* and *delete* method for each of them.
+This template call the `view_table` method from pynuts, which display a table with your employees and an `edit` and `delete` method for each of them.
 
-Then, you have to call this template in the function *table* in the file ``executable.py``::
+Then, you have to call this template in the function `table` in the file ``executable.py``::
 
     @app.route('/employees/table')
     def table_employees():
@@ -32,33 +32,34 @@ Then, you have to call this template in the function *table* in the file ``execu
 
 
 
-Edit Employee
-~~~~~~~~~~~~~
+Update Employee
+~~~~~~~~~~~~~~~
 
 In your route you have to give the model primary keys in parameters in order to access your employee object. Our table Employee have `id` as primary key. So we can call an `EmployeeView` instance according to an `id`.
 
-Create ``edit_employee.html``:
+Create ``update_employee.html``:
 
 .. sourcecode:: html+jinja
 
     {% extends "_layout.html" %}
     {% block main %}
-      <h2>Edit Employee</h2>
-      {{ obj.view_edit() }}
+      <h2>Update Employee</h2>
+      {{ obj.view_update() }}
     {% endblock main %}
 
 Then put this code in ``executable.py``::
 
-    @app.route('/employee/edit/<id>', methods=('POST', 'GET'))
-    def edit_employee(id):
-        return view.EmployeeView(id).edit('edit_employee.html',
+    @view.EmployeeView.update_page
+    @app.route('/employee/update/<id>', methods=('POST', 'GET'))
+    def update_employee(id):
+        return view.EmployeeView(id).update('update_employee.html',
                                           redirect='employees')
 
 .. note::
         
-    If you want to make this function available from the interface, you have to set the `edit_endpoint` in your view class.
+    If you want to make this function available from the interface, you have to set the `update_endpoint` in your view class.
     
-    If you didn't, you can call a decorator to automatically set this endpoint according to the route you've created. Just add `@view.EmployeeView.edit_page` before the `@app.route`.
+    If you didn't, you can call a decorator to automatically set this endpoint according to the route you've created. Just add `@view.EmployeeView.update_page` before the `@app.route`.
     
     For more information, see the `delete` function below.
 
@@ -66,7 +67,7 @@ Then put this code in ``executable.py``::
 
 Delete Employee
 ~~~~~~~~~~~~~~~
-Same as edit, but we decided here to use the decorator to set the endpoint.
+Same as update.
 
 Create ``delete_employee.html``:
 
@@ -87,26 +88,26 @@ Then put this code in ``executable.py``::
         return view.EmployeeView(id).delete('delete_employee.html',
                                             redirect='employees')
                                             
-View Employee
+Read Employee
 ~~~~~~~~~~~~~
-Same as delete and edit.
+Same as delete and update.
 
-Create ``view_employee.html``:
+Create ``read_employee.html``:
 
 .. sourcecode:: html+jinja
 
     {% extends "_layout.html" %}
     {% block main %}
       <h2>Employee</h2>
-      {{ obj.view_object() }}
+      {{ obj.view_read() }}
     {% endblock main %}
 
 Then put this code in ``executable.py``::
 
-    @view.EmployeeView.view_page
-    @app.route('/employee/view/<id>')
-    def view_employee(id):
-        return view.EmployeeView(id).view('view_employee.html')
+    @view.EmployeeView.read_page
+    @app.route('/employee/read/<id>')
+    def read_employee(id):
+        return view.EmployeeView(id).read('read_employee.html')
 
 
 Document
@@ -115,8 +116,25 @@ Document
 
 This part will describe how to make documents, make version and generate beautiful PDF report with Pynuts.
 
-Step 1: Creating Our Document Class
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configuration
+~~~~~~~~~~~~~
+If you want to use document archiving, you need to add the path to your document repository in the application config. Go to ``application.py`` and add this `'PYNUTS_DOCUMENT_REPOSITORY'` as key to the CONFIG then put the path to the `repo.git`; In this tutorial we have `/tmp/employees.git` as value.
+Now you have to make the repo. 
+
+ 
+Git Repository
+~~~~~~~~~~~~~~
+
+Simply create a bare git repository.
+
+::
+
+    $ git init --bare /tmp/employees.git
+    
+    
+Creating Our Document Class
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Start by creating the file ``document.py`` which will contain the Pynuts document class. 
 
@@ -128,7 +146,6 @@ Start by creating the file ``document.py`` which will contain the Pynuts documen
     class EmployeeDoc(app.Document):
         model = 'model/'
         document_id_template = '{employee.data.id}'
-        repository = '/tmp/employees.git'
 
 
 `model` 
@@ -137,22 +154,9 @@ Start by creating the file ``document.py`` which will contain the Pynuts documen
 `document_id_template`
  In this tutorial the document_id_template is the employee id.
 
-`repository`
- It's the path where your git repository is. The documents versions will be stored here.
- 
- 
-Step 2: Git Repository
-~~~~~~~~~~~~~~~~~~~~~~
 
-Simply create a bare git repository.
-
-::
-
-    $ git init --bare /tmp/employees.git
-    
-
-Step 3: Creating Documents
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Creating Documents
+~~~~~~~~~~~~~~~~~~
 
 When an employee is added in database and everything went well, we create an employee document.
 So you have to go back to the *add* route in ``executable.py``.
@@ -169,15 +173,19 @@ So you have to go back to the *add* route in ``executable.py``.
       employee = view.EmployeeView()
       response = employee.create('add_employee.html',
                                  redirect='employees')
-      if employee.form.validate_on_submit():
+      if employee.create_form.validate_on_submit():
           document.EmployeeDoc.create(employee=employee)
       return response
 
 When the document is created for the first time, Pynuts make an initial commit of the folder which contains the model in a new branch. 
 
+.. note ::
+    
+    create_form is the form made by pynuts according to `create_columns` you have specified. See the :ref:`api` documentation for more info.
+    
 
-Step 4: Editing Document
-~~~~~~~~~~~~~~~~~~~~~~~~
+Editing Document
+~~~~~~~~~~~~~~~~
 Since the document has been created, you may want to edit it and add some information for one specific employee.
 
 Thanks to pynuts document handling, it's possible and quite easy to do.
@@ -205,8 +213,8 @@ Then, in your ``executable.py``, you have to:
         return doc.edit('edit_employee_template.html',
                         employee=employee)
 
-Step 5: Rendering Document in HTML
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Rendering Document in HTML
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 Create the file ``employee_report.html``:
 
 .. sourcecode:: html+jinja
@@ -223,8 +231,8 @@ Create the file ``employee_report.html``:
         doc = document.EmployeeDoc
         return doc.html('employee_report.html', employee=view.EmployeeView(id))
 
-Step 6: Getting PDF Document
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting PDF Document
+~~~~~~~~~~~~~~~~~~~~
 To get the PDF document, call the `download_pdf` class method of a EmployeeDoc.
 
 ``executable.py``::
@@ -236,8 +244,8 @@ To get the PDF document, call the `download_pdf` class method of a EmployeeDoc.
                                 employee=view.EmployeeView(id))
 
 
-Step 7: Archiving
-~~~~~~~~~~~~~~~~~
+Using versions
+~~~~~~~~~~~~~~
 
 Get the version list
 ````````````````````

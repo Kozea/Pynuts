@@ -1,9 +1,9 @@
-from flaskext.wtf import (Form, TextField, Required)
+from flaskext.wtf import (Form, IntegerField, TextField, Required)
 from sqlalchemy.ext.hybrid import hybrid_property
 
 import pynuts
 
-CONFIG = {'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
+CONFIG = {'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/simple.db'}
 
 app = pynuts.Pynuts(__name__, config=CONFIG)
 
@@ -26,8 +26,10 @@ class EmployeeView(app.ModelView):
     create_columns = ('name', 'firstname')
 
     class Form(Form):
+        id = IntegerField(u'ID')
         name = TextField(u'Surname', validators=[Required()])
         firstname = TextField(u'Firstname', validators=[Required()])
+        fullname = TextField(u'Fullname')
 
 
 @app.route('/')

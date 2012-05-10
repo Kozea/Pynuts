@@ -62,7 +62,6 @@ def create_employee():
 @app.route('/employee/read/<int:person_id>')
 @allow_if(Is.admin | Is.connected_user)
 def read_employee(person_id=None):
-    person_id = person_id or app.context.person
     history = document.EmployeeDoc(person_id).history
     return view.EmployeeView(person_id).read(
         'read_employee.html', history=history)
