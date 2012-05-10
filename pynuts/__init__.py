@@ -2,6 +2,7 @@
 
 import os
 import flask
+from werkzeug import cached_property
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from . import document, git, rights, view
@@ -29,7 +30,7 @@ class Pynuts(flask.Flask):
         if reflect:
             self.db.metadata.reflect(bind=self.db.get_engine(self))
 
-        self.document_repository = git.Repo(
+        self.document_repository_path = (
             self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or
             os.path.join(self.instance_path, 'documents.git'))
 
@@ -51,6 +52,10 @@ class Pynuts(flask.Flask):
             _pynuts = self
 
         self.ModelView = ModelView
+
+    @cached_property
+    def document_repository(self):
+        return git.Repo(self.document_repository_path)
 
     def render_rest(self, document_type, part='index.rst.jinja2',
                     **kwargs):
