@@ -1,4 +1,4 @@
-from flask import flash, redirect, session, request, render_template, url_for
+from flask import flash, redirect, session, request, render_template
 
 from application import app
 from pynuts.rights import allow_if

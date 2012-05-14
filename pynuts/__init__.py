@@ -2,6 +2,7 @@
 
 import os
 import flask
+import argparse
 from werkzeug import cached_property
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -22,11 +23,23 @@ class Pynuts(flask.Flask):
     def __init__(self, import_name, config=None, reflect=False,
                  *args, **kwargs):
         super(Pynuts, self).__init__(import_name, *args, **kwargs)
+
         self.config['CSRF_ENABLED'] = False
         self.config.update(config or {})
+
+        # Get the config file
+        arg_parser = argparse.ArgumentParser()
+        arg_parser.add_argument(
+            '-c', '--config', help='Choose your config file')
+        parser_args = arg_parser.parse_args()
+        config_file = getattr(parser_args, 'config')
+        if config_file:
+            self.config.from_pyfile(config_file)
+
         self.db = SQLAlchemy(self)
         self.documents = {}
         self.views = {}
+
         if reflect:
             self.db.metadata.reflect(bind=self.db.get_engine(self))
 

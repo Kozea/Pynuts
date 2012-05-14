@@ -1,4 +1,7 @@
 {% for field in employee.read_fields %}
+{% if field.widget.input_type != 'hidden' %}
   {{ field.label.text }}
    {{ field.data | safe }}
+{% endif %}
+
 {% endfor %}
