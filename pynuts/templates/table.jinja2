@@ -1,9 +1,9 @@
 {% showonmatch 'tr td' %}
   <table>
     <tr>
-      {% for field in cls.table_fields %}
-        {% if field != 'csrf_token' %}
-          <th>{{ field }}</th>
+      {% for field_name, field in cls.table_fields.items() %}
+        {% if field_name != 'csrf_token' %}
+          <th>{{ field.label() }}</th>
         {% endif %}
       {% endfor %}
       {% if cls.update_endpoint %}
