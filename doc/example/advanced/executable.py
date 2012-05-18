@@ -38,6 +38,7 @@ def logout():
 @app.route('/employees/')
 @allow_if(Is.connected)
 def employees():
+    raise
     return view.EmployeeView.list('list_employees.html')
 
 
