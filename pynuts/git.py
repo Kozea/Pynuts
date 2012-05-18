@@ -1,6 +1,7 @@
 # coding: utf8
 import os
 import time
+from urllib import unquote
 
 import jinja2
 from dulwich.repo import Repo, Blob, Tree, Commit
@@ -131,10 +132,10 @@ class Git(object):
 
     def write(self, path, bytestring):
         """Update in place self.tree and make sure everything is stored.
-        
+
         :param path: path to the file to write
         :param bytestring: content of the file to write
-        
+
         """
         steps, _ = self._lookup(path, create_trees=True)
         tree, name, obj = steps.pop()
@@ -154,7 +155,7 @@ class Git(object):
         """Add a new commit in the current branch with this one (if any)
         as a parent, and check that there is no conflict.
 
-        :param author_name: commit author name 
+        :param author_name: commit author name
         :param author_email: commit author email
         :param message: commit message
 
@@ -180,13 +181,13 @@ class Git(object):
 
         Note that no branch will point to this commit. You may want to use
         `commit_into_branch` instead.
-        
+
         :param tree_id: git tree id
-        :param author_name: commit author name 
+        :param author_name: commit author name
         :param author_email: commit author email
         :param message: commit message
         :param parents: parent commits
-        
+
 
         """
         author = '%s <%s>' % (author_name, author_email)
@@ -224,20 +225,20 @@ class Git(object):
 
     def store_file(self, filename):
         """Store a file as a blob and return its ID.
-        
+
         :param filename: name of the file to store
-        
+
         """
         # TODO: store by chunks without reading everything in memory?
-        
+
         with open(filename, 'rb') as fd:
             return self.store_bytes(fd.read())
 
     def store_bytes(self, bytestring):
         """Store a byte string as a blob and return its ID.
-        
+
         :param bytestring: byte string to store
-        
+
         """
         blob = Blob.from_string(bytestring)
         self._add_object(blob)

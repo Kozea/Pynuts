@@ -3,10 +3,11 @@
 import os
 import flask
 import argparse
+from docutils.parsers.rst import directives
 from werkzeug import cached_property
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from . import document, git, rights, view
+from . import document, git, rights, view, directives as dc
 
 
 class Pynuts(flask.Flask):
