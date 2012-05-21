@@ -376,6 +376,18 @@ This will grant the access for a connected person which isn't blacklisted or to 
 Miscellaneous
 -------------
 
+Configuration file
+~~~~~~~~~~~~~~~~~~
+
+You can launch your pynuts application with a specific configuration file.
+
+To do that, simply run your executable with `-c` or `--config` and put the name of your configuration file (it should be in the same directory as your application)::
+
+    $ python executable.py -c config_file
+    * Running on http://127.0.0.1:5000/
+
+Help
+~~~~
 You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/doc/example/advanced>`_.
 
 Something doesn't work ? You want a new feature ? Feel free to write some bug report or feature request on the `issue tracker <http://redmine.kozea.fr/projects/pynuts>`_.
