@@ -15,7 +15,7 @@ class Editable(Directive):
     optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
-    option_spec = {'title': directives.class_option,
+    option_spec = {'title': directives.unchanged,
                    'class': directives.class_option,
                    'id': directives.class_option}
 
