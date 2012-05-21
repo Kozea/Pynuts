@@ -114,8 +114,11 @@ class Document(object):
 
     @property
     def datetime(self):
-        """Datetime of the document latest commit."""
-        return datetime.datetime.fromtimestamp(self.git.head.commit_time)
+        """Time of the document latest commit as an UTC naive datetime
+        object.
+
+        """
+        return datetime.datetime.utcfromtimestamp(self.git.head.commit_time)
 
     @property
     def author(self):
