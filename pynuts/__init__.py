@@ -21,12 +21,15 @@ class Pynuts(flask.Flask):
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
 
     """
-    def __init__(self, import_name, config=None, reflect=False,
-                 *args, **kwargs):
+    def __init__(self, import_name, config=None, config_file=None,
+                 reflect=False, *args, **kwargs):
         super(Pynuts, self).__init__(import_name, *args, **kwargs)
 
         self.config['CSRF_ENABLED'] = False
-        self.config.update(config or {})
+        if config_file:
+            self.config.from_pyfile(config_file)
+        if config:
+            self.config.update(config)
 
         # Get the config file
         arg_parser = argparse.ArgumentParser()
