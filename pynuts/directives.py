@@ -38,11 +38,10 @@ class Editable(Directive):
                 'data-document-id': document_id}
 
         for k in self.option_spec.keys():
-            # We can have many classes
-            if k == 'class':
-                attr[k] = ' '.join(self.options.get(k, []))
-            else:
+            if k == 'title':
                 attr[k] = self.options.get(k)
+            else:
+                attr[k] = ' '.join(self.options.get(k, []))
 
         content = '<div %s >%s</div>' % (
                 ' '.join(('%s="%s"' % (k, v)) for k, v in attr.items() if v),
