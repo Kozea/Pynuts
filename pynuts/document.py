@@ -319,9 +319,9 @@ class Document(object):
         for document in documents.values():
             try:
                 document.git.commit(
-                    'Pynuts',
-                    'pynuts@pynuts.org',
-                    'Edit %s' % document.document_id)
+                    author_name or 'Pynuts',
+                    author_email or 'pynut@pynuts.org',
+                    message or 'Edit %s' % document.document_id)
             except ConflictError:
                 return False
         return [{
