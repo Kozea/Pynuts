@@ -249,7 +249,7 @@ class Document(object):
             part=part, resource_type='base64', archive=archive,
             version=version, **kwargs)['whole']
         # TODO: stylesheets
-        return HTML(string=html.encode('utf-8')).write_pdf()
+        return HTML(string=html).write_pdf()
 
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
@@ -437,4 +437,4 @@ class Document(object):
         return jinja2.Markup(
             cls.generate_html(
                 part=part, version=version, archive=archive,
-                **kwargs)[html_part])
+                **kwargs)[html_part].decode('utf-8'))
