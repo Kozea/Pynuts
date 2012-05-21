@@ -2,12 +2,10 @@
 
 import os
 import flask
-import argparse
-from docutils.parsers.rst import directives
 from werkzeug import cached_property
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from . import document, git, rights, view, directives as dc
+from . import document, git, rights, view
 
 
 class Pynuts(flask.Flask):
@@ -30,15 +28,6 @@ class Pynuts(flask.Flask):
             self.config.from_pyfile(config_file)
         if config:
             self.config.update(config)
-
-        # Get the config file
-        arg_parser = argparse.ArgumentParser()
-        arg_parser.add_argument(
-            '-c', '--config', help='Choose your config file')
-        parser_args = arg_parser.parse_args()
-        config_file = getattr(parser_args, 'config')
-        if config_file:
-            self.config.from_pyfile(config_file)
 
         self.db = SQLAlchemy(self)
         self.documents = {}
