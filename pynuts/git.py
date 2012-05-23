@@ -284,6 +284,8 @@ def git_urlopen(url):
     return fileobj, mimetype, charset
 
 
+urlparse.uses_relative.append('git')
+
 REPOS_BY_ID = {}
 
 

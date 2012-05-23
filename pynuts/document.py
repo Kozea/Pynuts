@@ -47,6 +47,9 @@ class Document(object):
 
     #: Docutils settings
     docutils_settings = None
+    
+    #: Stylesheet name
+    stylesheet = 'style.css'
 
     #: Template generating the document id
     document_id_template = None
@@ -76,9 +79,6 @@ class Document(object):
         # Take the class attribute
         docutils_settings = dict(self.docutils_settings or {})
         docutils_settings['_pynuts'] = self._pynuts
-        if self.git.head:
-            docutils_settings.setdefault(
-                'stylesheet', self.resource_url('style.css', external=True))
         # Set an attribute instance to mask the class instance
         self.docutils_settings = docutils_settings
         self.data = None
@@ -228,14 +228,22 @@ class Document(object):
         part = 'index.rst' if archive else part
         source = self._generate_rest(
             part=part, archive=archive, resource_type=resource_type)
+        
+        resource = getattr(self, 'resource_%s_url' % resource_type)
+        settings = dict(self.docutils_settings)
+        settings.setdefault('stylesheet', resource(self.stylesheet))
         parts = docutils.core.publish_parts(
             source=source, writer=Writer(),
-            settings_overrides=self.docutils_settings)
+            settings_overrides=settings)
         return parts
 
     @classmethod
     def generate_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
                      **kwargs):
+        return cls.from_data(version=version, **kwargs)._generate_pdf(
+            part=part, archive=archive)
+
+    def _generate_pdf(self, part='index.rst.jinja2', version=None, archive=False):
         """Generate the PDF version from the document.
 
         :param part: part of the document to render.
@@ -244,11 +252,10 @@ class Document(object):
         """
 
         part = 'index.rst' if archive else part
-        html = cls.generate_html(
-            part=part, resource_type='git', archive=archive,
-            version=version, **kwargs)['whole']
-        # TODO: stylesheets
-        return HTML(string=html).write_pdf()
+        html = self._generate_html(
+            part=part, resource_type='git', archive=archive)['whole']
+        return HTML(string=html).write_pdf(stylesheets=[
+            self.resource_git_url(self.stylesheet)])
 
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
