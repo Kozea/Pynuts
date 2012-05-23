@@ -1,10 +1,14 @@
 # coding: utf8
 import os
+import io
 import time
-from urllib import unquote
+import urllib
+import urlparse
+import mimetypes
 
 import jinja2
-from dulwich.repo import Repo, Blob, Tree, Commit
+from weasyprint.urls import register_opener
+from dulwich.repo import Repo as BaseRepo, Blob, Tree, Commit
 
 
 class GitException(Exception):
@@ -44,12 +48,17 @@ class Git(object):
 
     committer = 'Pynuts <pynuts@pynuts.org>'
 
-    def __init__(self, repository, branch, commit=None):
+    def __init__(self, repository, branch=None, commit=None):
         self.repository = repository
         self._add_object = repository.object_store.add_object
         self._get_object = repository.get_object
-        self.ref = 'refs/heads/' + branch
-        commit = commit or repository.refs.read_ref(self.ref)
+
+        if branch:
+            self.ref = 'refs/heads/' + branch
+            commit = commit or repository.refs.read_ref(self.ref)
+        else:
+            self.ref = None
+
         if commit:
             self.head = repository.commit(commit)
             self.tree = repository.tree(self.head.tree)
@@ -162,6 +171,8 @@ class Git(object):
         :raises: ConflictError
 
         """
+        if not self.ref:
+            raise GitException('Not on a branch.')
         new_commit = self.store_commit(
             self.tree.id, author_name, author_email, message,
             parents=[self.head.id] if self.head else [])
@@ -176,7 +187,7 @@ class Git(object):
         self.head = new_commit
 
     def store_commit(self, tree_id, author_name, author_email,
-                     message, parents):
+                     message, parents, timezone=None):
         """Store a new commit and return its ID.
 
         Note that no branch will point to this commit. You may want to use
@@ -195,8 +206,10 @@ class Git(object):
         commit.author = author.encode('utf8')
         commit.committer = self.committer
         commit.author_time = commit.commit_time = int(time.time())
-        # TODO: use the server’s timezone? Something else?
-        commit.author_timezone = commit.commit_timezone = 0
+        if timezone is None:
+            # UTC. TODO: use the server’s timezone? Something else?
+            timezone = 0
+        commit.author_timezone = commit.commit_timezone = timezone
         commit.message = message.encode('utf8')
         commit.tree = tree_id
         commit.parents = parents
@@ -243,3 +256,38 @@ class Git(object):
         blob = Blob.from_string(bytestring)
         self._add_object(blob)
         return blob
+
+    def make_weasyprint_url(self, path):
+        """Return an URL that can be used in WeasyPrint for `path` at the
+        current commit. Uncommited changes will *not* be visible.
+
+        This does not checks that a blob actually exists at `path`
+        in the commit.
+
+        """
+        return 'git://{repo}-{commit}/{path}'.format(
+            repo=id(self.repository),
+            commit=self.head.id,
+            path=urllib.quote(path))
+
+
+@register_opener('git')
+def git_urlopen(url):
+    url = urlparse.urlsplit(url)
+    repo_id, commit_hash = url.netloc.split('-', 1)
+    git = Git(REPOS_BY_ID[int(repo_id)], commit=commit_hash)
+    path = urllib.unquote(url.path)
+    # TODO: avoid reading everything in memory at once?
+    fileobj = io.BytesIO(git.read(path))
+    mimetype, _ = mimetypes.guess_type(path)
+    charset = None  # unknown
+    return fileobj, mimetype, charset
+
+
+REPOS_BY_ID = {}
+
+
+class Repo(BaseRepo):
+    def __init__(self, path):
+        super(Repo, self).__init__(path)
+        REPOS_BY_ID[id(self)] = self
