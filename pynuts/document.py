@@ -261,12 +261,14 @@ class Document(object):
 
         :param part: part of the document to render
         :param version: version of the document to render
-        :param filename: attachment filename
+        :param filename: attachment filename, expect unicode
 
         """
         part = 'index.rst' if archive else part
         headers = Headers()
-        headers.add('Content-Disposition', 'attachment', filename=filename)
+        headers.add(
+            'Content-Disposition', 'attachment',
+            filename=filename.encode('utf-8'))
         pdf = cls.generate_pdf(
             part=part, version=version, archive=archive, **kwargs)
         return Response(pdf, mimetype='application/pdf', headers=headers)
