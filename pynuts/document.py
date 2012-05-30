@@ -47,7 +47,7 @@ class Document(object):
 
     #: Docutils settings
     docutils_settings = None
-    
+
     #: Stylesheet name
     stylesheet = 'style.css'
 
@@ -228,7 +228,7 @@ class Document(object):
         part = 'index.rst' if archive else part
         source = self._generate_rest(
             part=part, archive=archive, resource_type=resource_type)
-        
+
         resource = getattr(self, 'resource_%s_url' % resource_type)
         settings = dict(self.docutils_settings)
         settings.setdefault('stylesheet', resource(self.stylesheet))
@@ -254,8 +254,9 @@ class Document(object):
         part = 'index.rst' if archive else part
         html = self._generate_html(
             part=part, resource_type='git', archive=archive)['whole']
-        return HTML(string=html).write_pdf(stylesheets=[
-            self.resource_git_url(self.stylesheet)])
+        return HTML(string=html, encoding='utf8',
+                # Work around WeasyPrint bug #813:
+                base_url='http://example.net/').write_pdf()
 
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
@@ -271,7 +272,7 @@ class Document(object):
         headers = Headers()
         headers.add(
             'Content-Disposition', 'attachment',
-            filename=filename.encode('utf-8'))
+            filename=(filename.encode('utf-8') if filename else None))
         pdf = cls.generate_pdf(
             part=part, version=version, archive=archive, **kwargs)
         return Response(pdf, mimetype='application/pdf', headers=headers)
