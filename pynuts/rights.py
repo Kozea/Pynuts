@@ -93,8 +93,9 @@ class acl(object):  # pylint: disable=C0103
 
 class allow_if(object):  # pylint: disable=C0103
     """Check that the global context matches a criteria."""
-    def __init__(self, auth_fun):
+    def __init__(self, auth_fun, exception=None):
         self.auth_fun = auth_fun
+        self.exception = exception
 
     def __call__(self, function):
         """Check the global context."""
@@ -104,7 +105,10 @@ class allow_if(object):  # pylint: disable=C0103
             if self.auth_fun():
                 return function(*args, **kwargs)
             else:
-                abort(403)
+                if self.exception:
+                    raise self.exception
+                else:
+                    abort(403)
 
         check_auth._auth_fun = self.auth_fun
         return check_auth
