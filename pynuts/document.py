@@ -18,6 +18,10 @@ from .environment import create_environment
 from .git import Git, ConflictError
 
 
+class InvalidId(ValueError):
+    """The '/' character is not allowed in document identifiers."""
+
+
 class MetaDocument(type):
     """Metaclass for document classes."""
     def __init__(cls, name, bases, dict_):
@@ -64,6 +68,9 @@ class Document(object):
     edit_template = 'edit_document.jinja2'
 
     def __init__(self, document_id, version=None):
+        if '/' in document_id:
+            raise InvalidId("The '/' character is not allowed in "
+                            "document identifiers.")
         self.document_id = document_id
         self.git = Git(
             self._pynuts.document_repository, branch=self.branch,
