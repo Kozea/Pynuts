@@ -68,7 +68,7 @@ class Document(object):
     edit_template = 'edit_document.jinja2'
 
     def __init__(self, document_id, version=None):
-        if '/' in document_id:
+        if '/' in repr(document_id):
             raise InvalidId("The '/' character is not allowed in "
                             "document identifiers.")
         self.document_id = document_id
