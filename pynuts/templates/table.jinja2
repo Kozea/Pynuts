@@ -1,19 +1,21 @@
 {% showonmatch 'tr td' %}
-  <table>
-    <tr>
-      {% for field_name, field in cls.table_fields.items() %}
-        {% if field_name != 'csrf_token' %}
-          <th>{{ field.label() }}</th>
+  <table class="dataTable">
+    <thead>
+      <tr>
+        {% for field_name, field in cls.table_fields.items() %}
+          {% if field_name != 'csrf_token' %}
+            <th>{{ field.label() }}</th>
+          {% endif %}
+        {% endfor %}
+        {% if cls.update_endpoint %}
+          <th>Edit</th>
         {% endif %}
-      {% endfor %}
-      {% if cls.update_endpoint %}
-        <th>Edit</th>
-      {% endif %}
-      {% if cls.delete_endpoint %}
-        <th>Delete</th>
-      {% endif %}
-    </tr>
-    
+        {% if cls.delete_endpoint %}
+          <th>Delete</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
     {% for obj in cls.query(query) %}
       <tr>
         {% for column in cls.table_columns %}
@@ -37,5 +39,6 @@
         {% endif %}
       </tr>
     {% endfor %}
+    </tbody>
   </table>
 {% endshowonmatch %}

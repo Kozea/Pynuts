@@ -281,7 +281,7 @@ class ModelView(object):
         return flask.render_template(template, cls=cls, query=query, **kwargs)
 
     @classmethod
-    def table(cls, template=None, query=None, **kwargs):
+    def table(cls, template=None, query=None, datatable=False, **kwargs):
         """Return the table_template.
 
         :param template: The template you want to render
@@ -291,7 +291,8 @@ class ModelView(object):
         :type endpoint: String, func(lambda)
 
         """
-        return flask.render_template(template, cls=cls, query=query, **kwargs)
+        return flask.render_template(
+            template, cls=cls, query=query, datatable=datatable,**kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method. Also check the values in the form: \

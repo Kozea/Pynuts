@@ -1,6 +1,17 @@
 {% extends "_layout.html" %}
 
+{% block head %}
+<script src="{{ url_for('static', filename='DataTables/js/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='DataTables/js/jquery.dataTables.min.js') }}"></script>
+<link href="{{ url_for('static', filename='DataTables/css/jquery.dataTables.css') }}" rel="stylesheet" type="text/css"/>
+<script>
+$(document).ready(function() {
+    $('.dataTable').dataTable();
+});
+</script>
+{% endblock head %}
+
 {% block main %}
   <h2>Employees</h2>
-  {{ cls.view_table() }}
+  {{ cls.view_table(datatable=True) }}
 {% endblock main %}

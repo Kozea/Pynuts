@@ -40,6 +40,9 @@ class Pynuts(flask.Flask):
             self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or
             os.path.join(self.instance_path, 'documents.git'))
 
+        self.add_url_rule('/_pynuts-static/<path:filename>',
+                          '_pynuts-static', static)
+
         class Document(document.Document):
             """Document base class of the application."""
             _pynuts = self
@@ -66,3 +69,8 @@ class Pynuts(flask.Flask):
     def render_rest(self, document_type, part='index.rst.jinja2',
                     **kwargs):
         return self.documents[document_type].generate_rest(part, **kwargs)
+
+
+def static(filename):
+    return flask.send_from_directory(
+        os.path.join(os.path.dirname(__file__), 'static'), filename)
