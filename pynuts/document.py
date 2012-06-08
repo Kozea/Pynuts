@@ -31,7 +31,8 @@ class MetaDocument(type):
                 cls.type_name = cls.__name__
             cls._pynuts.documents[cls.type_name] = cls
             cls._pynuts.add_url_rule(
-                '/_resource/%s/<document_id>/<version>/<path:filename>' % (
+                '/_pynuts/resource/%s/<document_id>/'
+                '<version>/<path:filename>' % (
                     cls.type_name),
                 endpoint='_pynuts-resource/' + cls.type_name,
                 view_func=cls.static_route)
@@ -330,8 +331,8 @@ class Document(object):
                 cls = cls._pynuts.documents[values['document_type']]
                 document = cls(values['document_id'], values['version'])
                 documents[key] = document
-            document.git.write(values['part'],
-                               values['content'].encode('utf-8'))
+                document.git.write(values['part'],
+                                   values['content'].encode('utf-8'))
         for document in documents.values():
             try:
                 document.git.commit(

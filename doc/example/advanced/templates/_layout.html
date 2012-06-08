@@ -3,6 +3,8 @@
   <head>
     <title>Pynuts'</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}
+    {% endblock head %}
   </head>
   <body>
     <h1>Pynuts'</h1>
