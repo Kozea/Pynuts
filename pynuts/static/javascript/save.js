@@ -9,11 +9,7 @@ function hashCode(string) {
     return hash;
 }
 
-function save (divs, span_containers, url, ok_callback, error_callback) { 
-    var message = '';
-    if(arguments[0]) {
-        message = '/' + arguments[0];
-    }
+function save (divs, span_containers, message, url, ok_callback, error_callback) { 
     var data = [];
     $.each(divs, function () {
         if($(this).attr('data-hash') != hashCode($(this).html())) {
@@ -63,4 +59,5 @@ function save (divs, span_containers, url, ok_callback, error_callback) {
             }            
         }
     });
-}			
+}
+	
