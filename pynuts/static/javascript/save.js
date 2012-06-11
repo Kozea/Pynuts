@@ -27,7 +27,7 @@ function save (divs, span_containers, message, url, ok_callback, error_callback)
         var values = [];
         $.each(spans, function () {
              values.push($(this).html());
-        })
+        });
         data.push({
             "part": $(this).attr('data-part'),
             "document_type": $(this).attr('data-document-type'),
@@ -56,8 +56,7 @@ function save (divs, span_containers, message, url, ok_callback, error_callback)
                 ok_callback();
             } else {
                 error_callback();
-            }            
+            }
         }
     });
 }
-	
