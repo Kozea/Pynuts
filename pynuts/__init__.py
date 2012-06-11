@@ -40,8 +40,8 @@ class Pynuts(flask.Flask):
             self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or
             os.path.join(self.instance_path, 'documents.git'))
 
-        self.add_url_rule('/_pynuts-static/<path:filename>',
-                          '_pynuts-static', static)
+        self.add_url_rule('/_pynuts/static/<path:filename>',
+                          '_pynuts/static', static)
 
         class Document(document.Document):
             """Document base class of the application."""
