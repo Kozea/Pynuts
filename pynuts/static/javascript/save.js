@@ -9,37 +9,56 @@ function hashCode(string) {
     return hash;
 }
 
-function save (divs, span_containers, message, url, ok_callback, error_callback) { 
+function save (options) {
+    //Params : divs, span_containers, url, message, ok_callback, error_callback, empty_callback
     var data = [];
-    $.each(divs, function () {
-        if($(this).attr('data-hash') != hashCode($(this).html())) {
+    if (options.divs) {
+        $.each(options.divs, function () {
+            if($(this).attr('data-hash') != hashCode($(this).html())) {
+                data.push({
+                    "part": $(this).attr('data-part'),
+                    "document_type": $(this).attr('data-document-type'),
+                    "document_id": $(this).attr('data-document-id'),
+                    "version": $(this).attr('data-document-version'),
+                    "content": $(this).html()
+                });
+            }
+            $(this).attr('data-hash', hashCode($(this).html()));
+        });
+    }
+    if (options.span_containers) {
+        $.each(options.span_containers, function () {
+            var spans = $(this).find('span[contenteditable]');
+            var values = [];
+            $.each(spans, function () {
+                values.push($(this).html());
+            });
             data.push({
                 "part": $(this).attr('data-part'),
                 "document_type": $(this).attr('data-document-type'),
                 "document_id": $(this).attr('data-document-id'),
                 "version": $(this).attr('data-document-version'),
-                "content": $(this).html()
+                "content": JSON.stringify(values)
             });
-        }
-    });
-    $.each(span_containers, function () {
-        var spans = $(this).find('span[contenteditable]');
-        var values = [];
-        $.each(spans, function () {
-             values.push($(this).html());
         });
-        data.push({
-            "part": $(this).attr('data-part'),
-            "document_type": $(this).attr('data-document-type'),
-            "document_id": $(this).attr('data-document-id'),
-            "version": $(this).attr('data-document-version'),
-            "content": JSON.stringify(values)
-        });
-    });
+    }
+
+    // Check if contents is null
+    if (data.length == 0) {
+        if (options.empty_callback) options.empty_callback();
+        return false;
+    }
+
     // Make ajax
+    if (options.message) {
+        ajax_data = JSON.stringify({'data': data, 'message': options.message});
+    }
+    else {
+        ajax_data = JSON.stringify({'data': data});
+    }
     $.ajax({
-        url: url,
-        data: JSON.stringify({'data': data, 'message': message}),
+        url: options.url,
+        data: ajax_data,
         contentType: 'application/json',
         dataType: 'json',
         type: "POST",
@@ -53,9 +72,9 @@ function save (divs, span_containers, message, url, ok_callback, error_callback)
                     );
                     divs.attr('data-document-version', this.version);
                 });
-                ok_callback();
+                if (options.ok_callback) options.ok_callback();
             } else {
-                error_callback();
+                if (options.error_callback) options.error_callback();
             }
         }
     });
