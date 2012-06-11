@@ -11,6 +11,7 @@ function hashCode(string) {
 
 function save (options) {
     //Params : divs, span_containers, url, message, ok_callback, error_callback, empty_callback
+    options.document = options.document ? options.document : $(document);
     var data = [];
     if (options.divs) {
         $.each(options.divs, function () {
@@ -65,7 +66,7 @@ function save (options) {
         success: function(response){
             if(response && response.documents) {
                 $.each(response.documents, function () {
-                    var divs = $('#iframe').contents().find(
+                    var divs = options.document.contents().find(
                         'div[contenteditable]' +
                         '[data-document-type="' + this.document_type + '"]' +
                         '[data-document-id="' + this.document_id + '"]'
