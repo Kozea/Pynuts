@@ -319,15 +319,13 @@ class Document(object):
     @classmethod
     def update_content(cls):
         """Update the ReST document.
+        It is used by the javascript/AJAX save function.
+        It gets the request as JSON and update all the parts of the document
 
-        :param contents: This must contain the type of the document you want
-                         to edit, the id of the document, the version and
-                         the part wich will be updated.
-        :type contents: Dict
-        :param author_name: commit author name
-        :param author_email: commit author email
-        :param message: commit message
+        return document's information as JSON.
 
+        'See the save function<>_' for more details.
+        
         """
 
         contents = request.json['data']
