@@ -123,22 +123,27 @@ class ModelView(object):
 
     @classproperty
     def list_field(cls):
+        """Return the list fields."""
         return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
+        """Return the list fields."""
         return cls.TableForm()._fields
 
     @cached_property
     def create_form(self):
+        """Return the table fields."""
         return self.CreateForm()
 
     @cached_property
     def read_fields(self):
+        """Return the read fields."""
         return self.ReadForm(obj=self.data)
 
     @cached_property
     def update_form(self):
+        """Return the update fields."""
         return self.UpdateForm(obj=self.data)
 
     @classproperty

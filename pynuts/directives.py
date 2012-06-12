@@ -1,3 +1,5 @@
+"""Directives for Pynuts documents."""
+
 import json
 
 from docutils.parsers.rst import directives, Directive
