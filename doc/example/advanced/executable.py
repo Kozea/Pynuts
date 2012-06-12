@@ -48,7 +48,7 @@ def table_employees():
 
 
 @app.route('/employee/create/', methods=('POST', 'GET'))
-#@allow_if(Is.admin)
+@allow_if(Is.admin)
 def create_employee():
     employee = view.EmployeeView()
     response = employee.create('create_employee.html',
