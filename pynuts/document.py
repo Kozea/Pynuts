@@ -8,7 +8,7 @@ import docutils.core
 import mimetypes
 from urllib import quote, unquote
 from flask import (Response, render_template, request, redirect, flash,
-                   url_for)
+                   url_for, jsonify)
 from werkzeug.datastructures import Headers
 from jinja2 import ChoiceLoader
 from weasyprint import HTML
@@ -36,13 +36,16 @@ class MetaDocument(type):
                     cls.type_name),
                 endpoint='_pynuts-resource/' + cls.type_name,
                 view_func=cls.static_route)
+            cls._pynuts.add_url_rule(
+                '/_pynuts/update_content', '_pynuts-update_content',
+                cls.update_content, methods=('POST',))
             if cls.model_path and not os.path.isabs(cls.model_path):
                 cls.model_path = os.path.join(
                     cls._pynuts.root_path, cls.model_path)
             cls.document_id_template = unicode(cls.document_id_template)
             super(MetaDocument, cls).__init__(name, bases, dict_)
-
-
+            
+  
 class Document(object):
     """This class represents a document object. """
     __metaclass__ = MetaDocument
@@ -309,8 +312,7 @@ class Document(object):
             message or 'Archive %s' % document.document_id)
 
     @classmethod
-    def update_content(cls, contents, author_name=None, author_email=None,
-                       message=None):
+    def update_content(cls):
         """Update the ReST document.
 
         :param contents: This must contain the type of the document you want
@@ -322,6 +324,12 @@ class Document(object):
         :param message: commit message
 
         """
+        
+        contents = request.json['data']
+        author_name = request.json['author']
+        author_email = request.json['author_email']
+        message = request.json['message']
+        
         documents = {}
         for values in contents:
             key = (values['document_type'], values['document_id'])
@@ -341,11 +349,11 @@ class Document(object):
                     message or 'Edit %s' % document.document_id)
             except ConflictError:
                 return False
-        return [{
+        return jsonify(documents=[{
             'document_type': document.type_name,
             'document_id': document.document_id,
             'version': document.version}
-            for document in documents.values()]
+            for document in documents.values()])
 
     @classmethod
     def create(cls, author_name=None, author_email=None, message=None,
