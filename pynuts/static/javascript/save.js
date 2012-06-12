@@ -10,7 +10,7 @@ function hashCode(string) {
 }
 
 function save (options) {
-    //Params : divs, span_containers, url, message, ok_callback, error_callback, empty_callback
+    //Params : divs, span_containers, url, message, author, author_email, ok_callback, error_callback, empty_callback
     options.document = options.document ? options.document : $(document);
     var data = [];
     if (options.divs) {
@@ -50,16 +50,19 @@ function save (options) {
         return false;
     }
 
+    // Get commit options
+    commit_message = options.message ? options.message : null;
+    commit_author = options.author ? options.author : null;
+    commit_author_email = options.author_email ? options.author_email : null;
     // Make ajax
-    if (options.message) {
-        ajax_data = JSON.stringify({'data': data, 'message': options.message});
-    }
-    else {
-        ajax_data = JSON.stringify({'data': data});
-    }
     $.ajax({
-        url: options.url,
-        data: ajax_data,
+        url: '/_pynuts/update_content',
+        data: JSON.stringify({
+            'data': data,
+            'message': commit_message,
+            'author': commit_author,
+            'author_email': commit_author_email
+        }),
         contentType: 'application/json',
         dataType: 'json',
         type: "POST",
