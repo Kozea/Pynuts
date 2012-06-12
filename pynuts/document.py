@@ -324,12 +324,12 @@ class Document(object):
         :param message: commit message
 
         """
-        
+
         contents = request.json['data']
         author_name = request.json['author']
         author_email = request.json['author_email']
         message = request.json['message']
-        
+
         documents = {}
         for values in contents:
             key = (values['document_type'], values['document_id'])
