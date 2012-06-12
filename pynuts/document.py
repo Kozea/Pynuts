@@ -96,12 +96,14 @@ class Document(object):
 
     @classmethod
     def list_document_ids(cls):
+        """Return a list of document ids."""
         base = 'refs/heads/documents/' + quote(cls.type_name.encode('utf8'))
         for doc_id in cls._pynuts.document_repository.refs.keys(base=base):
             yield unquote(doc_id).decode('utf8')
 
     @classmethod
     def list_documents(cls):
+        """Return the whole document list."""
         return (cls(doc_id) for doc_id in cls.list_document_ids())
 
     @property
@@ -215,6 +217,7 @@ class Document(object):
     @classmethod
     def generate_html(cls, part='index.rst.jinja2', resource_type='http',
                       archive=False, version=None, **kwargs):
+        """Generate the html document from a ReST file or a jinja2 template."""
         return cls.from_data(version=version, **kwargs)._generate_html(
             part=part, resource_type=resource_type, archive=archive)
 
@@ -251,10 +254,12 @@ class Document(object):
     @classmethod
     def generate_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
                      **kwargs):
+        """Generate the PDF document."""
         return cls.from_data(version=version, **kwargs)._generate_pdf(
             part=part, archive=archive)
 
-    def _generate_pdf(self, part='index.rst.jinja2', version=None, archive=False):
+    def _generate_pdf(self, part='index.rst.jinja2', version=None,
+                      archive=False):
         """Generate the PDF version from the document.
 
         :param part: part of the document to render.

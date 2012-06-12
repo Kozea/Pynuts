@@ -1,8 +1,11 @@
+"""Rights for Pynuts."""
+
 from flask import abort
 from functools import wraps
 
 
 class MetaContext(type):
+    """Get context object for rights."""
     def __init__(cls, name, bases, dict_):
         cls._pynuts.context = cls()
 
