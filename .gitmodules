@@ -1,0 +1,3 @@
+[submodule "pynuts/static/javascript/TeddyBar"]
+	path = pynuts/static/javascript/TeddyBar
+	url = git://github.com/Kozea/TeddyBar
