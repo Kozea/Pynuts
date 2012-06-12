@@ -10,11 +10,21 @@ function hashCode(string) {
 }
 
 function save (options) {
-    //Params : divs, span_containers, url, message, author, author_email, ok_callback, error_callback, empty_callback
+    //Params : document, message, author, author_email, ok_callback, error_callback, empty_callback
     options.document = options.document ? options.document : $(document);
+    
+    // Get all the contenteditable elements
+    divs = $(options.document).contents().find('div[contenteditable]');
+    span_containers = $(options.document).contents().find('span[contenteditable]');
+    
+    if (divs.length != 0 && span_containers.length != 0) {
+        alert('You have no contenteditable on your document.');
+        return false;
+    }
+    
     var data = [];
-    if (options.divs) {
-        $.each(options.divs, function () {
+    if (divs.length != 0) {
+        $.each(divs, function () {
             if($(this).attr('data-hash') != hashCode($(this).html())) {
                 data.push({
                     "part": $(this).attr('data-part'),
@@ -27,8 +37,8 @@ function save (options) {
             $(this).attr('data-hash', hashCode($(this).html()));
         });
     }
-    if (options.span_containers) {
-        $.each(options.span_containers, function () {
+    if (span_containers.length != 0) {
+        $.each(span_containers, function () {
             var spans = $(this).find('span[contenteditable]');
             var values = [];
             $.each(spans, function () {
