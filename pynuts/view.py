@@ -2,7 +2,7 @@
 
 import flask
 import jinja2
-from flask.ext.wtf import Form
+from flask.ext.wtf import Form, TextField
 from werkzeug import cached_property
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
@@ -17,22 +17,22 @@ class MetaView(type):
             # TODO: find a better name than the name of the class
             cls._pynuts.views[cls.__name__] = cls
             cls._mapping = cls._mapping or class_mapper(cls.model)
-            column_names = (column.key for column in cls._mapping.columns)
-            cls.list_columns = (cls.list_column,)
+            column_names = [column.key for column in cls._mapping.columns]
+            cls.list_columns = (cls.list_column or column_names[0],)
             cls.table_columns = cls.table_columns or column_names
             cls.create_columns = cls.create_columns or column_names
             cls.read_columns = cls.read_columns or column_names
             cls.update_columns = cls.update_columns or column_names
 
             if cls.Form:
-                for action in ('list', 'table', 'create',
-                               'read', 'update'):
+                for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
+                    columns = getattr(cls, '%s_columns' % action)
                     setattr(cls, class_name, type(
-                        class_name, (Form,),
-                        {field_name: getattr(cls.Form, field_name)
-                         for field_name in getattr(
-                             cls, '%s_columns' % action)}))
+                        class_name, (Form,), {
+                            field_name: getattr(
+                                cls.Form, field_name, TextField(field_name))
+                            for field_name in columns}))
         super(MetaView, cls).__init__(name, bases, dict_)
 
 
@@ -123,22 +123,27 @@ class ModelView(object):
 
     @classproperty
     def list_field(cls):
+        """Return the list fields."""
         return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
+        """Return the list fields."""
         return cls.TableForm()._fields
 
     @cached_property
     def create_form(self):
+        """Return the table fields."""
         return self.CreateForm()
 
     @cached_property
     def read_fields(self):
+        """Return the read fields."""
         return self.ReadForm(obj=self.data)
 
     @cached_property
     def update_form(self):
+        """Return the update fields."""
         return self.UpdateForm(obj=self.data)
 
     @classproperty
