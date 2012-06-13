@@ -297,7 +297,7 @@ class ModelView(object):
 
         """
         return flask.render_template(
-            template, cls=cls, query=query, datatable=datatable,**kwargs)
+            template, cls=cls, query=query, datatable=datatable, **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method. Also check the values in the form: \
@@ -323,7 +323,8 @@ class ModelView(object):
             self.data = self.model(**form_values)
             self.session.add(self.data)
             self.session.commit()
-            return flask.redirect(self.template_url_for(redirect))
+            return flask.redirect(
+                self.template_url_for(redirect or type(self).read_endpoint))
         self.handle_errors(self.create_form)
         return flask.render_template(template, obj=self, **kwargs)
 
@@ -342,7 +343,8 @@ class ModelView(object):
                 self.update_form).items():
                 setattr(self.data, key, value)
             self.session.commit()
-            return flask.redirect(self.template_url_for(redirect))
+            return flask.redirect(
+                self.template_url_for(redirect or type(self).read_endpoint))
         self.handle_errors(self.update_form)
         return flask.render_template(template, obj=self, **kwargs)
 
@@ -369,5 +371,6 @@ class ModelView(object):
         if flask.request.method == 'POST':
             self.session.delete(self.data)
             self.session.commit()
-            return flask.redirect(self.template_url_for(redirect))
+            return flask.redirect(
+                self.template_url_for(redirect or type(self).list_endpoint))
         return flask.render_template(template, obj=self, **kwargs)
