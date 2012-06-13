@@ -44,8 +44,8 @@ class MetaDocument(type):
                     cls._pynuts.root_path, cls.model_path)
             cls.document_id_template = unicode(cls.document_id_template)
             super(MetaDocument, cls).__init__(name, bases, dict_)
-            
-  
+
+
 class Document(object):
     """This class represents a document object. """
     __metaclass__ = MetaDocument
