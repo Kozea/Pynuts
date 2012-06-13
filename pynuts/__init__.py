@@ -5,7 +5,7 @@ import flask
 from werkzeug import cached_property
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from . import document, git, rights, view
+from . import document, git, rights, view, filters
 
 
 class Pynuts(flask.Flask):
