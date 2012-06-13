@@ -30,6 +30,13 @@ Git
    :members:
 
 
+Directives
+----------
+
+.. automodule:: pynuts.directives
+   :members:
+
+
 Field
 -----
 

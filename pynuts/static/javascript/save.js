@@ -56,7 +56,7 @@ function save (options) {
 
     // Check if contents is null
     if (data.length == 0) {
-        if (options.empty_callback) options.empty_callback();
+        if (options.unchange_callback) options.unchange_callback();
         return false;
     }
 
@@ -86,9 +86,9 @@ function save (options) {
                     );
                     divs.attr('data-document-version', this.version);
                 });
-                if (options.ok_callback) options.ok_callback();
+                if (options.success_callback) options.success_callback();
             } else {
-                if (options.error_callback) options.error_callback();
+                if (options.fail_callback) options.fail_callback();
             }
         }
     });
