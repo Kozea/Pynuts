@@ -17,5 +17,6 @@ Contents:
     Installation
     Quickstart
     API
+    Additional features
     Tutorial
     Advanced tutorial

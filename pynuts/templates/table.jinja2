@@ -2,9 +2,9 @@
   <table class="dataTable">
     <thead>
       <tr>
-        {% for field_name, field in cls.table_fields.items() %}
+        {% for field_name in cls.table_columns %}
           {% if field_name != 'csrf_token' %}
-            <th>{{ field.label() }}</th>
+            <th>{{ cls.table_fields[field_name].label() }}</th>
           {% endif %}
         {% endfor %}
         {% if cls.update_endpoint %}

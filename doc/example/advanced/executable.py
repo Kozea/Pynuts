@@ -41,6 +41,12 @@ def employees():
     return view.EmployeeView.list('list_employees.html')
 
 
+@app.route('/companies/')
+@allow_if(Is.connected)
+def companies():
+    return view.CompanyView.list('list_companies.html')
+
+
 @app.route('/employees/table')
 @allow_if(Is.connected)
 def table_employees():
@@ -58,6 +64,14 @@ def create_employee():
     return response
 
 
+@app.route('/company/create/', methods=('POST', 'GET'))
+@allow_if(Is.admin)
+def create_company():
+    company = view.CompanyView()
+    response = company.create('create_company.html', redirect='employees')
+    return response
+
+
 @view.EmployeeView.read_page
 @app.route('/employee/read/<int:person_id>')
 @allow_if(Is.admin | Is.connected_user)
@@ -65,6 +79,13 @@ def read_employee(person_id=None):
     history = document.EmployeeDoc(person_id).history
     return view.EmployeeView(person_id).read(
         'read_employee.html', history=history)
+
+
+@view.CompanyView.read_page
+@app.route('/company/read/<int:company_id>')
+@allow_if(Is.admin | Is.connected_user)
+def read_company(company_id=None):
+    return view.CompanyView(company_id).read('read_company.html')
 
 
 @view.EmployeeView.update_page

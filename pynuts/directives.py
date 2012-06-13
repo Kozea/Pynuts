@@ -14,6 +14,11 @@ class Editable(Directive):
     The directive's argument must look like this:
     `document_type/document_id/version/part`
 
+    You can put those optional attributes on your editable content :
+      - `title`
+      - `id`
+      - `class`
+
     """
     required_arguments = 1
     optional_arguments = 0
@@ -56,10 +61,17 @@ directives.register_directive('editable', Editable)
 
 
 class Content(Directive):
-    """A rest directive...
+    """A rest directive which create an editable div.
+
+    You can add a function in the renderer.
 
     The directive's argument must look like this:
     `document_type/document_id/version/part`
+
+    Optional attributes :
+      - `title`
+      - `id`
+      - `renderer` : Call a function in your directive.
 
     """
     required_arguments = 1
