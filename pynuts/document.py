@@ -342,8 +342,8 @@ class Document(object):
                 cls = cls._pynuts.documents[values['document_type']]
                 document = cls(values['document_id'], values['version'])
                 documents[key] = document
-                document.git.write(values['part'],
-                                   values['content'].encode('utf-8'))
+            document.git.write(values['part'],
+                               values['content'].encode('utf-8'))
         for document in documents.values():
             try:
                 document.git.commit(
