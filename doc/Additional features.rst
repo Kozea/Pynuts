@@ -12,14 +12,15 @@ If you use Pynuts document class and if you need the `Editable` Pynuts ReST dire
 How does it work ?
 ~~~~~~~~~~~~~~~~~~
 
-The `save_content` function uses AJAX in order to save asynchronously a page which contains contenteditable elements by calling the `update_content` method of the document class (See here for more info on `udate_content` :ref:`api`) ; this method returns a JSON containing the document new information like the new commit version. So you don't need to create a route on your application, Pynuts do it for you! You only need to import the source and call the save function on any event you want. It will save only if the content has changed until the last save.
+The `save_content` function uses AJAX in order to save asynchronously a page which contains contenteditable elements by calling the `update_content` method of the document class (See here for more info on `udate_content` :ref:`api`) ; this method returns a JSON containing the document new information like the new commit version. So you don't need to create a route on your application, Pynuts do it for you! You only need to import the source and call the `init_content` function on page loading. Finally just call the save function on any event you want. It will save only if the content has changed until the last save.
 
 Simple example:
 
 .. sourcecode:: html+jinja
 
   <script src="{{ url_for('_pynuts-static', filename='javascript/save.js') }}"></script>
-  <button onclick="save()"></button>
+  <script> $(function () { init_content($(document)); }); </script>
+  <button onclick="save_content()"></button>
   <div contenteditable></div>
 
 How the changes are detected ?
@@ -64,32 +65,37 @@ Here is an detailed example using TeddyBar as text edition toolbar. See `TeddyBa
 
   <script src="{{ url_for('_pynuts-static', filename='javascript/save.js') }}"></script>
   <script>
-    $('#teddybar').teddybar({
-        menu: {
-            'save': save_button
-        },
-        commands: {
-            save_button: function () {
-                // First, get the commit message
-                message = prompt('Message :');
-                // Then, save
-                save_content({
-                    document: $('#page'),
-                    message: message,
-                    author: "{{ session.get('connected_user') }}",
-                    author_email: "{{ session.get('connected_usermail') }}",
-                    success_callback: function () {
-                        alert('Save went successfully!');
-                    },
-                    fail_callback: function () {
-                        alert('Save failed due to a conflict, please refresh the page.');
-                    },
-                    unchange_callback: function () {
-                        alert('The document hasn't changed.');
-                    }
-                });
+    $(function () {
+        // At page loading, initialize the contenteditable div elements
+        init_content($('#page'));
+        
+        $('#teddybar').teddybar({
+            menu: {
+                'save': save_button
+            },
+            commands: {
+                save_button: function () {
+                    // First, get the commit message
+                    message = prompt('Message :');
+                    // Then, save
+                    save_content({
+                        document: $('#page'),
+                        message: message,
+                        author: "{{ session.get('connected_user') }}",
+                        author_email: "{{ session.get('connected_usermail') }}",
+                        success_callback: function () {
+                            alert('Save went successfully!');
+                        },
+                        fail_callback: function () {
+                            alert('Save failed due to a conflict, please refresh the page.');
+                        },
+                        unchange_callback: function () {
+                            alert('The document hasn't changed.');
+                        }
+                    });
+                }
             }
-        }
+        });
     });
   <script>
   <section id="page">
