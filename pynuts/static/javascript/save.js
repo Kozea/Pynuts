@@ -9,13 +9,20 @@ function hashCode(string) {
     return hash;
 }
 
-function save (options) {
+function init_content (document) {
+    divs = $(document).contents().find('div[contenteditable]');
+    $.each(divs, function () {
+        $(this).attr('data-hash', hashCode($(this).html()));
+    });
+}
+
+function save_content (options) {
     //Params : document, message, author, author_email, ok_callback, error_callback, empty_callback
     options.document = options.document ? options.document : $(document);
     
     // Get all the contenteditable elements
-    divs = $(options.document).contents().find('div[contenteditable]');
-    span_containers = $(options.document).contents().find('span[contenteditable]');
+    var divs = $(options.document).contents().find('div[contenteditable]');
+    var span_containers = $(options.document).contents().find('span[contenteditable]');
     
     if (divs.length != 0 && span_containers.length != 0) {
         alert('You have no contenteditable on your document.');
@@ -56,7 +63,7 @@ function save (options) {
 
     // Check if contents is null
     if (data.length == 0) {
-        if (options.unchange_callback) options.unchange_callback();
+        if ('unchange_callback' in options) options.unchange_callback();
         return false;
     }
 
@@ -86,9 +93,9 @@ function save (options) {
                     );
                     divs.attr('data-document-version', this.version);
                 });
-                if (options.success_callback) options.success_callback();
+                if ('success_callback' in options) options.success_callback();
             } else {
-                if (options.fail_callback) options.fail_callback();
+                if ('fail_callback' in options) options.fail_callback();
             }
         }
     });

@@ -5,6 +5,8 @@ import flask
 from jinja2 import nodes, Environment, PackageLoader
 from jinja2.ext import Extension
 
+from . import filters
+
 
 class ShowOnMatch(Extension):
     """This extension introduces a new tag ``showonmatch``, allowing\
@@ -82,4 +84,5 @@ def create_environment():
         loader=PackageLoader('pynuts', 'templates'),
     extensions=[ShowOnMatch])
     environment.globals.update({'url_for': flask.url_for})
+    environment.filters['data'] = filters.data
     return environment

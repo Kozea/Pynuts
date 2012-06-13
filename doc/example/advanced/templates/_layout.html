@@ -11,7 +11,9 @@
     <nav>
       <a href="{{ url_for('employees') }}">Employee list</a>
       <a href="{{ url_for('create_employee') }}">Add a new employee</a>
-      <a href="{{ url_for('table_employees') }}">Employees table</a>
+      <a href="{{ url_for('table_employees') }}">Employees table</a> |
+      <a href="{{ url_for('companies') }}">Companies list</a>
+      <a href="{{ url_for('create_company') }}">Add a new company</a>
       {% if session.get('login') %}
         <a href="{{ url_for('logout') }}">Logout</a> Logged as <strong>{{ session.get('login') }}</strong>
       {% endif %}
