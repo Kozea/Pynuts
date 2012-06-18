@@ -4,11 +4,7 @@ Quickstart
 A Minimal application
 ---------------------
 
-
-
-A minimal Pynuts application looks something like this:
-
-A basic Pynuts application required 4 parts:
+A basic Pynuts application requires 4 parts:
 
 - An application file which provides a Flask application
 - A view class extended from pynuts ModelView

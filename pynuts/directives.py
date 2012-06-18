@@ -61,9 +61,20 @@ directives.register_directive('editable', Editable)
 
 
 class Content(Directive):
-    """A rest directive which create an editable div.
+    """A rest directive which create an editable div with specific content.
 
-    You can add a function in the renderer.
+    Use this directive if you have specific content you want to render which is not possible with the ReST synthax.
+    The content data has to look like a list interpretable as JSON (e.g. `["Product", "Quantity", "Price"]`).
+    You have to specify the renderer in the directive's attribute. It's will be associated with the function in your document class that renders the content.
+    For example, the Content directive can be used for rendering a table with some contenteditable columns::
+
+      from myapplication import app
+      class MyDocument(app.Document):
+          def render_table(self, data):
+              template = self.jinja_environment.get_template('price.jinja2')
+              return template.render(data=data)
+
+    Then you have to create the jinja2 template and use data as a list.
 
     The directive's argument must look like this:
     `document_type/document_id/version/part`
