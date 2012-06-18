@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from flask import flash, redirect, session, request, render_template
 
 from application import app
