@@ -4,7 +4,7 @@ setup(
     name="Pynuts",
     version="0.1",
     url="http://www.pynuts.org/",
-    license="GNU GPL v3",
+    license="BSD",
     platforms="Any",
     packages=["pynuts"],
     package_data={'pynuts': ['templates/*.jinja2', 'static/javascript/*.js']},

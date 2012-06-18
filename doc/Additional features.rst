@@ -1,6 +1,6 @@
 Additional features
 ===================
-
+ 
 Pynuts provides some javascript tools.
 
 
@@ -12,7 +12,7 @@ If you use Pynuts document class and if you need the `Editable` Pynuts ReST dire
 How does it work ?
 ~~~~~~~~~~~~~~~~~~
 
-The `save_content` function uses AJAX in order to save asynchronously a page which contains contenteditable elements by calling the `update_content` method of the document class (See here for more info on `udate_content` :ref:`api`) ; this method returns a JSON containing the document new information like the new commit version. So you don't need to create a route on your application, Pynuts do it for you! You only need to import the source and call the `init_content` function on page loading. Finally just call the save function on any event you want. It will save only if the content has changed until the last save.
+The `save_content` function uses AJAX in order to save asynchronously a page which contains contenteditable elements by calling the `update_content` method of the document class (See here for more info on `update_content` :ref:`api`) ; this method returns a JSON containing the document new information like the new commit version. So you don't need to create a route on your application, Pynuts do it for you! You only need to import the source and call the `init_content` function on page loading. Finally just call the save function on any event you want. It will save only if the content has changed until the last save.
 
 Simple example:
 
