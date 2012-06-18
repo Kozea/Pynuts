@@ -345,13 +345,10 @@ class Document(object):
             document.git.write(values['part'],
                                values['content'].encode('utf-8'))
         for document in documents.values():
-            try:
-                document.git.commit(
-                    author_name or 'Pynuts',
-                    author_email or 'pynut@pynuts.org',
-                    message or 'Edit %s' % document.document_id)
-            except ConflictError:
-                return False
+            document.git.commit(
+                author_name or 'Pynuts',
+                author_email or 'pynut@pynuts.org',
+                message or 'Edit %s' % document.document_id)
         return jsonify(documents=[{
             'document_type': document.type_name,
             'document_id': document.document_id,

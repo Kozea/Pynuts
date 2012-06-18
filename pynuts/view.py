@@ -65,7 +65,7 @@ class ModelView(object):
     """
     WTForms view form. Declare it in your view like this:
 
-    >>> MyView(ModelView):
+    >>> class MyView(ModelView):
     ...     class Form(Form):
     ...         id = IntegerField(u'Id', validators=[Required()])
     ...         name = TextField(u'Last name', validators=[Required()])
