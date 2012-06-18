@@ -9,8 +9,11 @@ function hashCode(string) {
     return hash;
 }
 
-function init_content (document) {
-    divs = $(document).contents().find('div[contenteditable]');
+function init_content (doc) {
+    if (!doc) {
+        doc = document;
+    }
+    divs = $(doc).contents().find('div[contenteditable]');
     $.each(divs, function () {
         $(this).attr('data-hash', hashCode($(this).html()));
     });
@@ -23,9 +26,9 @@ function save_content (options) {
     // Get all the contenteditable elements
     var divs = $(options.document).contents().find('div[contenteditable]');
     var span_containers = $(options.document).contents().find('span[contenteditable]');
-    
-    if (divs.length != 0 && span_containers.length != 0) {
-        alert('You have no contenteditable on your document.');
+
+    if (divs.length == 0 && span_containers.length == 0) {
+        alert('There is no contenteditable on this document.');
         return false;
     }
     
