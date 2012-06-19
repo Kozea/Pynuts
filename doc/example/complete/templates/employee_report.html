@@ -1,0 +1,12 @@
+{% extends "_layout.html" %}
+
+{% block head %}
+  <script src="http://code.jquery.com/jquery.min.js"></script>
+  <script>
+    $(function () { $('*[contenteditable]').removeAttr('contenteditable'); });
+  </script>
+{% endblock head %}
+
+{% block main %}
+  {{ cls.view_html(employee=employee) }}
+{% endblock main %}

@@ -1,0 +1,50 @@
+{% extends "_layout.html" %}
+
+{% block head %}
+  <script src="http://code.jquery.com/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/TeddyBar/teddybar.js') }}"></script>
+  <link href="{{ url_for('static', filename='javascript/TeddyBar/teddybar.css') }}" rel="stylesheet"/>
+  <script src="{{ url_for('_pynuts-static', filename='javascript/save.js') }}"></script>
+  <script>
+    $(function () {
+        init_content($('#report'));
+        $('#teddybar').teddybar({
+            menu: {
+                'save': 'save_function'
+            },
+            commands: {
+                save_function: function () {
+                    save_content({
+                        document: $('#report')
+                    });
+                }
+            }
+        });
+    });
+  </script>
+{% endblock head %}
+
+{% block main %}
+  <h2>Employee</h2>
+  {{ obj.view_read() }}
+  
+  <h2>Current report</h2>
+  <a href="{{ url_for('edit_employee_report', **obj.primary_keys) }}" class="edit_report">  >> Edit employee's model</a>
+  <div id="teddybar"></div>
+  <section id="report">
+    {{ doc.view_html(employee=obj) }} 
+  </section>
+  <h2>Report archives</h2>
+  <ul>
+  {% for hist in history %}
+    <li>
+      <h3>From the {{ hist.datetime }}</h3>
+      <ul>
+        <li><a href="{{ url_for('html_employee', version=hist.version, **obj.primary_keys) }}">View employee report archive</a></li>
+        <li><a href="{{ url_for('pdf_employee', version=hist.version, **obj.primary_keys) }}">Download report archive as PDF</a></li>
+      </ul>
+    </li>
+  {% endfor %}
+  </ul>
+
+{% endblock main %}
