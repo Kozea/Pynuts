@@ -1,0 +1,37 @@
+/* APPLICATION CSS */
+body            { font-family: sans-serif; background: #eee; margin: 0;
+                    padding: 0; width: 80%; margin-left: 10%; }
+a, h1, h2       { color: #377BA8; }
+h1, h2          { font-family: 'Georgia', serif; margin: 0; }
+h1              { border-bottom: 2px solid #eee; text-align: center; }
+h2              { font-size: 1.2em; }
+
+nav             { text-align: center; margin: 1em; }
+nav a           { margin: 1em; }
+
+body>section    { border: 1px solid #ddd; }
+
+form            { margin: 0.5em; }
+
+table           { border: thin solid #999; width: 50%; text-align:center;
+                  border-collapse: collapse; }
+
+th, td          { border: thin solid #999; }
+
+.error ul       { background: #F0D6D6; }
+.ok ul          { background: #80B76F; }
+
+/* REPORT CSS */
+.edit_report {
+    margin: 2em 10% 0; display: block;
+}
+h3 { 
+  font-family: 'Georgia', serif;
+  font-size: 0.9em;
+  margin: 0;
+}
+/* report frame */
+#report         { background: white; width: 80%; margin: 0.25em 10% 2em ; 
+                  border: thin solid #999; padding: 0.5em; }
+div[contenteditable] { width: 80%; margin: 1em 10%; height: 5em; border: thin solid #ddd; }
+div[contenteditable]:hover, div[contenteditable]:focus {  }

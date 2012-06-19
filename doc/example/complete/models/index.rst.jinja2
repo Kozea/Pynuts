@@ -1,0 +1,17 @@
+EMPLOYEE'S IDENTITY
+-------------------
+
+{% for field in employee.read_fields %}
+{% if field.widget.input_type != 'hidden' %}
+  {{ field.label.text }}
+   {{ field.data | safe }}
+{% endif %}
+
+{% endfor %}
+
+COMMENTS
+--------
+
+{% set path = document.type_name + "/" + document.document_id + "/" + document.version %}
+
+.. editable:: {{ path }}/comments
