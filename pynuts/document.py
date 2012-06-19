@@ -193,10 +193,10 @@ class Document(object):
     def generate_rest(cls, part='index.rst.jinja2', resource_type='http',
                       archive=False, version=None, **kwargs):
         return cls.from_data(version=version, **kwargs)._generate_rest(
-            part=part, resource_type=resource_type, archive=archive)
+            part=part, resource_type=resource_type, archive=archive, **kwargs)
 
     def _generate_rest(self, part='index.rst.jinja2', resource_type='http',
-                      archive=False):
+                      archive=False, **kwargs):
         """Generate the ReStructuredText version of the document.
 
         :param part: part of the document to render
