@@ -2,7 +2,7 @@
 
 # Set the jinja2 environment by defining templates location and globals.
 import flask
-from jinja2 import nodes, Environment, PackageLoader
+from jinja2 import nodes, Environment, PackageLoader, ChoiceLoader
 from jinja2.ext import Extension
 
 from . import filters
@@ -78,11 +78,11 @@ class ShowOnMatch(Extension):
         return [body_expr, assign_node, if_node]
 
 
-def create_environment():
+def create_environment(loader):
     """Create a new Jinja2 environment with Pynuts helpers."""
+    loaders = (loader, PackageLoader('pynuts', 'templates'))
     environment = Environment(
-        loader=PackageLoader('pynuts', 'templates'),
-    extensions=[ShowOnMatch])
+        loader=ChoiceLoader(loaders), extensions=[ShowOnMatch])
     environment.globals.update({'url_for': flask.url_for})
     environment.filters['data'] = filters.data
     return environment

@@ -10,7 +10,6 @@ from urllib import quote, unquote
 from flask import (Response, render_template, request, redirect, flash,
                    url_for, jsonify)
 from werkzeug.datastructures import Headers
-from jinja2 import ChoiceLoader
 from weasyprint import HTML
 from docutils_html5 import Writer
 
@@ -69,7 +68,7 @@ class Document(object):
     model_path = None
 
     # Templates
-    edit_template = 'edit_document.jinja2'
+    edit_template = '_pynuts/edit_document.jinja2'
 
     def __init__(self, document_id, version=None):
         if '/' in repr(document_id):
@@ -82,9 +81,8 @@ class Document(object):
         self.archive_git = Git(
             self._pynuts.document_repository, branch=self.archive_branch)
 
-        self.jinja_environment = create_environment()
-        self.jinja_environment.loader = ChoiceLoader((
-            self.git.jinja_loader(), self.jinja_environment.loader))
+        loader = self.git.jinja_loader()
+        self.jinja_environment = create_environment(loader)
         self.jinja_environment.globals['render_rest'] = \
             self._pynuts.render_rest
         # Take the class attribute

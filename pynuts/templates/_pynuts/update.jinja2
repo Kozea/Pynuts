@@ -1,0 +1,15 @@
+<form method="post" enctype="multipart/form-data">
+{%- for field in view.update_form %}
+  {% if field.widget.input_type != 'hidden' %}
+    {%- if not field.flags.no_label %}
+      {%- if field.errors %}
+        {{ field.label(class="error", title=', '.join(field.errors)) }}
+      {%- else %}
+        {{ field.label() }}
+      {%- endif %}
+    {%- endif %}
+  {%- endif -%}
+  {{ field() | safe }}
+{% endfor %}
+  <input type="submit" />
+</form>

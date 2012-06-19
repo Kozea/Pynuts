@@ -2,7 +2,7 @@
 
 {% block main %}
   <h2>Employee</h2>
-  {{ obj.view_read() }}
+  {{ view.view_read() }}
   <h2>Document history</h2>
   <table>
     <tr>
@@ -16,9 +16,9 @@
       <tr>
         <th>{{ hist.datetime }}</th>
         <td>{{ hist.message }}</td>
-        <td><a href="{{ url_for('edit_employee_report', version=hist.version, **obj.primary_keys) }}">></a></td>
-        <td><a href="{{ url_for('html_employee', version=hist.version, **obj.primary_keys) }}">></a></td>
-        <td><a href="{{ url_for('pdf_employee', version=hist.version, **obj.primary_keys) }}">></a></td>
+        <td><a href="{{ url_for('edit_employee_report', version=hist.version, **view.primary_keys) }}">></a></td>
+        <td><a href="{{ url_for('html_employee', version=hist.version, **view.primary_keys) }}">></a></td>
+        <td><a href="{{ url_for('pdf_employee', version=hist.version, **view.primary_keys) }}">></a></td>
       </tr>
     {% endfor %}
   </table>

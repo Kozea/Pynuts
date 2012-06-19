@@ -1,0 +1,17 @@
+{% showonmatch 'ul li' %}
+  <ul>
+  {%- for obj in view_class.query(query) %}
+    <li>
+    {%- if endpoint -%}
+      <a href="{{ endpoint(obj=obj) }}">
+    {%- elif obj.read_endpoint -%}
+      <a href="{{ obj.action_url_for('read') }}">
+    {%- endif -%}
+      {{ obj.data[obj.list_column] }}
+    {%- if endpoint or obj.read_endpoint -%}
+      </a>
+    {%- endif -%}
+    </li>
+  {%- endfor %}
+  </ul>
+{% endshowonmatch %}

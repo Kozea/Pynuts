@@ -23,6 +23,8 @@ class MetaView(type):
             cls.create_columns = cls.create_columns or column_names
             cls.read_columns = cls.read_columns or column_names
             cls.update_columns = cls.update_columns or column_names
+            cls.environment = create_environment(
+                cls._pynuts.jinja_env.loader)
 
             if cls.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
@@ -55,9 +57,6 @@ class ModelView(object):
     # Mapper
     _mapping = None
 
-    # Jinja2 environment
-    environment = create_environment()
-
     #: SQLAlchemy model
     model = None
 
@@ -78,12 +77,12 @@ class ModelView(object):
     delete_endpoint = None
 
     # Templates
-    list_template = 'list.jinja2'
-    table_template = 'table.jinja2'
-    create_template = 'create.jinja2'
-    read_template = 'read.jinja2'
-    update_template = 'update.jinja2'
-    delete_template = 'delete.jinja2'
+    list_template = '_pynuts/list.jinja2'
+    table_template = '_pynuts/table.jinja2'
+    create_template = '_pynuts/create.jinja2'
+    read_template = '_pynuts/read.jinja2'
+    update_template = '_pynuts/update.jinja2'
+    delete_template = '_pynuts/delete.jinja2'
 
     #: The column which represents your class
     list_column = None
@@ -242,34 +241,34 @@ class ModelView(object):
         """Render the HTML for list_template."""
         template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
-            cls=cls, query=query, endpoint=endpoint))
+            view_class=cls, query=query, endpoint=endpoint))
 
     @classmethod
     def view_table(cls, query=None, endpoint=None):
         """Render the HTML for table_template."""
         template = cls.environment.get_template(cls.table_template)
         return jinja2.Markup(template.render(
-            cls=cls, query=query, endpoint=endpoint))
+            view_class=cls, query=query, endpoint=endpoint))
 
     def view_create(self):
         """Render the HTML for create_template."""
         template = self.environment.get_template(self.create_template)
-        return jinja2.Markup(template.render(obj=self))
+        return jinja2.Markup(template.render(view=self))
 
     def view_read(self):
         """Render the HTML for read_template."""
         template = self.environment.get_template(self.read_template)
-        return jinja2.Markup(template.render(obj=self))
+        return jinja2.Markup(template.render(view=self))
 
     def view_update(self):
         """Render the HTML for update_template."""
         template = self.environment.get_template(self.update_template)
-        return jinja2.Markup(template.render(obj=self))
+        return jinja2.Markup(template.render(view=self))
 
     def view_delete(self):
         """Render the HTML for delete_template."""
         template = self.environment.get_template(self.delete_template)
-        return jinja2.Markup(template.render(obj=self))
+        return jinja2.Markup(template.render(view=self))
 
     # CRUD methods
     @classmethod
@@ -283,7 +282,7 @@ class ModelView(object):
         :type endpoint: String, func(lambda)
 
         """
-        return flask.render_template(template, cls=cls, query=query, **kwargs)
+        return flask.render_template(template, view_class=cls, query=query, **kwargs)
 
     @classmethod
     def table(cls, template=None, query=None, datatable=False, **kwargs):
@@ -297,7 +296,7 @@ class ModelView(object):
 
         """
         return flask.render_template(
-            template, cls=cls, query=query, datatable=datatable, **kwargs)
+            template, view_class=cls, query=query, **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method. Also check the values in the form: \
@@ -326,7 +325,8 @@ class ModelView(object):
             return flask.redirect(
                 self.template_url_for(redirect or type(self).read_endpoint))
         self.handle_errors(self.create_form)
-        return flask.render_template(template, obj=self, **kwargs)
+        return flask.render_template(template, view=self, view_class=type(self),
+            instance=self.data, **kwargs)
 
     def update(self, template=None, redirect=None, **kwargs):
         """Return the update_template. See the create method for more details.
@@ -346,7 +346,8 @@ class ModelView(object):
             return flask.redirect(
                 self.template_url_for(redirect or type(self).read_endpoint))
         self.handle_errors(self.update_form)
-        return flask.render_template(template, obj=self, **kwargs)
+        return flask.render_template(template, view=self, view_class=type(self),
+            instance=self.data, **kwargs)
 
     def read(self, template=None, **kwargs):
         """Return the view_template.
@@ -355,8 +356,9 @@ class ModelView(object):
         :type template: String
 
         """
-        self.read_fields.process(obj=self.data)
-        return flask.render_template(template, obj=self, **kwargs)
+        self.read_fields.process(view=self.data)
+        return flask.render_template(template, view=self, view_class=type(self),
+            instance=self.data, **kwargs)
 
     def delete(self, template=None, redirect=None, **kwargs):
         """Delete an entry from the database.
@@ -373,4 +375,5 @@ class ModelView(object):
             self.session.commit()
             return flask.redirect(
                 self.template_url_for(redirect or type(self).list_endpoint))
-        return flask.render_template(template, obj=self, **kwargs)
+        return flask.render_template(template, view=self, view_class=type(self),
+            instance=self.data, **kwargs)

@@ -1,13 +1,13 @@
 <form method="post" enctype="multipart/form-data">
-  {% for field in obj.create_form %}
-    {% if field.widget.input_type != 'hidden' %}
-      {% if field.errors %}
+  {%- for field in view.create_form %}
+    {%- if field.widget.input_type != 'hidden' -%}
+      {%- if field.errors -%}
         {{ field.label(class="error", title=', '.join(field.errors)) }}
-      {% else %}
+      {%- else -%}
         {{ field.label() }}
-      {% endif %}
-    {% endif %}
+      {%- endif -%}
+    {%- endif %}
     {{ field | safe }}
-  {% endfor %}
+  {%- endfor %}
   <input type="submit" />
 </form>

@@ -1,0 +1,44 @@
+{% showonmatch 'tr td' %}
+  <table>
+    <thead>
+      <tr>
+      {%- for field_name in view_class.table_columns %}
+        {%- if field_name != 'csrf_token' %}
+        <th>{{ view_class.table_fields[field_name].label() }}</th>
+        {%- endif -%}
+      {% endfor -%}
+      {%- if view_class.update_endpoint %}
+        <th>Edit</th>
+      {%- endif %}
+      {%- if view_class.delete_endpoint %}
+        <th>Delete</th>
+      {% endif -%}
+      </tr>
+    </thead>
+    <tbody>
+    {%- for obj in view_class.query(query) %}
+      <tr>
+      {%- for column in view_class.table_columns %}
+        <td>
+          {%- if endpoint -%}
+            <a href="{{ endpoint(obj=obj) }}">
+          {%- elif obj.read_endpoint -%}
+            <a href="{{ obj.action_url_for('read') }}">
+          {%- endif -%}
+          {{ obj.data[column] }}
+          {%- if endpoint or obj.read_endpoint -%}
+            </a>
+          {%- endif -%}
+        </td>
+      {%- endfor %}
+      {%- if obj.update_endpoint %}
+        <td><a href="{{ obj.action_url_for('update') }}">></a></td>
+      {%- endif %}
+      {%- if obj.delete_endpoint %}
+        <td><a href="{{ obj.action_url_for('delete') }}">x</a></td>
+      {%- endif %}
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+{% endshowonmatch %}

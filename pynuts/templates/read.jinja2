@@ -1,8 +1,0 @@
-<dl>
-  {% for field in obj.read_fields %}
-    {% if field.widget.input_type != 'hidden' %}
-      <dt>{{ field.label.text }}</dt>
-      <dd>{{ field | data }}</dd>
-    {% endif %}
-  {% endfor %}
-</dl>

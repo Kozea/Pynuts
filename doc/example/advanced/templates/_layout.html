@@ -3,8 +3,8 @@
   <head>
     <title>Pynuts'</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-    {% block head %}
-    {% endblock head %}
+    {%- block head -%}
+    {%- endblock head %}
   </head>
   <body>
     <h1>Pynuts'</h1>
@@ -14,11 +14,11 @@
       <a href="{{ url_for('table_employees') }}">Employees table</a> |
       <a href="{{ url_for('companies') }}">Companies list</a>
       <a href="{{ url_for('create_company') }}">Add a new company</a>
-      {% if session.get('login') %}
+      {% if session.get('login') -%}
         <a href="{{ url_for('logout') }}">Logout</a> Logged as <strong>{{ session.get('login') }}</strong>
-      {% endif %}
+      {%- endif %}
     </nav>
-    {% with messages = get_flashed_messages(with_categories=true) %}
+    {%- with messages = get_flashed_messages(with_categories=true) %}
       {% for style, messages in messages | groupby(0) %}
         <aside class="{{ style }}">
           <ul>
@@ -28,10 +28,10 @@
           </ul>
         </aside>
       {% endfor %}
-    {% endwith %}
+    {% endwith -%}
     <section>
-    {% block main %}
-    {% endblock main %}
+    {%- block main -%}
+    {%- endblock main %}
     </section>
   </body>
 </html>
