@@ -19,7 +19,7 @@ First, create a template called ``table_employees.html`` as below:
     {% extends "_layout.html" %}
     {% block main %}
       <h2>Employees</h2>
-      {{ cls.view_table() }}
+      {{ view_class.view_table() }}
     {% endblock main %}
 
 This template call the `view_table` method from pynuts, which display a table with your employees and an `edit` and `delete` method for each of them.
@@ -44,7 +44,7 @@ Create ``update_employee.html``:
     {% extends "_layout.html" %}
     {% block main %}
       <h2>Update Employee</h2>
-      {{ obj.view_update() }}
+      {{ view.view_update() }}
     {% endblock main %}
 
 Then put this code in ``executable.py``::
@@ -76,7 +76,7 @@ Create ``delete_employee.html``:
     {% extends "_layout.html" %}
     {% block main %}
       <h2>Delete Employee</h2>
-      {{ obj.view_delete() }}
+      {{ view.view_delete() }}
     {% endblock main %}
 
     
@@ -99,7 +99,7 @@ Create ``read_employee.html``:
     {% extends "_layout.html" %}
     {% block main %}
       <h2>Employee</h2>
-      {{ obj.view_read() }}
+      {{ view.view_read() }}
     {% endblock main %}
 
 Then put this code in ``executable.py``::
@@ -196,7 +196,7 @@ Create the file ``edit_employee_template.html``
 
     % extends "_layout.html" %}
     {% block main %}
-      {{ cls.view_edit(employee=employee) }}
+      {{ document.view_edit(employee=employee) }}
     {% endblock main %}
 
 Then, in your ``executable.py``, you have to:
@@ -221,7 +221,7 @@ Create the file ``employee_report.html``:
 
     {% extends "_layout.html" %}
     {% block main %}
-      {{ cls.view_html(employee=employee) }}
+      {{ document.view_html(employee=employee) }}
     {% endblock main %}
 
 ``executable.py``::
@@ -274,7 +274,7 @@ Now go to ``read_employee.html``. To use `history`, we loop on it and each eleme
 
   {% block main %}
     <h2>Employee</h2>
-    {{ obj.view_read() }}
+    {{ view.view_read() }}
     <h2>Document history</h2>
     <table>
       <tr>
@@ -288,9 +288,9 @@ Now go to ``read_employee.html``. To use `history`, we loop on it and each eleme
         <tr>
           <th>{{ archive.datetime }}</th>
           <td>{{ archive.message }}</td>
-          <td><a href="{{ url_for('edit_employee_report', version=archive.version, **obj.primary_keys) }}">></a></td>
-          <td><a href="{{ url_for('html_employee', version=archive.version, **obj.primary_keys) }}">></a></td>
-          <td><a href="{{ url_for('pdf_employee', version=archive.version, **obj.primary_keys) }}">></a></td>
+          <td><a href="{{ url_for('edit_employee_report', version=archive.version, **view.primary_keys) }}">></a></td>
+          <td><a href="{{ url_for('html_employee', version=archive.version, **view.primary_keys) }}">></a></td>
+          <td><a href="{{ url_for('pdf_employee', version=archive.version, **view.primary_keys) }}">></a></td>
         </tr>
       {% endfor %}
     </table>
@@ -311,7 +311,7 @@ Finally you have to go back to ``edit_employee_template.html`` in order to add t
 .. sourcecode:: html+jinja
  
     {% block main %}
-      {{ cls.view_edit(employee=employee, version=version) }}
+      {{ document.view_edit(employee=employee, version=version) }}
     {% endblock main %}
     
 Do the same with ``employee_report.html``.

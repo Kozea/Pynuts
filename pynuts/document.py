@@ -412,7 +412,7 @@ class Document(object):
                     return redirect(redirect_url)
 
         return render_template(
-            template, cls=cls, part=part, version=version, archive=archive,
+            template, document=cls, part=part, version=version, archive=archive,
             **kwargs)
 
     @classmethod
@@ -430,7 +430,7 @@ class Document(object):
         # TODO: what if archive==True?
         text = document.git.read(part).decode('utf-8')
         return jinja2.Markup(template.render(
-            cls=cls, text=text, old_commit=document.git.head.id, **kwargs))
+            document=cls, text=text, old_commit=document.git.head.id, **kwargs))
 
     @classmethod
     def html(cls, template, part='index.rst.jinja2', version=None,
@@ -444,7 +444,7 @@ class Document(object):
         """
         part = 'index.rst' if archive else part
         return render_template(
-            template, cls=cls, part=part, version=version, archive=archive,
+            template, document=cls, part=part, version=version, archive=archive,
             **kwargs)
 
     @classmethod

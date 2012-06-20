@@ -167,8 +167,8 @@ Step 6: The Templates
 
 For more information about the templates, you can see the `Jinja2 documentation <http://jinja.pocoo.org/docs/templates>`_
 
-layout.html
-~~~~~~~~~~~
+_layout.html
+~~~~~~~~~~~~
 This template contains the HTML skeleton.
 
 .. sourcecode:: html+jinja
@@ -189,7 +189,7 @@ list_employees.html
 ~~~~~~~~~~~~~~~~~~~
 This template show a list of all employees present in the database.
 
-`cls` stands for the EmployeeView class.
+`view_class` stands for the EmployeeView class.
 
 .. sourcecode:: html+jinja
 
@@ -197,7 +197,7 @@ This template show a list of all employees present in the database.
 
     {% block main %}
       <h2>Employee List</h2>
-      {{ cls.view_list() }}
+      {{ view_class.view_list() }}
     {% endblock main %}
     
 add_employee.html
@@ -205,7 +205,7 @@ add_employee.html
 
 This template shows a form to create an employee.
 
-`obj` stands_for an instance of EmployeeView.
+`view` stands_for an instance of EmployeeView.
 
 .. sourcecode:: html+jinja
     
@@ -213,13 +213,13 @@ This template shows a form to create an employee.
 
     {% block main %}
       <h2>Add New Employee</h2>
-      {{ obj.view_create() }}
+      {{ view.view_create() }}
     {% endblock main %}
 
 Handling form errors
 ~~~~~~~~~~~~~~~~~~~~
 
-Handling errors is really simple. Just add this code to your ``layout.html``
+Handling errors is really simple. Just add this code to your ``_layout.html``
 
 .. sourcecode:: html+jinja
 
