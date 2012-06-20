@@ -26,13 +26,13 @@
 
 {% block main %}
   <h2>Employee</h2>
-  {{ obj.view_read() }}
+  {{ view.view_read() }}
   
   <h2>Current report</h2>
-  <a href="{{ url_for('edit_employee_report', **obj.primary_keys) }}" class="edit_report">  >> Edit employee's model</a>
+  <a href="{{ url_for('edit_employee_report', **view.primary_keys) }}" class="edit_report">  >> Edit employee's model</a>
   <div id="teddybar"></div>
   <section id="report">
-    {{ doc.view_html(employee=obj) }} 
+    {{ doc.view_html(employee=view) }}
   </section>
   <h2>Report archives</h2>
   <ul>
@@ -40,8 +40,8 @@
     <li>
       <h3>From the {{ hist.datetime }}</h3>
       <ul>
-        <li><a href="{{ url_for('html_employee', version=hist.version, **obj.primary_keys) }}">View employee report archive</a></li>
-        <li><a href="{{ url_for('pdf_employee', version=hist.version, **obj.primary_keys) }}">Download report archive as PDF</a></li>
+        <li><a href="{{ url_for('html_employee', version=hist.version, **view.primary_keys) }}">View employee report archive</a></li>
+        <li><a href="{{ url_for('pdf_employee', version=hist.version, **view.primary_keys) }}">Download report archive as PDF</a></li>
       </ul>
     </li>
   {% endfor %}
