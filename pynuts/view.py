@@ -309,7 +309,7 @@ class ModelView(object):
         :type template: String
 
         :param redirect: The URL where you want to redirect after the function
-        :type redirect: String
+        :type redirect: String, func(lambda)
 
         :param values: The values of the object you want to create
         :type values: Dict
@@ -335,7 +335,7 @@ class ModelView(object):
         :type template: String
 
         :param redirect: The URL where you want to redirect after the function
-        :type redirect: String
+        :type redirect: String, func(lambda)
 
         """
         if self.update_form.validate_on_submit():
@@ -356,7 +356,7 @@ class ModelView(object):
         :type template: String
 
         """
-        self.read_fields.process(view=self.data)
+        self.read_fields.process(obj=self.data)
         return flask.render_template(template, view=self, view_class=type(self),
             instance=self.data, **kwargs)
 
@@ -367,7 +367,7 @@ class ModelView(object):
         :type template: String
 
         :param redirect: The URL where you want to redirect after the function
-        :type redirect: String
+        :type redirect: String, func(lambda)
 
         """
         if flask.request.method == 'POST':
