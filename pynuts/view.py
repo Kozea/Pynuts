@@ -234,18 +234,44 @@ class ModelView(object):
             lambda cls, **primary_keys: flask.url_for(
                 function.__name__, **primary_keys)
         return function
+    
+    @classmethod
+    def table_page(cls, function):
+        """Set the table_endpoint according to the function name."""
+        cls.table_endpoint = \
+            lambda cls, **primary_keys: flask.url_for(
+                function.__name__, **primary_keys)
+        return function
+
+    @classmethod
+    def list_page(cls, function):
+        """Set the list_endpoint according to the function name."""
+        cls.list_endpoint = \
+            lambda cls, **primary_keys: flask.url_for(
+                function.__name__, **primary_keys)
+        return function
 
     # View methods
     @classmethod
     def view_list(cls, query=None, endpoint=None):
-        """Render the HTML for list_template."""
+        """Render the HTML for list_template.
+
+        :param query: The SQLAlchemy query used for rendering the list
+        :type query: String
+
+        """
         template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
             view_class=cls, query=query, endpoint=endpoint))
 
     @classmethod
     def view_table(cls, query=None, endpoint=None):
-        """Render the HTML for table_template."""
+        """Render the HTML for table_template.
+
+        :param query: The SQLAlchemy query used for rendering the table
+        :type query: String
+
+        """
         template = cls.environment.get_template(cls.table_template)
         return jinja2.Markup(template.render(
             view_class=cls, query=query, endpoint=endpoint))
