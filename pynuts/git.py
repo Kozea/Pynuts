@@ -171,7 +171,7 @@ class Git(object):
         :raises: ConflictError
 
         """
-        if not self.ref:
+        if not self.ref:  # pragma: no cover
             raise GitException('Not on a branch.')
         new_commit = self.store_commit(
             self.tree.id, author_name, author_email, message,

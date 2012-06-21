@@ -1,3 +1,7 @@
+{% set path = document.type_name + "/" + document.document_id + "/" + document.version %}
+
+.. image:: {{ resource('logo.png') }}
+
 EMPLOYEE'S IDENTITY
 -------------------
 
@@ -9,9 +13,14 @@ EMPLOYEE'S IDENTITY
 
 {% endfor %}
 
-COMMENTS
---------
+MISC
+----
 
-{% set path = document.type_name + "/" + document.document_id + "/" + document.version %}
+.. content:: {{ path }}/Employee
+   :id: employee
+   :class: employee
+   :renderer: employee
 
-.. editable:: {{ path }}/comments
+   ["Employee", "Edit this !"]
+
+{{ render_rest(document.type_name, part='comments.rst.jinja2', employee=employee) }}

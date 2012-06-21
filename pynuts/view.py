@@ -120,19 +120,19 @@ class ModelView(object):
         else:
             self.data = None
 
-    @classproperty
-    def list_field(cls):
-        """Return the list fields."""
-        return cls.ListForm()._fields[cls.list_column]
+    # @classproperty
+    # def list_field(cls):
+    #     """Return the list field."""
+    #     return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
-        """Return the list fields."""
+        """Return the table fields."""
         return cls.TableForm()._fields
 
     @cached_property
     def create_form(self):
-        """Return the table fields."""
+        """Return the create fields."""
         return self.CreateForm()
 
     @cached_property

@@ -6,6 +6,7 @@ from pynuts.directives import Editable
 import view
 import document
 import rights as Is
+from exception import NoPermission
 
 
 @app.errorhandler(403)
@@ -27,6 +28,15 @@ def login_post():
     else:
         flash('invalid credentials', 'error')
     return redirect('employees')
+
+
+@app.route('/test_rights')
+@allow_if((Is.connected & ~ Is.admin) | (Is.dummy & Is.admin) | (
+    Is.dummy | Is.admin) | (Is.dummy ^ Is.admin) | (Is.connected ^ Is.admin),
+          NoPermission)
+def test_rights():
+    """Test rights route."""
+    return redirect(url_for('employees'))
 
 
 @app.route('/logout')
@@ -56,17 +66,20 @@ def table_employees():
     return view.EmployeeView.table('table_employees.html')
 
 
+@view.EmployeeView.create_page
 @app.route('/employee/create/', methods=('POST', 'GET'))
 @allow_if(Is.admin)
 def create_employee():
     employee = view.EmployeeView()
     response = employee.create('create_employee.html',
+                               values={'company_id': '9999'},
                                redirect='employees')
     if employee.create_form.validate_on_submit():
         document.EmployeeDoc.create(employee=employee)
     return response
 
 
+@view.CompanyView.create_page
 @app.route('/company/create/', methods=('POST', 'GET'))
 @allow_if(Is.admin)
 def create_company():
@@ -80,14 +93,13 @@ def create_company():
 @allow_if(Is.admin | Is.connected_user)
 def read_employee(person_id=None):
     doc = document.EmployeeDoc(person_id)
-    history = doc.history
     return view.EmployeeView(person_id).read(
-        'read_employee.html', history=history, doc=doc)
+        'read_employee.html', doc=doc)
 
 
 @view.CompanyView.read_page
 @app.route('/company/read/<int:company_id>')
-@allow_if(Is.admin | Is.connected_user)
+@allow_if(Is.admin)
 def read_company(company_id=None):
     return view.CompanyView(company_id).read('read_company.html')
 
@@ -118,7 +130,20 @@ def edit_employee_report(person_id, version=None):
     doc = document.EmployeeDoc
     return doc.edit('edit_employee_template.html',
                     employee=employee,
-                    version=version)
+                    version=version,
+                    redirect_url='employees')
+
+
+@app.route('/employee/archive_template/<int:person_id>', methods=('POST',))
+@app.route('/employee/archive_template/<int:person_id>/<version>',
+           methods=('POST',))
+@allow_if(Is.admin | Is.connected_user)
+def archive_employee_report(person_id, version=None):
+    employee = view.EmployeeView(person_id)
+    doc = document.EmployeeDoc
+    doc.archive(employee=employee)
+    flash('The report was sucessfully archived.', 'ok')
+    return redirect(url_for('read_employee', person_id=person_id))
 
 
 @app.route('/employee/html/<int:person_id>')
@@ -126,7 +151,17 @@ def edit_employee_report(person_id, version=None):
 @allow_if(Is.admin | Is.connected_user)
 def html_employee(person_id, version=None):
     doc = document.EmployeeDoc
-    return doc.html('employee_report.html',
+    return doc.html('employee_report.html', archive=False,
+                    employee=view.EmployeeView(person_id),
+                    version=version)
+
+
+@app.route('/employee/html/<int:person_id>/archive')
+@app.route('/employee/html/<int:person_id>/<version>/archive')
+@allow_if(Is.admin | Is.connected_user)
+def archived_html_employee(person_id, version=None):
+    doc = document.EmployeeDoc
+    return doc.html('employee_report.html', archive=True,
                     employee=view.EmployeeView(person_id),
                     version=version)
 
@@ -137,7 +172,17 @@ def html_employee(person_id, version=None):
 def pdf_employee(person_id, version=None):
     doc = document.EmployeeDoc
     return doc.download_pdf(
-        filename='Employee %s report' % (person_id),
+        filename='Employee %s report' % (person_id), archive=False,
+        employee=view.EmployeeView(person_id), version=version)
+
+
+@app.route('/employee/download/<int:person_id>/archive')
+@app.route('/employee/download/<int:person_id>/<version>/archive')
+@allow_if(Is.admin | Is.connected_user)
+def archived_pdf_employee(person_id, version=None):
+    doc = document.EmployeeDoc
+    return doc.download_pdf(
+        filename='Employee %s report' % (person_id), archive=True,
         employee=view.EmployeeView(person_id), version=version)
 
 
