@@ -122,19 +122,19 @@ class ModelView(object):
         else:
             self.data = None
 
-    @classproperty
-    def list_field(cls):
-        """Return the list fields."""
-        return cls.ListForm()._fields[cls.list_column]
+    # @classproperty
+    # def list_field(cls):
+    #     """Return the list field."""
+    #     return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
-        """Return the list fields."""
+        """Return the table fields."""
         return cls.TableForm()._fields
 
     @cached_property
     def create_form(self):
-        """Return the table fields."""
+        """Return the create fields."""
         return self.CreateForm()
 
     @cached_property
@@ -310,10 +310,11 @@ class ModelView(object):
         :type endpoint: String, func(lambda)
 
         """
-        return flask.render_template(template, view_class=cls, query=query, **kwargs)
+        return flask.render_template(
+            template, view_class=cls, query=query, **kwargs)
 
     @classmethod
-    def table(cls, template=None, query=None, datatable=False, **kwargs):
+    def table(cls, template=None, query=None, **kwargs):
         """Return the table_template.
 
         :param template: The template you want to render
@@ -325,6 +326,16 @@ class ModelView(object):
         """
         return flask.render_template(
             template, view_class=cls, query=query, **kwargs)
+
+    def render(self, template, **kwargs):
+        """Render a template with the view, view_class and instance variables.
+
+        :param template: The template to render
+        :type template: String
+
+        """
+        return flask.render_template(template, view=self, view_class=type(self),
+                instance=self.data, **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method. Also check the values in the form: \
@@ -343,18 +354,22 @@ class ModelView(object):
         :type values: Dict
 
         """
+        if self.handle_create_form(values):
+            self.session.commit()
+            return flask.redirect(
+                self.template_url_for(redirect or type(self).read_endpoint))
+        return self.render(template, **kwargs)
+
+    def handle_create_form(self, values=None):
+        """Handle the create form."""
         if self.create_form.validate_on_submit():
             form_values = self._get_form_attributes(self.create_form)
             if values:
                 form_values.update(values)
             self.data = self.model(**form_values)
             self.session.add(self.data)
-            self.session.commit()
-            return flask.redirect(
-                self.template_url_for(redirect or type(self).read_endpoint))
         self.handle_errors(self.create_form)
-        return flask.render_template(template, view=self, view_class=type(self),
-            instance=self.data, **kwargs)
+        return self.data
 
     def update(self, template=None, redirect=None, **kwargs):
         """Return the update_template. See the create method for more details.
@@ -366,16 +381,21 @@ class ModelView(object):
         :type redirect: String, func(lambda)
 
         """
+        if self.handle_update_form():
+            self.session.commit()
+            return flask.redirect(
+                self.template_url_for(redirect or type(self).read_endpoint))
+        return self.render(template, **kwargs)
+
+    def handle_update_form(self):
+        """Handle the update form."""
         if self.update_form.validate_on_submit():
             for key, value in self._get_form_attributes(
                 self.update_form).items():
                 setattr(self.data, key, value)
-            self.session.commit()
-            return flask.redirect(
-                self.template_url_for(redirect or type(self).read_endpoint))
+            return True
         self.handle_errors(self.update_form)
-        return flask.render_template(template, view=self, view_class=type(self),
-            instance=self.data, **kwargs)
+        return False
 
     def read(self, template=None, **kwargs):
         """Return the view_template.

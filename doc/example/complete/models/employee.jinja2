@@ -1,0 +1,11 @@
+<table>
+  <tr>
+    <th>Employee's name</th>
+    <th>Edit this table</th>
+  </tr>
+  <tr>
+  {% for row in data %}
+    <td><span contenteditable>{{ row }}</span></td>
+  {% endfor %}
+  </tr>
+</table>

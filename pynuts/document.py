@@ -166,6 +166,10 @@ class Document(object):
         """Resource content encoded in base64."""
         return self.git.make_weasyprint_url(filename)
 
+    def resource_archive_git_url(self, filename):
+        """Resource content encoded in base64."""
+        return self.archive_git.make_weasyprint_url(filename)
+
     def resource_http_url(self, filename):
         """Resource URL for the application."""
         return url_for(
@@ -184,6 +188,7 @@ class Document(object):
 
         """
         mimetype, _ = mimetypes.guess_type(filename)
+        print mimetype
         return Response(
             cls(document_id, version).git.read(filename), mimetype=mimetype)
 
@@ -205,10 +210,11 @@ class Document(object):
         """
         part = 'index.rst' if archive else part
         if archive:
-            return self.git.read(part)
+            return self.archive_git.read(part)
         else:
             template = self.jinja_environment.get_template(part)
             resource = getattr(self, 'resource_%s_url' % resource_type)
+            print resource
             return template.render(
                 resource=resource, document=self, **self.data)
 
@@ -266,11 +272,10 @@ class Document(object):
         """
 
         part = 'index.rst' if archive else part
+        resource_type = 'archive_git' if archive else 'git'
         html = self._generate_html(
-            part=part, resource_type='git', archive=archive)['whole']
-        return HTML(string=html, encoding='utf8',
-                # Work around WeasyPrint bug #813:
-                base_url='http://example.net/').write_pdf()
+            part=part, resource_type=resource_type, archive=archive)['whole']
+        return HTML(string=html, encoding='utf8').write_pdf()
 
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
@@ -323,7 +328,7 @@ class Document(object):
         return document's information as JSON.
 
         'See the save function<>_' for more details.
-        
+
         """
 
         contents = request.json['data']

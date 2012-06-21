@@ -34,3 +34,7 @@ def connected_user():
 def admin():
     """Returns whether the user is connected."""
     return session.get('login') == 'admin'
+
+
+def dummy():
+    return False

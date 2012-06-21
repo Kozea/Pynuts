@@ -30,20 +30,39 @@
   
   <h2>Current report</h2>
   <a href="{{ url_for('edit_employee_report', **view.primary_keys) }}" class="edit_report">  >> Edit employee's model</a>
+  <form action="{{ url_for('archive_employee_report', **view.primary_keys) }}" method="post" class="edit_report"><input type="submit" value="Archive this report"></form>
   <div id="teddybar"></div>
   <section id="report">
     {{ doc.view_html(employee=view) }}
   </section>
-  <h2>Report archives</h2>
+  <h2>Report history</h2>
   <ul>
-  {% for hist in history %}
+  {% for hist in doc.history %}
     <li>
-      <h3>From the {{ hist.datetime }}</h3>
+      <h3>Saved the {{ hist.datetime }} by {{ hist.author }}. </h3>
       <ul>
-        <li><a href="{{ url_for('html_employee', version=hist.version, **view.primary_keys) }}">View employee report archive</a></li>
-        <li><a href="{{ url_for('pdf_employee', version=hist.version, **view.primary_keys) }}">Download report archive as PDF</a></li>
+        <li><a href="{{ url_for('html_employee', version=hist.version, **view.primary_keys) }}">View this employee report</a></li>
+        <li><a href="{{ url_for('pdf_employee', version=hist.version, **view.primary_keys) }}">Download this report as PDF</a></li>
       </ul>
     </li>
+  {% endfor %}
+  </ul>
+  <h2>Report archives</h2>
+  <ul>
+  {% for hist in doc.archive_history %}
+    <li>
+      <h3>Archived the {{ hist.datetime }} by {{ hist.author }}. </h3>
+      <ul>
+        <li><a href="{{ url_for('archived_html_employee', version=hist.version, **view.primary_keys) }}">View</a></li>
+        <li><a href="{{ url_for('archived_pdf_employee', version=hist.version, **view.primary_keys) }}">Download as PDF</a></li>
+      </ul>
+    </li>
+  {% endfor %}
+  </ul>
+  <h2>Messages</h2>
+  <ul>
+  {% for document in doc.list_documents() %}
+    <li>{{ document.message }}</li>
   {% endfor %}
   </ul>
 

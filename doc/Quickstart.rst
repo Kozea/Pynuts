@@ -27,9 +27,15 @@ Create a file named ``employee.py``::
 
     app = pynuts.Pynuts(__name__, config=CONFIG)
     
+    #The database
+    class Employee(app.db.Model):
+        __tablename__ = 'Employee'
+        id = app.db.Column(app.db.Integer(), primary_key=True)
+        name = app.db.Column(app.db.String())
+        
     #The view
     class EmployeeView(app.ModelView):
-        model = database.Employee
+        model = Employee
 
         view_columns = ('id', 'name')
     
@@ -37,16 +43,11 @@ Create a file named ``employee.py``::
             id = IntegerField(u'ID', validators=[Required()])
             name = TextField(u'Surname', validators=[Required()])
 
-    #The database
-    class Employee(app.db.Model):
-        __tablename__ = 'Employee'
-        id = app.db.Column(app.db.Integer(), primary_key=True)
-        name = app.db.Column(app.db.String())
 
     #The executable
     @app.route('/')
     def employees():
-        return view.EmployeeView.list('list_employees.html')
+        return EmployeeView.list('list_employees.html')
 
     if __name__ == '__main__':
         app.db.create_all()
