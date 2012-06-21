@@ -75,6 +75,8 @@ class ModelView(object):
     read_endpoint = None
     update_endpoint = None
     delete_endpoint = None
+    list_endpoint = None
+    table_endpoint = None
 
     # Templates
     list_template = '_pynuts/list.jinja2'
