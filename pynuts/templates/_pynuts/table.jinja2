@@ -4,7 +4,7 @@
       <tr>
       {%- for field_name in view_class.table_columns %}
         {%- if field_name != 'csrf_token' %}
-        <th>{{ view_class.table_fields[field_name].label() }}</th>
+        <th>{{ view_class.table_fields[field_name].label.text }}</th>
         {%- endif -%}
       {% endfor -%}
       {%- if view_class.update_endpoint %}

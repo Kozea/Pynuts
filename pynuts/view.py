@@ -282,10 +282,11 @@ class ModelView(object):
         :type endpoint: String, func(lambda)
 
         """
-        return flask.render_template(template, view_class=cls, query=query, **kwargs)
+        return flask.render_template(
+            template, view_class=cls, query=query, **kwargs)
 
     @classmethod
-    def table(cls, template=None, query=None, datatable=False, **kwargs):
+    def table(cls, template=None, query=None, **kwargs):
         """Return the table_template.
 
         :param template: The template you want to render
