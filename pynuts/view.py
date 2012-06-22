@@ -210,47 +210,55 @@ class ModelView(object):
     @classmethod
     def create_page(cls, function):
         """Set the create_endpoint according to the function name."""
-        cls.create_endpoint = function.__name__
+        check_auth = getattr(function, '_auth_fun', lambda: True)
+        cls.create_endpoint = classproperty(
+            lambda cls: check_auth() and function.__name__)
         return function
 
     @classmethod
     def read_page(cls, function):
         """Set the read_endpoint according to the function name."""
-        cls.read_endpoint = \
-            lambda cls, **primary_keys: flask.url_for(
-                function.__name__, **primary_keys)
+        check_auth = getattr(function, '_auth_fun', lambda: True)
+        cls.read_endpoint = classproperty(
+            lambda cls: check_auth() and (
+                lambda cls, **primary_keys: \
+                    flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
     def update_page(cls, function):
         """Set the update_endpoint according to the function name."""
-        cls.update_endpoint = \
-            lambda cls, **primary_keys: flask.url_for(
-                function.__name__, **primary_keys)
+        check_auth = getattr(function, '_auth_fun', lambda: True)
+        cls.update_endpoint = classproperty(
+            lambda cls: check_auth() and (
+                lambda cls, **primary_keys: \
+                    flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
     def delete_page(cls, function):
         """Set the delete_endpoint according to the function name."""
-        cls.delete_endpoint = \
-            lambda cls, **primary_keys: flask.url_for(
-                function.__name__, **primary_keys)
+        check_auth = getattr(function, '_auth_fun', lambda: True)
+        cls.delete_endpoint = classproperty(
+            lambda cls: check_auth() and (
+                lambda cls, **primary_keys: \
+                    flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
     def table_page(cls, function):
         """Set the table_endpoint according to the function name."""
-        cls.table_endpoint = \
-            lambda cls, **primary_keys: flask.url_for(
-                function.__name__, **primary_keys)
+        check_auth = getattr(function, '_auth_fun', lambda: True)
+        cls.table_endpoint = classproperty(
+            lambda cls: check_auth() and function.__name__)
         return function
 
     @classmethod
     def list_page(cls, function):
         """Set the list_endpoint according to the function name."""
-        cls.list_endpoint = \
-            lambda cls, **primary_keys: flask.url_for(
-                function.__name__, **primary_keys)
+        check_auth = getattr(function, '_auth_fun', lambda: True)
+        cls.list_endpoint = classproperty(
+            lambda cls: check_auth() and function.__name__)
         return function
 
     # View methods
