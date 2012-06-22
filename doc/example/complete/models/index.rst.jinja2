@@ -5,7 +5,7 @@
 EMPLOYEE'S IDENTITY
 -------------------
 
-{% for field in employee.read_fields %}
+{% for field in employee.read_form %}
 {% if field.widget.input_type != 'hidden' %}
   {{ field.label.text }}
    {{ field.data | safe }}

@@ -1,5 +1,5 @@
 <dl>
-{%- for field in view.read_fields %}
+{%- for field in view.read_form %}
   {%- if field.widget.input_type != 'hidden' %}
     <dt>{{ field.label.text }}</dt>
     <dd>{{ field | data }}</dd>

@@ -122,10 +122,10 @@ class ModelView(object):
         else:
             self.data = None
 
-    # @classproperty
-    # def list_field(cls):
-    #     """Return the list field."""
-    #     return cls.ListForm()._fields[cls.list_column]
+    @classproperty
+    def list_field(cls):
+        """Return the list field."""
+        return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
@@ -138,8 +138,8 @@ class ModelView(object):
         return self.CreateForm()
 
     @cached_property
-    def read_fields(self):
-        """Return the read fields."""
+    def read_form(self):
+        """Return the read form."""
         return self.ReadForm(obj=self.data)
 
     @cached_property
@@ -159,7 +159,7 @@ class ModelView(object):
 
     @classmethod
     def query(cls, query=None):
-        """Return all the model elements according to a query..
+        """Return all the view elements according to a query.
 
         :param query: The SQLAlchemy query
         :type query: String
@@ -413,7 +413,7 @@ class ModelView(object):
         :type template: String
 
         """
-        self.read_fields.process(obj=self.data)
+        self.read_form.process(obj=self.data)
         return flask.render_template(
             template, view=self, view_class=type(self), instance=self.data,
             **kwargs)
