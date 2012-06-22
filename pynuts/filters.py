@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 """Jinja environment filters for Pynuts."""
 
 from flask import escape
-from flask.ext.wtf import QuerySelectField, QuerySelectMultipleField
+from flask.ext.wtf import (
+    QuerySelectField, QuerySelectMultipleField, BooleanField)
 
 
 def data(field):
@@ -13,4 +16,6 @@ def data(field):
     elif isinstance(field, QuerySelectField):
         if field.data:
             return escape(field.get_label(field.data))
+    elif isinstance(field, BooleanField):
+        return u'✓' if field.data else u'✕'
     return escape(field.data)
