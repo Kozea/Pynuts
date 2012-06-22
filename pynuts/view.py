@@ -236,7 +236,7 @@ class ModelView(object):
             lambda cls, **primary_keys: flask.url_for(
                 function.__name__, **primary_keys)
         return function
-    
+
     @classmethod
     def table_page(cls, function):
         """Set the table_endpoint according to the function name."""
@@ -334,8 +334,9 @@ class ModelView(object):
         :type template: String
 
         """
-        return flask.render_template(template, view=self, view_class=type(self),
-                instance=self.data, **kwargs)
+        return flask.render_template(
+            template, view=self, view_class=type(self), instance=self.data,
+            **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method. Also check the values in the form: \
@@ -405,8 +406,9 @@ class ModelView(object):
 
         """
         self.read_fields.process(obj=self.data)
-        return flask.render_template(template, view=self, view_class=type(self),
-            instance=self.data, **kwargs)
+        return flask.render_template(
+            template, view=self, view_class=type(self), instance=self.data,
+            **kwargs)
 
     def delete(self, template=None, redirect=None, **kwargs):
         """Delete an entry from the database.
@@ -423,5 +425,6 @@ class ModelView(object):
             self.session.commit()
             return flask.redirect(
                 self.template_url_for(redirect or type(self).list_endpoint))
-        return flask.render_template(template, view=self, view_class=type(self),
-            instance=self.data, **kwargs)
+        return flask.render_template(
+            template, view=self, view_class=type(self), instance=self.data,
+            **kwargs)
