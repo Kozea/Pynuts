@@ -184,16 +184,20 @@ class ModelView(object):
     @classmethod
     def _get_form_attributes(cls, form):
         """Return the form attributes which are defined on the model."""
-        return {key.name: key.data for key in form
-                if hasattr(cls.model, key.name) and
-                isinstance(getattr(cls.model, key.name),
-                InstrumentedAttribute)}
+        result = {}
+        for key in form:
+            model_attr = getattr(cls.model, key.name, None)
+            if model_attr is not None:
+                if (isinstance(model_attr, InstrumentedAttribute) or
+                    isinstance(model_attr, property) and model_attr.fset is not
+                        None):
+                    result[key.name] = key.data
+        return result
 
     def handle_errors(self, form):
         """Flash all the errors contained in the form."""
         # Test for attribute if the form has not "handle_errors" method.
-        if hasattr(form, 'handle_errors'):
-            form.handle_errors()
+        form.handle_errors()
 
     def template_url_for(self, endpoint):
         """Return endpoint if callable, url_for this endpoint else.
