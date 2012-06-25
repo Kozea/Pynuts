@@ -232,8 +232,8 @@ class ModelView(object):
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.read_endpoint = classproperty(
             lambda cls: check_auth() and (
-                lambda cls, **primary_keys: \
-                    flask.url_for(function.__name__, **primary_keys)))
+                lambda cls, **primary_keys:
+                flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
@@ -242,8 +242,8 @@ class ModelView(object):
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.update_endpoint = classproperty(
             lambda cls: check_auth() and (
-                lambda cls, **primary_keys: \
-                    flask.url_for(function.__name__, **primary_keys)))
+                lambda cls, **primary_keys:
+                flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
@@ -252,8 +252,8 @@ class ModelView(object):
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.delete_endpoint = classproperty(
             lambda cls: check_auth() and (
-                lambda cls, **primary_keys: \
-                    flask.url_for(function.__name__, **primary_keys)))
+                lambda cls, **primary_keys:
+                flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
@@ -419,7 +419,7 @@ class ModelView(object):
         """Handle the update form."""
         if self.update_form.validate_on_submit():
             for key, value in self._get_form_attributes(
-                self.update_form).items():
+                    self.update_form).items():
                 setattr(self.data, key, value)
             return True
         self.handle_errors(self.update_form)
