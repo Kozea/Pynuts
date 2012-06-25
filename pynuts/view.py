@@ -6,6 +6,7 @@ from flask.ext.wtf import Form, TextField
 from werkzeug import cached_property
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from .environment import create_environment
 
@@ -170,10 +171,11 @@ class ModelView(object):
 
     @classmethod
     def _get_form_attributes(cls, form):
-        """Return the form attributes."""
+        """Return the form attributes which are defined on the model."""
         return {key.name: key.data for key in form
-                if key.name != 'csrf_token' or
-                cls._pynuts.config.get('CSRF_ENABLED')}
+                if hasattr(cls.model, key.name) and
+                isinstance(getattr(cls.model, key.name), 
+                    InstrumentedAttribute)}
 
     def handle_errors(self, form):
         """Flash all the errors contained in the form."""
