@@ -1,4 +1,4 @@
-<form method="post" enctype="multipart/form-data">
+<form {% if action %} action="{{ action }}" {% endif %} method="post" enctype="multipart/form-data">
   <p>Do you really want to delete <strong>{{ view.name }}</strong>?</p>
   <input type="submit" value="Yes">
   <a href="javascript:window.history.go(-1)">No</a>

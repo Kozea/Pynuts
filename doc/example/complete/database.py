@@ -16,6 +16,7 @@ class Employee(app.db.Model):
     firstname = app.db.Column(app.db.String())
     login = app.db.Column(app.db.String())
     password = app.db.Column(app.db.String())
+    driving_license = app.db.Column(app.db.Boolean())
     company_id = app.db.Column(
         app.db.Integer(), app.db.ForeignKey('Company.company_id'))
 

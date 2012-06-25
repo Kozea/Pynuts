@@ -12,8 +12,7 @@ class ShowOnMatch(Extension):
     """This extension introduces a new tag ``showonmatch``, allowing\
     conditional output of a its body according to a css selector.
 
-    This will output an ul with lis if mylist is not empty, or no result\
-    otherwise:
+    This will output an ul with lis if mylist is not empty.
 
     .. sourcecode:: html+jinja
 
@@ -23,8 +22,6 @@ class ShowOnMatch(Extension):
             <li>{{a}}</li>
           {% endfor %}
           </ul>
-          {% else %}
-            <p>No result</p>
         {% endshowonmatch %}
 
     """

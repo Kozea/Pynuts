@@ -263,28 +263,36 @@ class ModelView(object):
 
     # View methods
     @classmethod
-    def view_list(cls, query=None, endpoint=None):
+    def view_list(cls, query=None, endpoint=None, no_result_message=None):
         """Render the HTML for list_template.
 
         :param query: The SQLAlchemy query used for rendering the list
         :type query: String
+        :param no_result_message: The message displayed if not any result
+                                  is returned by the query
+        :type no_result_message: String
 
         """
         template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
-            view_class=cls, query=query, endpoint=endpoint))
+            view_class=cls, query=query, endpoint=endpoint,
+            no_result_message=no_result_message))
 
     @classmethod
-    def view_table(cls, query=None, endpoint=None):
+    def view_table(cls, query=None, endpoint=None, no_result_message=None):
         """Render the HTML for table_template.
 
         :param query: The SQLAlchemy query used for rendering the table
         :type query: String
+        :param no_result_message: The message displayed if not any result
+                                  is returned by the query
+        :type no_result_message: String
 
         """
         template = cls.environment.get_template(cls.table_template)
         return jinja2.Markup(template.render(
-            view_class=cls, query=query, endpoint=endpoint))
+            view_class=cls, query=query, endpoint=endpoint,
+            no_result_message=no_result_message))
 
     def view_create(self):
         """Render the HTML for create_template."""

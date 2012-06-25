@@ -14,6 +14,8 @@
       </li>
     {%- endfor %}
   </ul>
-{% else %}
-  <p>No result</p>
+{%- else -%}
+  {%- if no_result_message -%}
+    <p>{{ no_result_message }}</p>
+  {%- endif -%}
 {% endshowonmatch %}
