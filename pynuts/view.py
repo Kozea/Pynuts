@@ -11,6 +11,17 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from .environment import create_environment
 
 
+class FormBase(Form):
+
+    def handle_errors(self):
+        if self.errors:
+            for key, errors in self.errors.items():
+                flask.flash(jinja2.Markup(
+                    u'<label for="%s">%s</label>: %s.' % (
+                        key, self[key].label.text, ', '.join(errors))),
+                    'error')
+
+
 class MetaView(type):
     """Metaclass for view classes."""
     def __init__(cls, name, bases, dict_):
@@ -26,13 +37,12 @@ class MetaView(type):
             cls.update_columns = cls.update_columns or column_names
             cls.environment = create_environment(
                 cls._pynuts.jinja_env.loader)
-
             if cls.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
                     columns = getattr(cls, '%s_columns' % action)
                     setattr(cls, class_name, type(
-                        class_name, (Form,), {
+                        class_name, (cls.form_base_class,), {
                             field_name: getattr(
                                 cls.Form, field_name, TextField(field_name))
                             for field_name in columns}))
@@ -60,6 +70,8 @@ class ModelView(object):
 
     #: SQLAlchemy model
     model = None
+
+    form_base_class = FormBase
 
     Form = None
     """
@@ -174,17 +186,14 @@ class ModelView(object):
         """Return the form attributes which are defined on the model."""
         return {key.name: key.data for key in form
                 if hasattr(cls.model, key.name) and
-                isinstance(getattr(cls.model, key.name), 
-                    InstrumentedAttribute)}
+                isinstance(getattr(cls.model, key.name),
+                InstrumentedAttribute)}
 
     def handle_errors(self, form):
         """Flash all the errors contained in the form."""
-        if form.errors:
-            for key, errors in form.errors.items():
-                flask.flash(jinja2.Markup(
-                    u'<label for="%s">%s</label>: %s.' % (
-                        key, form[key].label.text, ', '.join(errors))),
-                'error')
+        # Test for attribute if the form has not "handle_errors" method.
+        if hasattr(form, 'handle_errors'):
+            form.handle_errors()
 
     def template_url_for(self, endpoint):
         """Return endpoint if callable, url_for this endpoint else.
