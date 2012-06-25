@@ -20,14 +20,18 @@
       <tr>
       {%- for column in view_class.table_columns %}
         <td>
-          {%- if endpoint -%}
-            <a href="{{ endpoint(obj=obj) }}">
-          {%- elif obj.read_endpoint -%}
-            <a href="{{ obj.action_url_for('read') }}">
-          {%- endif -%}
-          {{ obj.data[column] }}
-          {%- if endpoint or obj.read_endpoint -%}
-            </a>
+          {%- if loop.index == 1 -%}
+              {%- if endpoint -%}
+                <a href="{{ endpoint(view=view) }}">
+              {%- elif view.read_endpoint -%}
+                <a href="{{ view.action_url_for('read') }}">
+              {%- endif -%}
+              {{ view.TableForm(obj=view.data)[column] | data }}
+              {%- if endpoint or view.read_endpoint -%}
+                </a>
+              {%- endif -%}
+          {%- else -%}
+            {{ view.TableForm(obj=view.data)[column] | data }}
           {%- endif -%}
         </td>
       {%- endfor %}
@@ -41,4 +45,8 @@
     {%- endfor %}
     </tbody>
   </table>
+  {%- else -%}
+    {%- if no_result_message %}
+      <p>{{ no_result_message }}</p>
+    {%- endif -%}
 {% endshowonmatch %}

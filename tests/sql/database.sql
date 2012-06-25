@@ -8,7 +8,8 @@ CREATE TABLE "Employee" (
 	firstname VARCHAR, 
 	login VARCHAR, 
 	password VARCHAR, 
-	company_id INTEGER, 
+	company_id INTEGER,
+	driving_license INTEGER,
 	reflected VARCHAR, 
 	PRIMARY KEY (person_id), 
 	FOREIGN KEY(company_id) REFERENCES "Company" (company_id)

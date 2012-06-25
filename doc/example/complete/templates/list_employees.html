@@ -3,5 +3,5 @@
 
 {% block main %}
   <h2>Employee List</h2>
-  {{ view_class.view_list() }}
+  {{ view_class.view_list(no_result_message='No employee found') }}
 {% endblock main %}

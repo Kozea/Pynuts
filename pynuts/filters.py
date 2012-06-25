@@ -8,7 +8,22 @@ from flask.ext.wtf import (
 
 
 def data(field):
-    """Return data according to a specific field."""
+    """Field data beautifier.
+
+    QuerySelectMultipleField
+      Renders comma-separated data.
+    QuerySelectField
+      Renders the selected value.
+    BooleanField
+      Renders '✓' or '✕'
+
+    Example:
+
+    .. sourcecode:: html+jinja
+
+        <dd>{{ field | data }}</dd>
+
+    """
     if isinstance(field, QuerySelectMultipleField):
         if field.data:
             return escape(

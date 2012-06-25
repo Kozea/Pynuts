@@ -2,5 +2,5 @@
 
 {% block main %}
   <h2>Employees</h2>
-  {{ view_class.view_table() }}
+  {{ view_class.view_table(no_result_message='No employee found') }}
 {% endblock main %}

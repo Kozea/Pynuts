@@ -48,3 +48,10 @@ Environment
 
 .. automodule:: pynuts.environment
    :members:
+   
+Filters
+-------
+
+.. automodule:: pynuts.filters
+    :members:
+

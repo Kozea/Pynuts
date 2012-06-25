@@ -47,6 +47,7 @@ def logout():
     return render_template('login.html')
 
 
+@view.EmployeeView.list_page
 @app.route('/')
 @app.route('/employees/')
 @allow_if(Is.connected)
@@ -60,6 +61,7 @@ def companies():
     return view.CompanyView.list('list_companies.html')
 
 
+@view.EmployeeView.table_page
 @app.route('/employees/table')
 @allow_if(Is.connected)
 def table_employees():
@@ -72,6 +74,7 @@ def table_employees():
 def create_employee():
     employee = view.EmployeeView()
     response = employee.create('create_employee.html',
+                               action=url_for('create_employee'),
                                values={'company_id': '9999'},
                                redirect='employees')
     if employee.create_form.validate_on_submit():
@@ -110,7 +113,7 @@ def read_company(company_id=None):
 @allow_if(Is.admin | Is.connected_user)
 def update_employee(person_id=None):
     return view.EmployeeView(person_id or app.context.person).update(
-        'update_employee.html', redirect='employees')
+        'update_employee.html', action="lol", redirect='employees')
 
 
 @view.EmployeeView.delete_page
