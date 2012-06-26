@@ -1,4 +1,4 @@
-from flask import session, request
+from flask import session, request, g
 from application import app
 from pynuts.rights import acl
 
@@ -20,14 +20,14 @@ class Context(app.Context):
 @acl
 def connected():
     """Returns whether the user is connected."""
-    return app.context.person is not None
+    return g.context.person is not None
 
 
 @acl
 def connected_user():
     """Returns the connected user."""
-    if app.context.person:
-        return app.context.person == request.view_args.get('person_id')
+    if g.context.person:
+        return g.context.person == request.view_args.get('person_id')
 
 
 @acl

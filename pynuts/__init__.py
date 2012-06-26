@@ -54,6 +54,12 @@ class Pynuts(flask.Flask):
             __metaclass__ = rights.MetaContext
             _pynuts = self
 
+            def __getitem__(self, key):
+                return getattr(self, key)
+
+            def __setitem__(self, key, value):
+                setattr(self, key, value)
+
         self.Context = Context
 
         class ModelView(view.ModelView):
@@ -71,6 +77,10 @@ class Pynuts(flask.Flask):
                     **kwargs):
         """Return the rest of the document."""
         return self.documents[document_type].generate_rest(part, **kwargs)
+
+    def create_context(self):
+        """Create the request context."""
+        flask.g.context = self._context_class()
 
 
 def static(filename):

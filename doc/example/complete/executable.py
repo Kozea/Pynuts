@@ -1,4 +1,5 @@
-from flask import flash, redirect, session, request, render_template, url_for
+from flask import (
+    flash, redirect, session, request, render_template, url_for, g)
 
 from application import app
 from pynuts.rights import allow_if
@@ -112,7 +113,7 @@ def read_company(company_id=None):
 @app.route('/employee/update/<int:person_id>', methods=('POST', 'GET'))
 @allow_if(Is.admin | Is.connected_user)
 def update_employee(person_id=None):
-    return view.EmployeeView(person_id or app.context.person).update(
+    return view.EmployeeView(person_id or g.context.person).update(
         'update_employee.html', action="lol", redirect='employees')
 
 
