@@ -22,6 +22,11 @@ Document
 .. automodule:: pynuts.document
    :members:
 
+Rights
+----------
+
+.. automodule:: pynuts.rights
+   :members:
 
 Git 
 ---

@@ -36,6 +36,8 @@ class CompanyView(app.ModelView):
     list_column = 'name'
     create_columns = ('name', 'employees')
     read_columns = ('name', 'employees')
+    
+    list_template = 'list.jinja2'
 
     class Form(Form):
         company_id = IntegerField('Company')

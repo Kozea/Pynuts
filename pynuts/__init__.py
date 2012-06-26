@@ -50,7 +50,19 @@ class Pynuts(flask.Flask):
         self.Document = Document
 
         class Context(object):
-            """Context base class of the application."""
+            """Context base class of the application.
+
+            You can get or set any element in the context stored in
+            the `g` flask object.
+
+            Example : Set the current time of the request in the context, using
+            datetime :
+
+            @app.before_request
+            def set_request_time():
+                g.context.request_time = datetime.now().strftime('%Y/%m/%d')
+
+            """
             __metaclass__ = rights.MetaContext
             _pynuts = self
 
@@ -59,6 +71,9 @@ class Pynuts(flask.Flask):
 
             def __setitem__(self, key, value):
                 setattr(self, key, value)
+
+            def get(self, key, default=None):
+                return getattr(self, key, default)
 
         self.Context = Context
 

@@ -17,6 +17,7 @@
       {% if session.get('login') %}
         <a href="{{ url_for('logout') }}">Logout</a> Logged as <strong>{{ session.get('login') }}</strong>
       {% endif %}
+      <span>{{ g.context['request_time'] }}</span>
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for style, messages in messages | groupby(0) %}

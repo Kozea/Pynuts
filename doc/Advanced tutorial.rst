@@ -337,12 +337,14 @@ For example, we decided here to create a property called `person` which will sta
             
 Once you're done with the context class, you can create your own rights thanks to the ACL you imported above. The ACL class is an utility decorator for access control in `allow_if` decorators. The `allow_if` decorator check that the global context matches a criteria.
 
+The context is stored in the `g` object of your application.
+
 Your functions should look like the following::
 
     @acl
     def connected():
         """Returns whether the user is connected."""
-        return app.context.person is not None
+        return g.context.person is not None
         
 Then, import your rights in the file ``executable.py`` along with the `allow_if` function from `pynuts.rights` . You can import rights as `Is` to have a good syntax using the allow_if decorator: ``@allow_if(Is.connected)`` for example.
 
