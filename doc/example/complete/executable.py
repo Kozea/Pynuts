@@ -189,6 +189,11 @@ def archived_pdf_employee(person_id, version=None):
         employee=view.EmployeeView(person_id), version=version)
 
 
+@app.route('/test_endpoint/<int:company_id>')
+def test_endpoint(company_id):
+    return redirect(url_for('read_company', company_id=company_id))
+
+
 if __name__ == '__main__':  # pragma: no cover
     app.db.create_all()
     app.secret_key = 'Azerty'
