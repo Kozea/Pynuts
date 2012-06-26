@@ -1,0 +1,9 @@
+{% showonmatch 'ul li' %}
+<ul>
+  {% for company in view_class.model.query.all() %}
+    <li>
+      <a href="{{ view_class(company.company_id).template_url_for(url_for('test_endpoint', company_id=company.company_id)) }}">{{ company.name }}</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endshowonmatch %}
