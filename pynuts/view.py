@@ -202,6 +202,8 @@ class ModelView(object):
     def template_url_for(self, endpoint):
         """Return endpoint if callable, url_for this endpoint else.
 
+        If the given endpoint is already an url, return as is.
+
         :param endpoint: The endpoint for the registered URL rule
         :type endpoint: String, func(lambda)
 
@@ -209,7 +211,10 @@ class ModelView(object):
         if callable(endpoint):
             return endpoint(self, **self.primary_keys)
         elif endpoint:
-            return flask.url_for(endpoint)
+            if '/' in endpoint:
+                return endpoint
+            else:
+                return flask.url_for(endpoint)
 
     def action_url_for(self, action):
         """Return url_for for CRUD operation.
