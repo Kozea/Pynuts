@@ -326,7 +326,7 @@ class ModelView(object):
     def view_update(self, action=None):
         """Render the HTML for update_template.
 
-        :param action: the URL for the create form validation.
+        :param action: the URL for the update form validation.
 
         """
         template = self.environment.get_template(self.update_template)
