@@ -6,8 +6,20 @@ from flask.ext.wtf import Form, TextField
 from werkzeug import cached_property
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from .environment import create_environment
+
+
+class FormBase(Form):
+
+    def handle_errors(self):
+        if self.errors:
+            for key, errors in self.errors.items():
+                flask.flash(jinja2.Markup(
+                    u'<label for="%s">%s</label>: %s.' % (
+                        key, self[key].label.text, ', '.join(errors))),
+                    'error')
 
 
 class MetaView(type):
@@ -25,13 +37,12 @@ class MetaView(type):
             cls.update_columns = cls.update_columns or column_names
             cls.environment = create_environment(
                 cls._pynuts.jinja_env.loader)
-
             if cls.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
                     columns = getattr(cls, '%s_columns' % action)
                     setattr(cls, class_name, type(
-                        class_name, (Form,), {
+                        class_name, (cls.form_base_class,), {
                             field_name: getattr(
                                 cls.Form, field_name, TextField(field_name))
                             for field_name in columns}))
@@ -59,6 +70,8 @@ class ModelView(object):
 
     #: SQLAlchemy model
     model = None
+
+    form_base_class = FormBase
 
     Form = None
     """
@@ -122,10 +135,10 @@ class ModelView(object):
         else:
             self.data = None
 
-    @classproperty
-    def list_field(cls):
-        """Return the list field."""
-        return cls.ListForm()._fields[cls.list_column]
+    # @classproperty
+    # def list_field(cls):
+    #     """Return the list field."""
+    #     return cls.ListForm()._fields[cls.list_column]
 
     @classproperty
     def table_fields(cls):
@@ -138,8 +151,8 @@ class ModelView(object):
         return self.CreateForm()
 
     @cached_property
-    def read_form(self):
-        """Return the read form."""
+    def read_fields(self):
+        """Return the read fields."""
         return self.ReadForm(obj=self.data)
 
     @cached_property
@@ -159,7 +172,7 @@ class ModelView(object):
 
     @classmethod
     def query(cls, query=None):
-        """Return all the view elements according to a query.
+        """Return all the model elements according to a query..
 
         :param query: The SQLAlchemy query
         :type query: String
@@ -170,19 +183,21 @@ class ModelView(object):
 
     @classmethod
     def _get_form_attributes(cls, form):
-        """Return the form attributes."""
-        return {key.name: key.data for key in form
-                if key.name != 'csrf_token' or
-                cls._pynuts.config.get('CSRF_ENABLED')}
+        """Return the form attributes which are defined on the model."""
+        result = {}
+        for key in form:
+            model_attr = getattr(cls.model, key.name, None)
+            if model_attr is not None:
+                if (isinstance(model_attr, InstrumentedAttribute) or
+                    isinstance(model_attr, property) and model_attr.fset is not
+                        None):
+                    result[key.name] = key.data
+        return result
 
     def handle_errors(self, form):
         """Flash all the errors contained in the form."""
-        if form.errors:
-            for key, errors in form.errors.items():
-                flask.flash(jinja2.Markup(
-                    u'<label for="%s">%s</label>: %s.' % (
-                        key, form[key].label.text, ', '.join(errors))),
-                'error')
+        # Test for attribute if the form has not "handle_errors" method.
+        form.handle_errors()
 
     def template_url_for(self, endpoint):
         """Return endpoint if callable, url_for this endpoint else.
@@ -221,8 +236,8 @@ class ModelView(object):
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.read_endpoint = classproperty(
             lambda cls: check_auth() and (
-                lambda cls, **primary_keys: \
-                    flask.url_for(function.__name__, **primary_keys)))
+                lambda cls, **primary_keys:
+                flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
@@ -231,8 +246,8 @@ class ModelView(object):
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.update_endpoint = classproperty(
             lambda cls: check_auth() and (
-                lambda cls, **primary_keys: \
-                    flask.url_for(function.__name__, **primary_keys)))
+                lambda cls, **primary_keys:
+                flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
@@ -241,8 +256,8 @@ class ModelView(object):
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.delete_endpoint = classproperty(
             lambda cls: check_auth() and (
-                lambda cls, **primary_keys: \
-                    flask.url_for(function.__name__, **primary_keys)))
+                lambda cls, **primary_keys:
+                flask.url_for(function.__name__, **primary_keys)))
         return function
 
     @classmethod
@@ -416,7 +431,7 @@ class ModelView(object):
         """Handle the update form."""
         if self.update_form.validate_on_submit():
             for key, value in self._get_form_attributes(
-                self.update_form).items():
+                    self.update_form).items():
                 setattr(self.data, key, value)
             return True
         self.handle_errors(self.update_form)
@@ -429,7 +444,7 @@ class ModelView(object):
         :type template: String
 
         """
-        self.read_form.process(obj=self.data)
+        self.read_fields.process(obj=self.data)
         return flask.render_template(
             template, view=self, view_class=type(self), instance=self.data,
             **kwargs)
@@ -448,7 +463,9 @@ class ModelView(object):
             self.session.delete(self.data)
             self.session.commit()
             return flask.redirect(
-                self.template_url_for(redirect or type(self).list_endpoint))
+                self.template_url_for(
+                    redirect or type(self).list_endpoint or
+                    type(self).table_endpoint))
         return flask.render_template(
             template, view=self, view_class=type(self), instance=self.data,
             **kwargs)

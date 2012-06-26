@@ -7,7 +7,7 @@
         {%- elif view.read_endpoint -%}
           <a href="{{ view.action_url_for('read') }}">
         {%- endif -%}
-        {{ view.ListForm(obj=view.data)[view.list_column] | data }}
+        {{ view.ListForm(obj=view.data, formdata=None)[view.list_column] | data }}
         {%- if endpoint or view.read_endpoint -%}
           </a>
         {%- endif -%}
