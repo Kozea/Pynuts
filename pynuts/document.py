@@ -194,12 +194,12 @@ class Document(object):
 
     @classmethod
     def generate_rest(cls, part='index.rst.jinja2', resource_type='http',
-                      archive=False, version=None, **kwargs):
+                      archive=False, version=None, editable=True, **kwargs):
         return cls.from_data(version=version, **kwargs)._generate_rest(
-            part=part, resource_type=resource_type, archive=archive, **kwargs)
+            part=part, resource_type=resource_type, archive=archive, editable=editable, **kwargs)
 
     def _generate_rest(self, part='index.rst.jinja2', resource_type='http',
-                      archive=False, **kwargs):
+                      archive=False, editable=True, **kwargs):
         """Generate the ReStructuredText version of the document.
 
         :param part: part of the document to render
@@ -214,19 +214,19 @@ class Document(object):
         else:
             template = self.jinja_environment.get_template(part)
             resource = getattr(self, 'resource_%s_url' % resource_type)
-            print resource
-            return template.render(
-                resource=resource, document=self, **self.data)
+            return template.render(resource=resource, document=self,
+                                   editable=editable, **self.data)
 
     @classmethod
     def generate_html(cls, part='index.rst.jinja2', resource_type='http',
-                      archive=False, version=None, **kwargs):
+                      archive=False, version=None, editable=True, **kwargs):
         """Generate the html document from a ReST file or a jinja2 template."""
         return cls.from_data(version=version, **kwargs)._generate_html(
-            part=part, resource_type=resource_type, archive=archive)
+            part=part, resource_type=resource_type, archive=archive,
+            editable=editable)
 
     def _generate_html(self, part='index.rst.jinja2', resource_type='http',
-                      archive=False):
+                      archive=False, editable=True):
         """Generate the HTML samples of the document.
 
         The output is a dict corresponding to the different HTML samples as
@@ -245,7 +245,8 @@ class Document(object):
         """
         part = 'index.rst' if archive else part
         source = self._generate_rest(
-            part=part, archive=archive, resource_type=resource_type)
+            part=part, archive=archive, resource_type=resource_type,
+            editable=editable)
 
         resource = getattr(self, 'resource_%s_url' % resource_type)
         settings = dict(self.docutils_settings)
@@ -439,7 +440,7 @@ class Document(object):
 
     @classmethod
     def html(cls, template, part='index.rst.jinja2', version=None,
-             archive=False, **kwargs):
+             archive=False, editable=True, **kwargs):
         """Render the HTML version of the document.
 
         :param template: application template including the render
@@ -448,21 +449,26 @@ class Document(object):
 
         """
         part = 'index.rst' if archive else part
+        editable = False if archive else editable
         return render_template(
-            template, document=cls, part=part, version=version, archive=archive,
-            **kwargs)
+            template, document=cls, part=part, version=version,
+            archive=archive, editable=editable, **kwargs)
 
     @classmethod
     def view_html(cls, part='index.rst.jinja2', version=None, archive=False,
-                  html_part='article', **kwargs):
+                  html_part='article', editable=True, **kwargs):
         """View the HTML document ready to include in Jinja templates.
 
         :param part: part of the document to render
         :param version: version of the document to render
+        :param archive: set it to 'True' if you render an archive
+        :param html_part: the docutils publish part to render
+        :param editable: if you use the 'Editable' pynuts' ReST directive and if you need to render html with 'contenteditable="false"', set this parameter to 'False'. For more info see :ref:`api`
 
         """
         part = 'index.rst' if archive else part
+        editable = False if archive else editable
         return jinja2.Markup(
             cls.generate_html(
-                part=part, version=version, archive=archive,
+                part=part, version=version, archive=archive, editable=editable,
                 **kwargs)[html_part].decode('utf-8'))

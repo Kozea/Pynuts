@@ -294,20 +294,28 @@ class ModelView(object):
             view_class=cls, query=query, endpoint=endpoint,
             no_result_message=no_result_message))
 
-    def view_create(self):
-        """Render the HTML for create_template."""
+    def view_create(self, action=None):
+        """Render the HTML for create_template.
+
+        :param action: the URL for the create form validation.
+
+        """
         template = self.environment.get_template(self.create_template)
-        return jinja2.Markup(template.render(view=self))
+        return jinja2.Markup(template.render(view=self, action=action))
 
     def view_read(self):
         """Render the HTML for read_template."""
         template = self.environment.get_template(self.read_template)
         return jinja2.Markup(template.render(view=self))
 
-    def view_update(self):
-        """Render the HTML for update_template."""
+    def view_update(self, action=None):
+        """Render the HTML for update_template.
+
+        :param action: the URL for the create form validation.
+
+        """
         template = self.environment.get_template(self.update_template)
-        return jinja2.Markup(template.render(view=self))
+        return jinja2.Markup(template.render(view=self, action=action))
 
     def view_delete(self):
         """Render the HTML for delete_template."""

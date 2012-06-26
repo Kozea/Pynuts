@@ -26,7 +26,8 @@ class Editable(Directive):
     has_content = True
     option_spec = {'title': directives.unchanged,
                    'class': directives.class_option,
-                   'id': directives.class_option}
+                   'id': directives.class_option,
+                   'contenteditable': directives.class_option}
 
     def run(self):
         document_type, document_id, version, part = \
@@ -49,9 +50,11 @@ class Editable(Directive):
         for k in self.option_spec.keys():
             if k == 'title':
                 attr[k] = self.options.get(k)
+            elif k == 'contenteditable':
+                attr[k] = ' '.join(self.options.get(k, ['true']))
             else:
                 attr[k] = ' '.join(self.options.get(k, []))
-
+        print attr
         content = '<div %s>%s</div>' % (
                 ' '.join(('%s="%s"' % (k, v)) for k, v in attr.items() if v),
                 content or '')

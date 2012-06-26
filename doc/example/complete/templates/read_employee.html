@@ -33,7 +33,7 @@
   <form action="{{ url_for('archive_employee_report', **view.primary_keys) }}" method="post" class="edit_report"><input type="submit" value="Archive this report"></form>
   <div id="teddybar"></div>
   <section id="report">
-    {{ doc.view_html(employee=view) }}
+    {{ doc.view_html(employee=view, editable='true') }}
   </section>
   <h2>Report history</h2>
   <ul>

@@ -2,8 +2,8 @@ function hashCode(string) {
     var hash = 0;
     if (string.length == 0) return hash;
     for (i = 0; i < string.length; i++) {
-        char = string.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
+        var chr = string.charCodeAt(i);
+        hash = ((hash<<5)-hash)+chr;
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
@@ -13,8 +13,8 @@ function init_content (doc) {
     if (!doc) {
         doc = document;
     }
-    divs = $(doc).contents().find('div[contenteditable]');
-    span_containers = $(doc).contents().find('div[data-content=true]');
+    var divs = $(doc).contents().find('div[contenteditable]');
+    var span_containers = $(doc).contents().find('div[data-content=true]');
     $.each(divs, function () {
         $(this).attr('data-hash', hashCode($(this).html()));
     });
@@ -39,13 +39,14 @@ function save_content (options) {
     var data = [];
     if (divs.length != 0) {
         $.each(divs, function () {
-            if($(this).attr('data-hash') != hashCode($(this).html())) {
+            var $this = $(this);
+            if($this.attr('data-hash') != hashCode($this.html())) {
                 data.push({
-                    "part": $(this).attr('data-part'),
-                    "document_type": $(this).attr('data-document-type'),
-                    "document_id": $(this).attr('data-document-id'),
-                    "version": $(this).attr('data-document-version'),
-                    "content": $(this).html()
+                    "part": $this.attr('data-part'),
+                    "document_type": $this.attr('data-document-type'),
+                    "document_id": $this.attr('data-document-id'),
+                    "version": $this.attr('data-document-version'),
+                    "content": $this.html()
                 });
             }
             $(this).attr('data-hash', hashCode($(this).html()));
@@ -53,21 +54,22 @@ function save_content (options) {
     }
     if (span_containers.length != 0) {
         $.each(span_containers, function () {
-            if($(this).attr('data-hash') != hashCode($(this).html())) {
-                var spans = $(this).find('span[contenteditable]');
+            var $this = $(this);
+            if($this.attr('data-hash') != hashCode($this.html())) {
+                var spans = $this.find('span[contenteditable]');
                 var values = [];
                 $.each(spans, function () {
-                    values.push($(this).html());
+                    values.push($this.html());
                 });
                 data.push({
-                    "part": $(this).attr('data-part'),
-                    "document_type": $(this).attr('data-document-type'),
-                    "document_id": $(this).attr('data-document-id'),
-                    "version": $(this).attr('data-document-version'),
+                    "part": $this.attr('data-part'),
+                    "document_type": $this.attr('data-document-type'),
+                    "document_id": $this.attr('data-document-id'),
+                    "version": $this.attr('data-document-version'),
                     "content": JSON.stringify(values)
                 });
             }
-            $(this).attr('data-hash', hashCode($(this).html()));
+            $this.attr('data-hash', hashCode($this.html()));
         });
     }
 
@@ -78,9 +80,9 @@ function save_content (options) {
     }
 
     // Get commit options
-    commit_message = options.message ? options.message : null;
-    commit_author = options.author ? options.author : null;
-    commit_author_email = options.author_email ? options.author_email : null;
+    var commit_message = options.message ? options.message : null;
+    var commit_author = options.author ? options.author : null;
+    var commit_author_email = options.author_email ? options.author_email : null;
     // Make ajax
     $.ajax({
         url: '/_pynuts/update_content',
