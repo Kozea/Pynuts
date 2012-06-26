@@ -59,7 +59,7 @@ function save_content (options) {
                 var spans = $this.find('span[contenteditable]');
                 var values = [];
                 $.each(spans, function () {
-                    values.push($this.html());
+                    values.push($(this).html());
                 });
                 data.push({
                     "part": $this.attr('data-part'),
