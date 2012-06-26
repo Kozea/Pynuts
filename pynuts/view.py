@@ -455,7 +455,9 @@ class ModelView(object):
             self.session.delete(self.data)
             self.session.commit()
             return flask.redirect(
-                self.template_url_for(redirect or type(self).list_endpoint))
+                self.template_url_for(
+                    redirect or type(self).list_endpoint or
+                    type(self).table_endpoint))
         return flask.render_template(
             template, view=self, view_class=type(self), instance=self.data,
             **kwargs)
