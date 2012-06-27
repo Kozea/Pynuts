@@ -26,14 +26,14 @@ Simple example:
 How the changes are detected ?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before saving, Pynuts check if the document has changed. How does it work ?
+Before saving, Pynuts checks if the document has changed. How does it work ?
 
-On document load, Pynuts will get all the contenteditable div elements and add a `data-hash` attribute which corresponds to the hashed content of this div element. On calling the save function, Pynuts will compare the current value of the `data-hash` attribute and the current hashed content of the editable div element. If both hash are equals it will call the `unchange_callback`.
+On document load, the `init_content` function will get all the contenteditable div elements and add a `data-hash` attribute which corresponds to the hashed content of this div element. On calling the save function, Pynuts will compare the current value of the `data-hash` attribute and the current hashed content of the editable div element. If both hash are equals it will call the `unchange_callback`.
 
 What happens on success ?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If the save happened successfuly, Pynuts will automatically change the value of the `data-version` attribute (given by the JSON response of the `update_content` function) and the value of `data-hash` attribute of all the contenteditable div.
+If the save happened successfully, Pynuts will automatically change the value of the `data-version` attribute (given by the JSON response of the `update_content` function) and the value of `data-hash` attribute of all the contenteditable div.
 
 Parameters
 ~~~~~~~~~~
