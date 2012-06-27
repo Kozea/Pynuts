@@ -8,8 +8,6 @@ from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from .environment import create_environment
-
 
 class FormBase(Form):
 
@@ -35,8 +33,6 @@ class MetaView(type):
             cls.create_columns = cls.create_columns or column_names
             cls.read_columns = cls.read_columns or column_names
             cls.update_columns = cls.update_columns or column_names
-            cls.environment = create_environment(
-                cls._pynuts.jinja_env.loader)
             if cls.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()

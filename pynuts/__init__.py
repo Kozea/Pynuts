@@ -6,6 +6,7 @@ from werkzeug import cached_property
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from . import document, git, rights, view, filters
+from .environment import create_environment
 
 
 class Pynuts(flask.Flask):
@@ -80,6 +81,7 @@ class Pynuts(flask.Flask):
         class ModelView(view.ModelView):
             """Model view base class of the application."""
             _pynuts = self
+            environment = create_environment(_pynuts.jinja_env.loader)
 
         self.ModelView = ModelView
 
