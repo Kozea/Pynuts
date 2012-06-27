@@ -16,6 +16,14 @@ class Context(app.Context):
         """Returns the current logged on person, or None."""
         return session.get('id')
 
+    @property
+    def request_time(self):
+        return g.context.get('_request_time')
+
+    @request_time.setter
+    def request_time(self, value):
+        g.context['_request_time'] = value
+
 
 @acl
 def connected():

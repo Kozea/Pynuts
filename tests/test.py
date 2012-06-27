@@ -355,3 +355,13 @@ def test_InvalidId(client):
     class EmployeeDoc(app.Document):
         document_id_template = '/'
     EmployeeDoc.create()
+
+
+@with_client
+@with_setup(setup_func, teardown_func)
+def test_test_endpoint(client):
+    """Test the endpoint."""
+    with client.application.test_request_context():
+        response = request(
+            client.get, url_for('test_endpoint', company_id=1))
+        assert 'Test Company 1' in response.data

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import (
     flash, redirect, session, request, render_template, url_for, g)
 
@@ -188,6 +189,16 @@ def archived_pdf_employee(person_id, version=None):
     return doc.download_pdf(
         filename='Employee %s report' % (person_id), archive=True,
         employee=view.EmployeeView(person_id), version=version)
+
+
+@app.route('/test_endpoint/<int:company_id>')
+def test_endpoint(company_id):
+    return redirect(url_for('read_company', company_id=company_id))
+
+
+@app.before_request
+def set_request_time():
+    g.context.request_time = datetime.now().strftime('%Y/%m/%d')
 
 
 if __name__ == '__main__':  # pragma: no cover
