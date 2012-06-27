@@ -18,20 +18,17 @@ sys.path.insert(0, PATH)
 import pynuts
 from complete import application
 
-def connect_db():
-    return sqlite3.connect(DATABASE)
-
 
 def execute_sql(application, filename, folder=None):
     """Execute a sql file in the sql folder for application.app"""
     path = os.path.join(PATH, 'tests', 'sql', filename)
-    with closing(connect_db()) as db:
+    with closing(sqlite3.connect(DATABASE)) as db:
         with application.open_resource(path) as f:
             db.cursor().executescript(f.read())
         db.commit()
 
 
-def setup():
+def setup_fixture():
     """Setup function for tests."""
     # global variable shouldn't be used but is quite useful here
     # pylint: disable=W0603
@@ -51,7 +48,7 @@ def setup():
     execute_sql(application.app, 'database.sql')
 
 
-def teardown():
+def teardown_fixture():
     """Remove the temp directory after the tests."""
     if os.path.exists(os.path.join(PATH, 'tests', 'fake_instance')):
         shutil.rmtree(os.path.join(PATH, 'tests', 'fake_instance'))
