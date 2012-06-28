@@ -167,14 +167,16 @@ class ModelView(object):
         return cls.model.query.session
 
     @classmethod
-    def query(cls, query=None):
+    def query(cls, query=None, elements=None):
         """Return all the model elements according to a query..
 
         :param query: The SQLAlchemy query
         :type query: String
+        :param elements: A model list (if present, does not execute query)
+        :type elements: List
 
         """
-        for data in (query or cls.model.query).all():
+        for data in elements or (query or cls.model.query).all():
             yield cls(data=data)
 
     @classmethod
@@ -280,7 +282,7 @@ class ModelView(object):
     # View methods
     @classmethod
     def view_list(cls, query=None, endpoint=None, no_result_message=None,
-                  **kwargs):
+                  elements=None, **kwargs):
         """Render the HTML for list_template.
 
         :param query: The SQLAlchemy query used for rendering the list
@@ -288,16 +290,18 @@ class ModelView(object):
         :param no_result_message: The message displayed if not any result
                                   is returned by the query
         :type no_result_message: String
+        :param elements: A model list replacing query
+        :type elements: List
 
         """
         template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
-            view_class=cls, query=query, endpoint=endpoint,
-            no_result_message=no_result_message, **kwargs))
+            views=cls.query(query, elements), endpoint=endpoint,
+            view_class=cls, no_result_message=no_result_message, **kwargs))
 
     @classmethod
     def view_table(cls, query=None, endpoint=None, no_result_message=None,
-        **kwargs):
+                   elements=None, **kwargs):
         """Render the HTML for table_template.
 
         :param query: The SQLAlchemy query used for rendering the table
@@ -305,12 +309,14 @@ class ModelView(object):
         :param no_result_message: The message displayed if not any result
                                   is returned by the query
         :type no_result_message: String
+        :param elements: A model list replacing query
+        :type elements: List
 
         """
         template = cls.environment.get_template(cls.table_template)
         return jinja2.Markup(template.render(
-            view_class=cls, query=query, endpoint=endpoint,
-            no_result_message=no_result_message, **kwargs))
+            views=cls.query(query, elements), endpoint=endpoint,
+            view_class=cls, no_result_message=no_result_message, **kwargs))
 
     def view_create(self, action=None, **kwargs):
         """Render the HTML for create_template.

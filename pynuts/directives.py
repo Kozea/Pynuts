@@ -54,7 +54,6 @@ class Editable(Directive):
                 attr[k] = ' '.join(self.options.get(k, ['true']))
             else:
                 attr[k] = ' '.join(self.options.get(k, []))
-        print attr
         content = '<div %s>%s</div>' % (
                 ' '.join(('%s="%s"' % (k, v)) for k, v in attr.items() if v),
                 content or '')

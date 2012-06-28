@@ -24,6 +24,7 @@ function init_content (doc) {
 }
 
 function save_content (options) {
+    var options = options || {};
     //Params : document, message, author, author_email, ok_callback, error_callback, empty_callback
     options.document = options.document ? options.document : $(document);
     
