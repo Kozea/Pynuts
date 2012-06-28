@@ -176,7 +176,8 @@ class ModelView(object):
         :type elements: List
 
         """
-        for data in elements or (query or cls.model.query).all():
+        for data in elements if elements != None else (
+                query or cls.model.query).all():
             yield cls(data=data)
 
     @classmethod
