@@ -279,7 +279,8 @@ class ModelView(object):
 
     # View methods
     @classmethod
-    def view_list(cls, query=None, endpoint=None, no_result_message=None):
+    def view_list(cls, query=None, endpoint=None, no_result_message=None,
+                  **kwargs):
         """Render the HTML for list_template.
 
         :param query: The SQLAlchemy query used for rendering the list
@@ -292,10 +293,11 @@ class ModelView(object):
         template = cls.environment.get_template(cls.list_template)
         return jinja2.Markup(template.render(
             view_class=cls, query=query, endpoint=endpoint,
-            no_result_message=no_result_message))
+            no_result_message=no_result_message, **kwargs))
 
     @classmethod
-    def view_table(cls, query=None, endpoint=None, no_result_message=None):
+    def view_table(cls, query=None, endpoint=None, no_result_message=None,
+        **kwargs):
         """Render the HTML for table_template.
 
         :param query: The SQLAlchemy query used for rendering the table
@@ -308,35 +310,37 @@ class ModelView(object):
         template = cls.environment.get_template(cls.table_template)
         return jinja2.Markup(template.render(
             view_class=cls, query=query, endpoint=endpoint,
-            no_result_message=no_result_message))
+            no_result_message=no_result_message, **kwargs))
 
-    def view_create(self, action=None):
+    def view_create(self, action=None, **kwargs):
         """Render the HTML for create_template.
 
         :param action: the URL for the create form validation.
 
         """
         template = self.environment.get_template(self.create_template)
-        return jinja2.Markup(template.render(view=self, action=action))
+        return jinja2.Markup(template.render(view=self, action=action,
+            **kwargs))
 
-    def view_read(self):
+    def view_read(self, **kwargs):
         """Render the HTML for read_template."""
         template = self.environment.get_template(self.read_template)
-        return jinja2.Markup(template.render(view=self))
+        return jinja2.Markup(template.render(view=self, **kwargs))
 
-    def view_update(self, action=None):
+    def view_update(self, action=None, **kwargs):
         """Render the HTML for update_template.
 
         :param action: the URL for the update form validation.
 
         """
         template = self.environment.get_template(self.update_template)
-        return jinja2.Markup(template.render(view=self, action=action))
+        return jinja2.Markup(template.render(view=self, action=action,
+            **kwargs))
 
-    def view_delete(self):
+    def view_delete(self, **kwargs):
         """Render the HTML for delete_template."""
         template = self.environment.get_template(self.delete_template)
-        return jinja2.Markup(template.render(view=self))
+        return jinja2.Markup(template.render(view=self, **kwargs))
 
     # CRUD methods
     @classmethod
