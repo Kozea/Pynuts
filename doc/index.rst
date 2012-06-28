@@ -15,6 +15,7 @@ It allows you to:
  - implement some basic CRUD (Create, Read, Update and Delete) view functions for administration in a few lines.
  - create rights for your application very easily, using the request context to check some permissions and make it secure.
  - handle HTML and PDF documents with git, you can store anything you want for any instance you created. Of course, you can use all the features that git provides and do what you want with your documents, that's why Pynuts is a powerful tool for developpers.
+ - reduce drastically the amount of code to write.
 
 Take a look at this comparison:
 
@@ -40,7 +41,6 @@ Take a look at this comparison:
     |            return render_template(url_for('add_employee'))          |                                                                                     |
     |                                                                     |                                                                                     |
     +---------------------------------------------------------------------+-------------------------------------------------------------------------------------+
-
 
 Pynuts is based on
 

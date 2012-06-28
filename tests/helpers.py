@@ -33,8 +33,7 @@ def with_client(function):
 
 
 def request(method, route, status_code=200, content_type='text/html',
-            data=None, data_content_type='application/x-www-form-urlencoded',
-            follow_redirects=True):
+            data=None, data_content_type=None, follow_redirects=True):
     """
     Create the test_client  and check status code and content_type.
     """

@@ -21,6 +21,7 @@ import json
 from flask import url_for
 
 from pynuts.document import InvalidId
+from pynuts.git import ConflictError
 
 from . import (
     teardown_func, setup_func, setup_fixture as setup_module,
@@ -325,3 +326,34 @@ class TestComplete(object):
             response = request(
                 client.get, url_for('test_endpoint', company_id=1))
             assert 'Test Company 1' in response.data
+
+    @with_client
+    def test_edit_image(self, client):
+        """Test the endpoint."""
+        filename = 'tests/dump/static/img/test.png'
+        with client.application.test_request_context():
+            response = request(
+                client.get, url_for('edit_image', person_id=1))
+            assert 'form' in response.data
+        with client.application.test_request_context():
+            with open(filename) as image_file:
+                response = request(
+                    client.post, url_for('edit_image', person_id=1),
+                    data={'image': image_file})
+
+    @with_client
+    def test_conflict_error(self, client):
+        """Test the endpoint."""
+        filename = 'tests/dump/static/img/test.png'
+
+        class EmployeeDoc(app.Document):
+            pass
+
+        content1 = EmployeeDoc(1).get_content('logo.png')
+        content2 = EmployeeDoc(1).get_content('logo.png')
+        try:
+            content1.write(open(filename).read())
+            content2.write(open(filename).read())
+        except ConflictError:
+            return
+        raise StandardError('This test must raise ConflictError')

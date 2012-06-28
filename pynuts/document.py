@@ -471,3 +471,47 @@ class Document(object):
             cls.generate_html(
                 part=part, version=version, archive=archive, editable=editable,
                 **kwargs)[html_part].decode('utf-8'))
+
+    def get_content(self, part):
+        return Content(self.git, part)
+
+
+class Content(object):
+    """The content class.
+    It allows you to read/write any content in a git repository.
+
+    :param git: The git repository
+    :type: Git object
+
+    :param part: The file in the repository
+    :type: String
+
+    """
+    def __init__(self, git, part):
+        self.git = git
+        self.part = part
+
+    def read(self):
+        """Read part's content."""
+        return self.git.read(self.part)
+
+    def write(self, content, author_name=None, author_email=None,
+              message=None):
+        """Write content in part.
+
+        :param content: the content to store
+        :param author_name: the commit author name
+        :param author_email: the commit author email
+        :param message: the commit message
+
+        """
+        try:
+            self.git.write(self.part, content)
+            self.git.commit(
+                author_name or 'Pynuts',
+                author_email or 'pynut@pynuts.org',
+                message or 'Edit %s' % self.part)
+        except ConflictError:
+            raise ConflictError
+        else:
+            return True
