@@ -188,7 +188,6 @@ class Document(object):
 
         """
         mimetype, _ = mimetypes.guess_type(filename)
-        print mimetype
         return Response(
             cls(document_id, version).git.read(filename), mimetype=mimetype)
 
