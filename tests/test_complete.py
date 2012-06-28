@@ -260,7 +260,7 @@ class TestComplete(object):
         with client.application.test_request_context():
             request(client.get,
                     url_for('_pynuts-static', filename='javascript/save.js'),
-                    content_type='application/x-javascript')
+                    content_type='javascript')
 
     @with_client
     def test_pynuts_resource(self, client):
