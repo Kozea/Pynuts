@@ -5,6 +5,7 @@ from flask import (
 from application import app
 from pynuts.rights import allow_if
 from pynuts.directives import Editable
+from pynuts.document import Content
 import view
 import document
 import rights as Is
@@ -98,8 +99,9 @@ def create_company():
 @allow_if(Is.admin | Is.connected_user)
 def read_employee(person_id=None):
     doc = document.EmployeeDoc(person_id)
+    content = Content(doc.git, 'logo.png')
     return view.EmployeeView(person_id).read(
-        'read_employee.html', doc=doc)
+        'read_employee.html', doc=doc, content=content)
 
 
 @view.CompanyView.read_page
@@ -194,6 +196,16 @@ def archived_pdf_employee(person_id, version=None):
 @app.route('/test_endpoint/<int:company_id>')
 def test_endpoint(company_id):
     return redirect(url_for('read_company', company_id=company_id))
+
+
+@app.route('/edit_image_post/<int:person_id>', methods=('POST', 'GET'))
+def edit_image(person_id):
+    if request.method == 'GET':
+        return render_template('edit_image.html')
+    else:
+        content = document.EmployeeDoc(person_id).get_content('logo.png')
+        content.write(request.files['image'].read())
+        return redirect(url_for('read_employee', person_id=person_id))
 
 
 @app.before_request
