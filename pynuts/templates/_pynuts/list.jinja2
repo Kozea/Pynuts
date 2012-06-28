@@ -1,6 +1,6 @@
 {% showonmatch 'ul li' %}
   <ul>
-    {%- for view in view_class.query(query) %}
+    {%- for view in views  %}
       <li>
         {%- if endpoint -%}
           <a href="{{ endpoint(view=view) }}">
