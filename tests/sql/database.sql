@@ -7,6 +7,7 @@ CREATE TABLE "Employee" (
 	name VARCHAR, 
 	firstname VARCHAR, 
 	login VARCHAR, 
+	"order" INTEGER, 
 	password VARCHAR, 
 	company_id INTEGER,
 	driving_license INTEGER,
@@ -17,7 +18,7 @@ CREATE TABLE "Employee" (
 
 CREATE TABLE "Company" (
 	company_id INTEGER NOT NULL, 
-	name VARCHAR, 
+	name VARCHAR,
 	PRIMARY KEY (company_id)
 );
 

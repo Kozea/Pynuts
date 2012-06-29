@@ -85,7 +85,8 @@ def create_employee():
                                redirect='employees')
     if employee.create_form.validate_on_submit():
         document.EmployeeDoc.create(employee=employee)
-        employee.data.set_order_to_last(Employee.company_id == employee.data.co)
+        employee.data.set_order_to_last(
+            Employee.company_id == employee.data.company_id)
         app.db.session.commit()
     return response
 

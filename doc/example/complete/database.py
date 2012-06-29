@@ -7,7 +7,6 @@ class Company(app.db.Model):
     __tablename__ = 'Company'
     company_id = app.db.Column(app.db.Integer(), primary_key=True)
     name = app.db.Column(app.db.String())
-    order = app.db.Column(app.db.Integer())
     employees = app.db.relationship(
          'Employee', backref='company', order_by='Employee.order')
 
