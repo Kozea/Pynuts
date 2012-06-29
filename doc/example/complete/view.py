@@ -10,12 +10,12 @@ class EmployeeView(app.ModelView):
     model = database.Employee
 
     list_column = 'fullname'
-    table_columns = ('fullname', 'driving_license')
+    table_columns = ('order', 'fullname', 'driving_license')
     create_columns = ('login', 'password', 'name', 'firstname', 'company',
                       'driving_license')
     read_columns = ('person_id', 'name', 'firstname', 'fullname', 'company',
                     'driving_license')
-    update_columns = ('name', 'firstname', 'company', 'driving_license')
+    update_columns = ('name', 'firstname', 'company', 'driving_license', 'order')
 
     class Form(Form):
         person_id = IntegerField('ID')

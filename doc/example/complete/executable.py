@@ -1,3 +1,4 @@
+# *-* coding: utf-8 *-*
 from datetime import datetime
 from flask import (
     flash, redirect, session, request, render_template, url_for, g)
@@ -8,6 +9,7 @@ from pynuts.directives import Editable
 from pynuts.document import Content
 import view
 import document
+from database import Employee, Company
 import rights as Is
 from exception import NoPermission
 
@@ -68,7 +70,8 @@ def companies():
 @app.route('/employees/table')
 @allow_if(Is.connected)
 def table_employees():
-    return view.EmployeeView.table('table_employees.html')
+    return view.EmployeeView.table(
+        'table_employees.html')
 
 
 @view.EmployeeView.create_page
@@ -82,6 +85,8 @@ def create_employee():
                                redirect='employees')
     if employee.create_form.validate_on_submit():
         document.EmployeeDoc.create(employee=employee)
+        employee.data.set_order_to_last(Employee.company_id == employee.data.co)
+        app.db.session.commit()
     return response
 
 
@@ -104,11 +109,47 @@ def read_employee(person_id=None):
         'read_employee.html', doc=doc, content=content)
 
 
+@app.route('/company/read/<int:company_id>/'
+           'employee/table/<int:person_id>/up')
+@allow_if(Is.connected)
+def up_employee(company_id, person_id):
+    Employee.query.get(person_id).up(Employee.company_id == company_id)
+    Employee.query.session.commit()
+    return redirect(url_for('read_company', company_id=company_id))
+
+
+@app.route('/company/read/<int:company_id>/'
+           'employee/table/<int:person_id>/down')
+@allow_if(Is.connected)
+def down_employee(company_id, person_id):
+    Employee.query.get(person_id).down(Employee.company_id == company_id)
+    Employee.query.session.commit()
+    return redirect(url_for('read_company', company_id=company_id))
+
+
 @view.CompanyView.read_page
 @app.route('/company/read/<int:company_id>')
 @allow_if(Is.admin)
 def read_company(company_id=None):
-    return view.CompanyView(company_id).read('read_company.html')
+    company_view = view.CompanyView(company_id)
+    employee_table = view.EmployeeView.view_table(
+        actions=[{
+            'label': u'٧',
+            'title': u'Down',
+            'endpoint': 'down_employee',
+            'data': {
+                'company_id': company_id
+            }
+        }, {
+            'label': u'٨',
+            'title': u'Up',
+            'endpoint': 'up_employee',
+            'data': {
+                'company_id': company_id
+            }
+        }],
+        elements=company_view.data.employees)
+    return company_view.read('read_company.html', table=employee_table)
 
 
 @view.EmployeeView.update_page
@@ -124,8 +165,12 @@ def update_employee(person_id=None):
 @app.route('/employee/delete/<int:person_id>', methods=('POST', 'GET'))
 @allow_if(Is.admin)
 def delete_employee(person_id):
-    return view.EmployeeView(person_id).delete('delete_employee.html',
-                                        redirect='employees')
+    employee_view = view.EmployeeView(person_id)
+    if request.method == 'POST':
+        employee_view.data.reorder(
+            Employee.company_id == employee_view.data.company_id)
+    return employee_view.delete(
+        'delete_employee.html', redirect='employees')
 
 
 @app.route('/employee/edit_template/<int:person_id>', methods=('POST', 'GET'))

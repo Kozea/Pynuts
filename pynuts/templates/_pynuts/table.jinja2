@@ -13,6 +13,9 @@
       {%- if view_class.delete_endpoint %}
         <th>Delete</th>
       {% endif -%}
+      {% for action in actions %}
+        <th>{{ action.title or action.label }}</th>
+      {% endfor %}
       </tr>
     </thead>
     <tbody>
@@ -41,6 +44,9 @@
       {%- if view.delete_endpoint %}
         <td><a href="{{ view.action_url_for('delete') }}">x</a></td>
       {%- endif %}
+      {% for action in actions %}
+        <td><a href="{{ action.data.update(view.primary_keys) or url_for(action.endpoint, **action.data) }}">{{ action.label }}</a></td>
+      {% endfor %}
       </tr>
     {%- endfor %}
     </tbody>
