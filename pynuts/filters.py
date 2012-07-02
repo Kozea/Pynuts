@@ -28,6 +28,8 @@ def data(field):
         if field.data:
             return escape(
                 u', '.join(field.get_label(data) for data in field.data))
+        else:
+            return u'∅'
     elif isinstance(field, QuerySelectField):
         if field.data:
             return escape(field.get_label(field.data))
