@@ -116,9 +116,9 @@ class ModelView(object):
     @property
     def primary_keys(self):
         """Primary keys/value dict."""
-        return {
-            column.key: getattr(self.data, column.key)
-            for column in self.mapping.primary_key}
+        return dict(
+            (column.key, getattr(self.data, column.key))
+            for column in self.mapping.primary_key)
 
     @property
     def name(self):
