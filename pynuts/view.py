@@ -40,10 +40,10 @@ class MetaView(type):
                     class_name = '%sForm' % action.capitalize()
                     columns = getattr(cls, '%s_columns' % action)
                     setattr(cls, class_name, type(
-                        class_name, (cls.form_base_class,), {
-                            field_name: getattr(
-                                cls.Form, field_name, TextField(field_name))
-                            for field_name in columns}))
+                        class_name, (cls.form_base_class,), dict(
+                            (field_name, getattr(
+                                cls.Form, field_name, TextField(field_name)))
+                            for field_name in columns)))
         super(MetaView, cls).__init__(name, bases, dict_)
 
 

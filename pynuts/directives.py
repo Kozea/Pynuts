@@ -113,8 +113,8 @@ class Content(Directive):
                 'data-document-type': document_type,
                 'data-document-id': document_id,
                 'data-content': 'true'}
-        attr.update({
-            key: ' '.join(values) for key, values in self.options.items()})
+        attr.update(dict(
+            (key, ' '.join(values)) for key, values in self.options.items()))
 
         content = '<div %s>%s</div>' % (
                 ' '.join(('%s="%s"' % (k, v)) for k, v in attr.items() if v),
