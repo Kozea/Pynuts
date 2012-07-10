@@ -4,6 +4,8 @@ import flask
 import jinja2
 from flask.ext.wtf import Form, TextField
 from werkzeug import cached_property
+from werkzeug.datastructures import FileStorage
+
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -420,6 +422,13 @@ class ModelView(object):
             if values:
                 form_values.update(values)
             self.data = self.model(**form_values)
+
+            for key, value in form_values.items():
+                if isinstance(value, FileStorage):
+                    handler = getattr(self, key + '_handler', None)
+                    if handler:
+                        setattr(self.data, key, handler.save(value))
+
             self.session.add(self.data)
         self.handle_errors(self.create_form)
         return self.data
