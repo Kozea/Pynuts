@@ -7,11 +7,13 @@
         <th>{{ view_class.table_fields[field_name].label.text }}</th>
         {%- endif -%}
       {% endfor -%}
-      {%- if view_class.update_endpoint %}
-        <th>Edit</th>
-      {%- endif %}
-      {%- if view_class.delete_endpoint %}
-        <th>Delete</th>
+      {%- if not no_default_actions %}
+        {%- if view_class.update_endpoint %}
+          <th>Edit</th>
+        {%- endif %}
+        {%- if view_class.delete_endpoint %}
+          <th>Delete</th>
+        {% endif -%}
       {% endif -%}
       {% for action in actions %}
         <th>{{ action.title or action.label }}</th>
