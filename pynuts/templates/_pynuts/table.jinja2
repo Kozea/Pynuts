@@ -38,12 +38,14 @@
           {%- endif -%}
         </td>
       {%- endfor %}
-      {%- if view.update_endpoint %}
-        <td><a href="{{ view.action_url_for('update') }}">></a></td>
-      {%- endif %}
-      {%- if view.delete_endpoint %}
-        <td><a href="{{ view.action_url_for('delete') }}">x</a></td>
-      {%- endif %}
+      {%- if not no_default_actions %}
+        {%- if view.update_endpoint %}
+          <td><a href="{{ view.action_url_for('update') }}">></a></td>
+        {%- endif %}
+        {%- if view.delete_endpoint %}
+          <td><a href="{{ view.action_url_for('delete') }}">x</a></td>
+        {%- endif %}
+      {% endif %}
       {% for action in actions %}
         <td><a href="{{ action.data.update(view.primary_keys) or url_for(action.endpoint, **action.data) }}">{{ action.label }}</a></td>
       {% endfor %}

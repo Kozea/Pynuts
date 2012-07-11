@@ -304,7 +304,8 @@ class ModelView(object):
 
     @classmethod
     def view_table(cls, query=None, endpoint=None, no_result_message=None,
-                   elements=None, actions=None, **kwargs):
+                   elements=None, actions=None, no_default_actions=False,
+                   **kwargs):
         """Render the HTML for table_template.
 
         :param query: The SQLAlchemy query used for rendering the table
@@ -320,7 +321,8 @@ class ModelView(object):
         return jinja2.Markup(template.render(
             views=cls.query(query, elements), endpoint=endpoint,
             view_class=cls, no_result_message=no_result_message,
-            actions=actions or [], **kwargs))
+            actions=actions or [], no_default_actions=no_default_actions,
+            **kwargs))
 
     def view_create(self, action=None, **kwargs):
         """Render the HTML for create_template.
