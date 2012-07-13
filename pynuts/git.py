@@ -7,7 +7,7 @@ import urlparse
 import mimetypes
 
 import jinja2
-from weasyprint.urls import register_opener
+from weasyprint import default_url_fetcher
 from dulwich.repo import Repo as BaseRepo, Blob, Tree, Commit
 
 
@@ -271,20 +271,20 @@ class Git(object):
             path=urllib.quote(path))
 
 
-@register_opener('git')
-def git_urlopen(url):
-    url = urlparse.urlsplit(url)
-    repo_id, commit_hash = url.netloc.split('-', 1)
-    git = Git(REPOS_BY_ID[int(repo_id)], commit=commit_hash)
-    path = urllib.unquote(url.path)
-    # TODO: avoid reading everything in memory at once?
-    fileobj = io.BytesIO(git.read(path))
-    mimetype, _ = mimetypes.guess_type(path)
-    charset = None  # unknown
-    return fileobj, mimetype, charset
-
-
 urlparse.uses_relative.append('git')
+
+def git_url_fetcher(url):
+    if url.startswith('git:'):
+        url = urlparse.urlsplit(url)
+        repo_id, commit_hash = url.netloc.split('-', 1)
+        git = Git(REPOS_BY_ID[int(repo_id)], commit=commit_hash)
+        path = urllib.unquote(url.path)
+        mimetype, _ = mimetypes.guess_type(path)
+        # TODO: avoid reading everything in memory at once?
+        return dict(string=git.read(path), mime_type=mimetype or 'text/plain')
+    else:
+        return default_url_fetcher(url)
+
 
 REPOS_BY_ID = {}
 

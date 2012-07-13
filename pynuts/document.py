@@ -14,7 +14,7 @@ from weasyprint import HTML
 from docutils_html5 import Writer
 
 from .environment import create_environment
-from .git import Git, ConflictError
+from .git import Git, ConflictError, git_url_fetcher
 
 
 class InvalidId(ValueError):
@@ -275,7 +275,8 @@ class Document(object):
         resource_type = 'archive_git' if archive else 'git'
         html = self._generate_html(
             part=part, resource_type=resource_type, archive=archive)['whole']
-        return HTML(string=html, encoding='utf8').write_pdf()
+        return HTML(string=html, encoding='utf8',
+                    url_fetcher=git_url_fetcher).write_pdf()
 
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
