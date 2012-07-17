@@ -200,7 +200,7 @@ class ModelView(object):
         # Test for attribute if the form has not "handle_errors" method.
         form.handle_errors()
 
-    def template_url_for(self, endpoint):
+    def template_url_for(self, endpoint, **kwargs):
         """Return endpoint if callable, url_for this endpoint else.
 
         If the given endpoint is already an url, return as is.
@@ -210,14 +210,16 @@ class ModelView(object):
 
         """
         if callable(endpoint):
-            return endpoint(self, **self.primary_keys)
+            dict_args = dict(self.primary_keys)
+            dict_args.update(kwargs)
+            return endpoint(self, **dict_args)
         elif endpoint:
             if '/' in endpoint:
                 return endpoint
             else:
-                return flask.url_for(endpoint)
+                return flask.url_for(endpoint, **kwargs)
 
-    def action_url_for(self, action):
+    def action_url_for(self, action, **kwargs):
         """Return url_for for CRUD operation.
 
         :param action: Endpoint name
@@ -225,7 +227,7 @@ class ModelView(object):
 
         """
         return self.template_url_for(
-            getattr(type(self), '%s_endpoint' % action))
+            getattr(type(self), '%s_endpoint' % action), **kwargs)
 
     # Endpoints methods
     @classmethod
