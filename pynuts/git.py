@@ -7,8 +7,7 @@ import urlparse
 import mimetypes
 
 import jinja2
-from weasyprint import default_url_fetcher
-from dulwich.repo import Repo as BaseRepo, Blob, Tree, Commit
+from dulwich.repo import Repo, Blob, Tree, Commit
 
 
 class GitException(Exception):
@@ -256,40 +255,3 @@ class Git(object):
         blob = Blob.from_string(bytestring)
         self._add_object(blob)
         return blob
-
-    def make_weasyprint_url(self, path):
-        """Return an URL that can be used in WeasyPrint for `path` at the
-        current commit. Uncommited changes will *not* be visible.
-
-        This does not checks that a blob actually exists at `path`
-        in the commit.
-
-        """
-        return 'git://{repo}-{commit}/{path}'.format(
-            repo=id(self.repository),
-            commit=self.head.id,
-            path=urllib.quote(path))
-
-
-urlparse.uses_relative.append('git')
-
-def git_url_fetcher(url):
-    if url.startswith('git:'):
-        url = urlparse.urlsplit(url)
-        repo_id, commit_hash = url.netloc.split('-', 1)
-        git = Git(REPOS_BY_ID[int(repo_id)], commit=commit_hash)
-        path = urllib.unquote(url.path)
-        mimetype, _ = mimetypes.guess_type(path)
-        # TODO: avoid reading everything in memory at once?
-        return dict(string=git.read(path), mime_type=mimetype or 'text/plain')
-    else:
-        return default_url_fetcher(url)
-
-
-REPOS_BY_ID = {}
-
-
-class Repo(BaseRepo):
-    def __init__(self, path):
-        super(Repo, self).__init__(path)
-        REPOS_BY_ID[id(self)] = self
