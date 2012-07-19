@@ -4,9 +4,9 @@ import shutil
 import tempfile
 
 import jinja2
-from weasyprint import CSS
 
-from pynuts.git import Repo, Git, ObjectTypeError, NotFoundError, ConflictError
+from pynuts.git import (Repo, Git, ObjectTypeError, NotFoundError,
+                        ConflictError)
 
 
 class TestGit(unittest.TestCase):
@@ -88,12 +88,3 @@ class TestGit(unittest.TestCase):
         git = Git(repo, branch='inexistent')
         git.tree = git.store_directory(os.path.join(self.tempdir, 'refs'))
         assert git.read('heads/master').strip() == commit_2
-
-    def test_git_urls(self):
-        repo = Repo.init_bare(self.tempdir)
-        git = Git(repo, branch='master')
-        git.write('foo/bar.css', b'.test-pynuts { color: green }')
-        git.commit('Pynuts', 'pynuts@pynuts.org', 'Some CSS')
-        css = CSS(url=git.make_weasyprint_url('foo/bar.css'))
-        assert css.base_url.startswith('git://')
-        assert css.stylesheet.rules[0].selector.as_css() == '.test-pynuts'
