@@ -5,12 +5,11 @@ import os
 import sys
 import shutil
 import sqlite3
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
 from contextlib import closing
 
 PATH = os.path.dirname(os.path.dirname(__file__))
-TEMP_DIR = None
-DATABASE = '/tmp/test.db'
+DATABASE = mkstemp()[1]
 
 sys.path.insert(0, os.path.join(PATH, 'doc', 'example'))
 sys.path.insert(0, PATH)
@@ -30,42 +29,30 @@ def execute_sql(application, filename, folder=None):
 
 def setup_fixture():
     """Setup function for tests."""
-    # global variable shouldn't be used but is quite useful here
-    # pylint: disable=W0603
-    global TEMP_DIR
-    TEMP_DIR = mkdtemp()
-    if os.path.exists(os.path.join(PATH, 'tests', 'fake_instance')):
-        shutil.rmtree(os.path.join(PATH, 'tests', 'fake_instance'))
-    if os.path.exists(DATABASE):
-        os.remove(DATABASE)
     app = pynuts.Pynuts('complete',
-        config={'PYNUTS_DOCUMENT_REPOSITORY': os.path.join(
-                    PATH, 'tests', 'fake_instance', 'documents.git')},
+        config={
+            'PYNUTS_DOCUMENT_REPOSITORY': os.path.join(
+                mkdtemp(), 'documents.git'),
+            'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + DATABASE},
         config_file='config/test.cfg',
         reflect=True)
     application.app = app
     import complete.executable
-    execute_sql(application.app, 'database.sql')
 
 
 def teardown_fixture():
     """Remove the temp directory after the tests."""
-    if os.path.exists(os.path.join(PATH, 'tests', 'fake_instance')):
-        shutil.rmtree(os.path.join(PATH, 'tests', 'fake_instance'))
-    if os.path.exists(TEMP_DIR):
-        shutil.rmtree(TEMP_DIR)
-    if os.path.exists(DATABASE):
-        os.remove(DATABASE)
-    execute_sql(application.app, 'drop_all.sql')
+    os.rmdir(os.path.dirname(
+        application.app.config['PYNUTS_DOCUMENT_REPOSITORY']))
 
 
 def setup_func():
-    execute_sql(application.app, 'insert_data.sql')
+    execute_sql(application.app, 'database.sql')
     shutil.copytree(
         os.path.join(PATH, 'tests', 'dump', 'instance', 'documents.git'),
-        os.path.join(PATH, 'tests', 'fake_instance', 'documents.git'))
+        application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
 
 
 def teardown_func():
-    execute_sql(application.app, 'truncate_all.sql')
-    shutil.rmtree(os.path.join(PATH, 'tests', 'fake_instance'))
+    os.remove(DATABASE)
+    shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])

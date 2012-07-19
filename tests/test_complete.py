@@ -311,6 +311,7 @@ class TestComplete(object):
 
     def test_InvalidId(self):
         """Test InvalidId exception."""
+        # Use Document from the vanilla app, not from the test app
         class EmployeeDoc(app.Document):
             document_id_template = '/'
         try:
@@ -344,6 +345,8 @@ class TestComplete(object):
     @with_client
     def test_conflict_error(self, client):
         """Test the endpoint."""
+        # Use Document from the test app, not from the vanilla app
+        from complete.application import app
         filename = 'tests/dump/static/img/test.png'
 
         class EmployeeDoc(app.Document):
