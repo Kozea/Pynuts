@@ -178,8 +178,17 @@ class ModelView(object):
         :type elements: List
 
         """
-        for data in elements if elements != None else (
-                query or cls.model.query).all():
+        if elements:
+            iterable = elements
+        elif query:
+            iterable = query.all()
+        else:
+            iterable = cls.model.query
+            if hasattr(cls, 'order_by'):
+                iterable = iterable.order_by(cls.order_by)
+            iterable = iterable.all()
+
+        for data in iterable:
             yield cls(data=data)
 
     @classmethod

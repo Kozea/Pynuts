@@ -4,7 +4,7 @@
 
 from flask import escape
 from flask.ext.wtf import (
-    QuerySelectField, QuerySelectMultipleField, BooleanField)
+    QuerySelectField, QuerySelectMultipleField, BooleanField, DateField)
 
 
 def data(field):
@@ -35,4 +35,7 @@ def data(field):
             return escape(field.get_label(field.data))
     elif isinstance(field, BooleanField):
         return u'✓' if field.data else u'✕'
+    elif isinstance(field, DateField):
+        if field.data:
+            return field.data.strftime(field.format)
     return escape(field.data)
