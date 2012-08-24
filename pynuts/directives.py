@@ -5,7 +5,7 @@ import json
 from docutils.parsers.rst import directives, Directive
 import docutils.core
 
-from pynuts.git import NotFoundError
+from .git import NotFoundError
 
 
 class Editable(Directive):
