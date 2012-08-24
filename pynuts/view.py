@@ -178,7 +178,7 @@ class ModelView(object):
         :type elements: List
 
         """
-        if elements:
+        if elements is not None:
             iterable = elements
         elif query:
             iterable = query.all()
