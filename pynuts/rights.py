@@ -8,7 +8,6 @@ class MetaContext(type):
     """Get context object for rights."""
     def __init__(cls, name, bases, dict_):
         cls._pynuts._context_class = cls
-        cls._pynuts.before_request(cls._pynuts.create_context)
 
 
 # These classes are decorators, they can begin with an lowercase letter

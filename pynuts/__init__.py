@@ -85,6 +85,8 @@ class Pynuts(flask.Flask):
 
         self.ModelView = ModelView
 
+        self.before_request(self.create_context)
+
     @cached_property
     def document_repository(self):
         """Return the path to the document repository."""
