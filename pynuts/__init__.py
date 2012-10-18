@@ -29,23 +29,27 @@ class Pynuts(flask.Flask):
                  reflect=False, *args, **kwargs):
         super(Pynuts, self).__init__(import_name, *args, **kwargs)
 
-        self.config['CSRF_ENABLED'] = False
+        self.config['CSRF_ENABLED'] = False  # Why False?
         if config_file:
-            self.config.from_pyfile(config_file)
+            self.config.from_pyfile(config_file)  # generate app config from file
         if config:
-            self.config.update(config)
+            self.config.update(config)  # generate app config from dict
 
-        self.db = SQLAlchemy(self)
+        self.db = SQLAlchemy(self)  # bind the SQLAlchemy controller to the Pynuts app
         self.documents = {}
         self.views = {}
 
         if reflect:
+            # Automatically reate models from the database existent data
             self.db.metadata.reflect(bind=self.db.get_engine(self))
 
+        # Set the document repository path
         self.document_repository_path = (
             self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or
             os.path.join(self.instance_path, 'documents.git'))
 
+        # Serve files from the Pynuts static folder
+        # at the /_pynuts/static/<path:filename> URL
         self.add_url_rule('/_pynuts/static/<path:filename>',
                           '_pynuts-static', static)
 
@@ -86,6 +90,8 @@ class Pynuts(flask.Flask):
         class ModelView(view.ModelView):
             """Model view base class of the application."""
             _pynuts = self
+            
+            # Create a new Jinja2 environment with Pynuts helpers
             environment = create_environment(_pynuts.jinja_env.loader)
 
         self.ModelView = ModelView
