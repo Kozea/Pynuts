@@ -13,8 +13,13 @@ class Pynuts(flask.Flask):
     """Create the Pynuts class.
 
     :param import_name: Flask application name
+    :type import_name: str
     :param config: Flask application configuration
+    :type config: dict
+    :param config_file: path of the application configuration file
+    :type config_file: str
     :param reflect: Create models with database data
+    :type reflect: bool
 
     .. seealso::
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
