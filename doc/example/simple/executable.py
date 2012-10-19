@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flaskext.wtf import (Form, IntegerField, TextField, Required)
+from flask.ext.wtf import (Form, IntegerField, TextField, Required)
 from sqlalchemy.ext.hybrid import hybrid_property
 
 import pynuts
