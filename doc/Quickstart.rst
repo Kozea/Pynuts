@@ -11,7 +11,7 @@ A basic Pynuts application requires 4 parts:
 - A SQLAlchemy class 
 - An executable
 
-You can do 4 different files if you want more lisibility, but here one file is enough.
+You can code each part in a secific file if you want more readability, but here, one file will work as well.
 
 Create a file named ``employee.py``::
 
