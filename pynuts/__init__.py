@@ -45,8 +45,14 @@ class Pynuts(flask.Flask):
 
         # Set the document repository path
         self.document_repository_path = (
-            self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or
-            os.path.join(self.instance_path, 'documents.git'))
+            os.path.join(
+                self.instance_path, self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or 'documents.git'))
+
+        # If self.document_repository_path does not exist, create it (and possible parent folders)
+        # and initialize the repo
+        if not os.path.exists(self.document_repository_path):
+            os.makedirs(self.document_repository_path)
+            git.Repo.init_bare(self.document_repository_path)
 
         # Serve files from the Pynuts static folder
         # at the /_pynuts/static/<path:filename> URL
