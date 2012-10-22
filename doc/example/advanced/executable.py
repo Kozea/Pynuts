@@ -3,7 +3,7 @@ from flask import flash, redirect, session, request, render_template, g
 
 from application import app
 from pynuts.rights import allow_if
-from pynuts.directives import Editable
+# from pynuts.directives import Editable
 import view
 import document
 import rights as Is
