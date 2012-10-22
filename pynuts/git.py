@@ -34,11 +34,11 @@ class Git(object):
 
     This is a higher level wrapper around Dulwich for bare repositories.
 
-    :param repository_path:
+    :param repository:
         Full path to the repository’s directory in the filesystem.
     :param branch:
         Which branch to use in the repository. (`refs/heads` is implicit.)
-    :param commit_id:
+    :param commit:
         The SHA1 hash of the commit to use. If given, no check is made that
         the commit is actually reachable from `branch`. If not given,
         use the latest commit in `branch`.
