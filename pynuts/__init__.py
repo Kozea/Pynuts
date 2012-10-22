@@ -41,7 +41,7 @@ class Pynuts(flask.Flask):
         self.views = {}
 
         if reflect:
-            # Automatically reate models from the database existent data
+            # Automatically create models from the database existent data
             self.db.metadata.reflect(bind=self.db.get_engine(self))
 
         # Set the document repository path
