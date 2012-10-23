@@ -10,9 +10,9 @@ The CRUD part is explained in the first tutorial.
 Table of Employees
 ~~~~~~~~~~~~~~~~~~
 
-With advanced pynuts features, you can easily create an admin table which will provide CRUD functions.
+With advanced pynuts features, you can easily create an admin table which will provide CRUD operations over a data model.
 
-First, create a template called ``table_employees.html`` as below:
+First, create a template called ``table_employees.html``:
 
 .. sourcecode:: html+jinja   
 
@@ -22,20 +22,22 @@ First, create a template called ``table_employees.html`` as below:
       {{ view_class.view_table() }}
     {% endblock main %}
 
-This template call the `view_table` method from pynuts, which display a table with your employees and an `edit` and `delete` method for each of them.
+This template calls the ``view_table`` method from pynuts, which display a table containing all employees and an `edit` and `delete` method for each of them.
 
-Then, you have to call this template in the function `table` in the file ``executable.py``::
+Then, use this template as argument of the ``EmployeeView.table`` method in ``executable.py``::
 
     @app.route('/employees/table')
     def table_employees():
         return view.EmployeeView.table('table_employees.html')
 
 
+.. _update:
 
 Update Employee
 ~~~~~~~~~~~~~~~
 
-In your route you have to give the model primary keys in parameters in order to access your employee object. Our table Employee have `id` as primary key. So we can call an `EmployeeView` instance according to an `id`.
+You need to pass the model primary keys as route parameters in order to have access to an employee object.
+The primary key of the Employee table is ``id``, so we can call an `EmployeeView` instance according to an `id`.
 
 Create ``update_employee.html``:
 
@@ -47,7 +49,7 @@ Create ``update_employee.html``:
       {{ view.view_update() }}
     {% endblock main %}
 
-Then put this code in ``executable.py``::
+Add this function in ``executable.py``::
 
     @view.EmployeeView.update_page
     @app.route('/employee/update/<id>', methods=('POST', 'GET'))
@@ -59,17 +61,18 @@ Then put this code in ``executable.py``::
         
     If you want to make this function available from the interface, you have to set the `update_endpoint` in your view class.
     
-    If you didn't, you can call a decorator to automatically set this endpoint according to the route you've created. Just add `@view.EmployeeView.update_page` before the `@app.route`.
+    If you do not, you can call a decorator to automatically set this endpoint according to the route you've created. Just add `@view.EmployeeView.update_page` before the `@app.route`.
     
     For more information, see the `delete` function below.
 
 
+.. _delete:
 
 Delete Employee
 ~~~~~~~~~~~~~~~
-Same as update.
+The logic here is the same than in :ref:`update`.
 
-Create ``delete_employee.html``:
+First, create the ``delete_employee.html`` template:
 
 .. sourcecode:: html+jinja
 
@@ -80,7 +83,7 @@ Create ``delete_employee.html``:
     {% endblock main %}
 
     
-Then put this code in ``executable.py``::
+The, add this function in ``executable.py``::
 
     @view.EmployeeView.delete_page
     @app.route('/employee/delete/<id>')
@@ -90,9 +93,9 @@ Then put this code in ``executable.py``::
                                             
 Read Employee
 ~~~~~~~~~~~~~
-Same as delete and update.
+The logic here is the same than in :ref:`update` and :ref:`delete`.
 
-Create ``read_employee.html``:
+Create the ``read_employee.html`` template:
 
 .. sourcecode:: html+jinja
 
@@ -102,7 +105,7 @@ Create ``read_employee.html``:
       {{ view.view_read() }}
     {% endblock main %}
 
-Then put this code in ``executable.py``::
+Add this function in ``executable.py``::
 
     @view.EmployeeView.read_page
     @app.route('/employee/read/<id>')
@@ -114,23 +117,15 @@ Document
 --------
 
 
-This part will describe how to make documents, make version and generate beautiful PDF report with Pynuts.
+This part describes how to create documents, manage them using a version control system and convert these HTML documents into PDF reports.
 
 
 Configuration
 ~~~~~~~~~~~~~
-If you want to use document archiving, you need to add the path to your document repository in the application config. Go to ``application.py`` and add this `'PYNUTS_DOCUMENT_REPOSITORY'` as key to the CONFIG then put the path to the `repo.git`; In this tutorial we have `/tmp/employees.git` as value.
-Now you have to make the repo. 
+If you want to use document archiving, you need to add the path to your document repository in the application config. 
+Go to ``application.py`` and add this ``'PYNUTS_DOCUMENT_REPOSITORY'`` as key to the CONFIG then put the path to the `repo.git`; In this tutorial we have `/tmp/employees.git` as value.
 
- 
-Git Repository
-~~~~~~~~~~~~~~
-
-Simply create a bare git repository.
-
-::
-
-    $ git init --bare /tmp/employees.git
+Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
     
     
 Creating Our Document Class
@@ -149,7 +144,7 @@ Start by creating the file ``document.py`` which will contain the Pynuts documen
 
 
 `model_path` 
- That's the path to the folder where the model is stored. You have to create a file named `index.rst.jinja2` in this folder, this will be your document template written in ReST/Jinja2.
+The path to the folder where the model is stored. You have to create a file named `index.rst.jinja2` in this folder, this will be your document template written in ReST/Jinja2.
 
 `document_id_template`
  In this tutorial the document_id_template is the employee id.
@@ -158,13 +153,8 @@ Start by creating the file ``document.py`` which will contain the Pynuts documen
 Creating Documents
 ~~~~~~~~~~~~~~~~~~
 
-When an employee is added in database and everything went well, we create an employee document.
-So you have to go back to the *create* route in ``executable.py``.
-
-- First create an instance of EmployeeView
-- Then we call the create method of EmployeeView. 
-- If the employee `create_form` is validated we create a new document.
-- Finally we redirect to the list of employees
+We would like to create an Employee document each time an employee is succesfully added into database.
+To do so, go back to the *create* route in ``executable.py`` and insert the following snippet
 
 ::
 
@@ -177,18 +167,24 @@ So you have to go back to the *create* route in ``executable.py``.
           document.EmployeeDoc.create(employee=employee)
       return response
 
+This function performs the following operations:
+
+- Create an instance of EmployeeView
+- Call the create method of EmployeeView. 
+- reate a new document, if the employee `create_form` is validated.
+- Finally, redirect to the list of employees
+
 When the document is created for the first time, Pynuts make an initial commit of the folder which contains the model in a new branch. 
 
 .. note ::
     
-    create_form is the form made by pynuts according to `create_columns` you have specified. See the :ref:`api` documentation for more info.
+    ``create_form`` is the form generated by pynuts according to the value of ``create_columns`` you specified. See the :ref:`api` documentation for more info.
     
 
 Editing Document
 ~~~~~~~~~~~~~~~~
-Since the document has been created, you may want to edit it and add some information for one specific employee.
-
-Thanks to pynuts document handling, it's possible and quite easy to do.
+Now that the document has been created, you may want to edit it and add some information for one specific employee.
+Pynuts document handling makes these operations very simple to perform.
 
 Create the file ``edit_employee_template.html``
 
@@ -199,10 +195,8 @@ Create the file ``edit_employee_template.html``
       {{ document.view_edit(employee=employee) }}
     {% endblock main %}
 
-Then, in your ``executable.py``, you have to:
-    - Declare an EmployeeView
-    - Declare an EmployeeDoc
-    - Call the `edit` function with the template and the EmployeeView in parameters
+
+Then, insert the following snippet in ``executable.py``
     
 ::
 
@@ -213,9 +207,15 @@ Then, in your ``executable.py``, you have to:
         return doc.edit('edit_employee_template.html',
                         employee=employee)
 
+This function performs the following operations:
+
+  - Declare an EmployeeView
+  - Declare an EmployeeDoc
+  - Call the `edit` function with the template and the EmployeeView in parameters
+
 Rendering Document in HTML
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Create the file ``employee_report.html``:
+Create the``employee_report.html`` template:
 
 .. sourcecode:: html+jinja
 
@@ -224,18 +224,16 @@ Create the file ``employee_report.html``:
       {{ document.view_html(employee=employee) }}
     {% endblock main %}
 
-``executable.py``::
+and add this snippet to ``executable.py``::
 
     @app.route('/employee/html/<id>', methods=('POST', 'GET'))
     def html_employee(id):
         doc = document.EmployeeDoc
         return doc.html('employee_report.html', employee=view.EmployeeView(id))
 
-Getting PDF Document
-~~~~~~~~~~~~~~~~~~~~
-To get the PDF document, call the `download_pdf` class method of a EmployeeDoc.
-
-``executable.py``::
+Download PDF Document
+~~~~~~~~~~~~~~~~~~~~~
+To download the PDF version of the document, call the ``download_pdf`` class method of a EmployeeDoc in ``executable.py``::
 
     @app.route('/employee/download/<id>')
     def download_employee(id):
@@ -244,13 +242,14 @@ To get the PDF document, call the `download_pdf` class method of a EmployeeDoc.
                                 employee=view.EmployeeView(id))
 
 
-Using versions
-~~~~~~~~~~~~~~
+Working with versions
+~~~~~~~~~~~~~~~~~~~~~
 
 Get the version list
 ````````````````````
-In our view of an employee we decide to allow the user to access the version of the employee model description.
-Go back to the `read_employee` function. In the view of an employee we want to list all the existing versions of the archived document. To list them we just use the `history` property of a document instance. We create an instance by giving the `id` of an employee  which is also the id of the document.
+
+To all the existing versions of the archived document, use the ``history`` property of a document instance. 
+We can create an instance by giving the id of an employee which is also the id of the document.
 
 ::
   
@@ -260,13 +259,16 @@ Then we have to return the read template with the list of versions::
 
     return view.EmployeeView(id).read('read_employee.html', history=history)
     
-Now go to ``read_employee.html``. To use `history`, we loop on it and each element is a `EmployeeDoc` instance. So we can use the instance properties like the version of the document. In this example we make a table:
+Now go to the ``read_employee.html`` template. To use ``history``, we loop on it and each element is a `EmployeeDoc` instance.
+So we can use the instance properties like the version of the document. 
 
-1. The first column displays the document datetime by using the `datetime` property of `EmployeeDoc`. 
-2. This is the commit message.
-3. The second create a link to edit the archived template by giving the version to `url_for`.
-4. The third create a link to view the html of the template
-5. The fourth create a link to the pdf download
+In the following example, we generate a table:
+
+#. The first column contains the document datetime by using the `datetime` property of `EmployeeDoc`. 
+#. The second column contains the commit message.
+#. The third column contains a link allowin to edit the archived template
+#. The fourth columns contains a link to view the html of the template
+#. The fifth column contains a link to the pdf download
 
 .. sourcecode:: html+jinja
 
@@ -296,7 +298,8 @@ Now go to ``read_employee.html``. To use `history`, we loop on it and each eleme
     </table>
   {% endblock main %}
 
-I hope you noticed that the `edit_employee_report`, `html_employee` and `pdf_employee` view functions already exists. You just have to add a new route to those view function which takes the version in parameter. Something like that for the `html_employee` view::
+I hope you noticed that the ``edit_employee_report``, ``html_employee`` and ``pdf_employee`` view functions already exist. You just have to add a new route to those view function which takes the version in parameter. 
+Something like that for the `html_employee` view::
 
     @app.route('/employee/html/<id>')
     @app.route('/employee/html/<id>/<version>')
@@ -306,7 +309,7 @@ I hope you noticed that the `edit_employee_report`, `html_employee` and `pdf_emp
                         employee=view.EmployeeView(id),
                         version=version)
                         
-Finally you have to go back to ``edit_employee_template.html`` in order to add the version in parameter of the view classmethod of `EmployeeDoc`
+Finally, go back to the ``edit_employee_template.html`` template in order to add the version in parameter of the view classmethod of `EmployeeDoc`
 
 .. sourcecode:: html+jinja
  
@@ -316,13 +319,14 @@ Finally you have to go back to ``edit_employee_template.html`` in order to add t
     
 Do the same with ``employee_report.html``.
 
-Now you can run the server and see that works perfectly!
+Now you can run the server and see that everything runs smoothly!
 
 Rights
 ------
-With pynuts, putting specific rights for the route you want is quite simple. First, you have to create a file ``rights.py``. In this file, you have to import two major things:
- - Your application `from application import app`
- - The pynuts ACL class `from pynuts.rights import acl`
+With pynuts, setting specific permissions on each endpoint is quite simple. First, create a ``rights.py`` file . In this file, import your app and the ``rights`` module::
+
+  from application import app
+  from pynuts.rights import acl
  
 Then, create a `Context` class, inheriting from your application context. Here you can define some properties that will be used for the context of your rights.
 
@@ -337,16 +341,17 @@ For example, we decided here to create a property called `person` which will sta
             
 Once you're done with the context class, you can create your own rights thanks to the ACL you imported above. The ACL class is an utility decorator for access control in `allow_if` decorators. The `allow_if` decorator check that the global context matches a criteria.
 
-The context is stored in the `g` object of your application.
+The context is stored in the `g <http://flask.pocoo.org/docs/api/#flask.g>`_ object of your application.
 
-Your functions should look like the following::
+Your functions should look like the following one ::
 
     @acl
     def connected():
         """Returns whether the user is connected."""
         return g.context.person is not None
         
-Then, import your rights in the file ``executable.py`` along with the `allow_if` function from `pynuts.rights` . You can import rights as `Is` to have a good syntax using the allow_if decorator: ``@allow_if(Is.connected)`` for example.
+Then, import your rights in the file ``executable.py`` along with the `allow_if` function from `pynuts.rights`.
+You can import rights as `Is` to have a good syntax using the allow_if decorator: ``@allow_if(Is.connected)`` for example.
 
 All you have to do now is to put a decorator before your function to apply rights::
 
@@ -375,18 +380,6 @@ You can write this for example:
 
 This will grant the access for a connected person which isn't blacklisted or to the admin.
 
-Miscellaneous
--------------
-
-Configuration file
-~~~~~~~~~~~~~~~~~~
-
-You can launch your pynuts application with a specific configuration file.
-
-To do that, simply run your executable with `-c` or `--config` and put the name of your configuration file (it should be in the same directory as your application)::
-
-    $ python executable.py -c config_file
-    * Running on http://127.0.0.1:5000/
 
 Help
 ~~~~

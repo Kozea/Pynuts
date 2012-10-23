@@ -30,11 +30,9 @@ Then, specify its configuration::
         'CSRF_ENABLED': False,
         'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
         
-`CSRF_ENABLED`
-    This is used by WTForms, see `WTForms documentation <http://packages.python.org/Flask-WTF>`_
+.. note::
     
-`SQLALCHEMY_DATABASE_URI` 
-    This is the database. In this tutorial we will use a SQLite database.
+    Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
 
 Finally, create your pynuts application with the previous configuration
 
