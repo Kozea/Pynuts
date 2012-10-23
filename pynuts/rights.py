@@ -14,15 +14,16 @@ class MetaContext(type):
 class acl(object):  # pylint: disable=C0103
     """Utility decorator for access control in ``allow_if`` decorators.
 
-    Allowing to write:
+    Allows to write:
     ``@allow_if((Is.admin | Is.in_domain) & ~Is.in_super_domain)``
     given that Is module functions are decorated by acl
 
     It implements the following operators:
-    ``a & b`` -> ``a and b``
-    ``a | b`` -> a or  b``
-    ``a ^ b`` -> a xor b``
-    ``~ a`` -> not a``
+
+    * ``a & b``: a and b
+    * ``a | b``: a or  b
+    * ``a ^ b``: a xor b
+    * ``~ a``: not a
 
     """
     def __init__(self, function=lambda context: True):
