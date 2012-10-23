@@ -6,9 +6,9 @@ A Minimal application
 
 A basic Pynuts application requires 4 parts:
 
-- An application file which provides a Flask application
-- A view class extended from pynuts ModelView
-- A SQLAlchemy class 
+- An application file instanciating a Flask application
+- A view class extended from pynuts ``ModelView``
+- A ``SQLAlchemy`` class
 - An executable
 
 You can code each part in a secific file if you want more readability, but here, one file will work as well.
