@@ -4,15 +4,15 @@ Additional features
 Pynuts provides some javascript tools.
 
 
-Saving document contenteditable parts
--------------------------------------
+Saving document ``contenteditable`` parts
+-----------------------------------------
 
 If you use Pynuts document class and if you need the `Editable` Pynuts ReST directive in your documents (See here :ref:`api`), you probably want to save the edited contents. Pynuts allows that by using the `save_content` javascript function. It relies on jQuery so you must have imported it before. This function saves your content as simple git files.
 
 How does it work ?
 ~~~~~~~~~~~~~~~~~~
 
-The `save_content` function uses AJAX in order to save asynchronously a page which contains contenteditable elements by calling the `update_content` method of the document class (See here for more info on `update_content` :ref:`api`) ; this method returns a JSON containing the document new information like the new commit version. So you don't need to create a route on your application, Pynuts do it for you! You only need to import the source and call the `init_content` function on page loading. Finally just call the save function on any event you want. It will save only if the content has changed until the last save.
+The `save_content` function uses AJAX in order to save asynchronously a page which contains contenteditable elements by calling the `update_content` method of the document class (See here for more info on `update_content` :ref:`api`) ; this method returns a JSON containing the document new information like the new commit version. So you don't need to create a route on your application, Pynuts does it for you! You only need to import the source and call the `init_content` function on page loading. Finally just call the save function on any event you want. It will save only if the content has changed until the last saving.
 
 Simple example:
 
@@ -23,12 +23,12 @@ Simple example:
   <button onclick="save_content()"></button>
   <div contenteditable></div>
 
-How the changes are detected ?
+How are the changes detected ?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before saving, Pynuts checks if the document has changed. How does it work ?
 
-On document load, the `init_content` function will get all the contenteditable div elements and add a `data-hash` attribute which corresponds to the hashed content of this div element. On calling the save function, Pynuts will compare the current value of the `data-hash` attribute and the current hashed content of the editable div element. If both hash are equals it will call the `unchange_callback`.
+On document load, the `init_content` function will get all the ``contenteditable`` div elements and add a `data-hash` attribute which corresponds to the hashed content of this div element. On calling the save function, Pynuts will compare the current value of the `data-hash` attribute and the current hashed content of the editable div element. If both hash are equals it will call the `unchange_callback`.
 
 What happens on success ?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
