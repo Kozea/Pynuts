@@ -20,6 +20,8 @@ class Pynuts(flask.Flask):
     :type config_file: str
     :param reflect: Create models with database data
     :type reflect: bool
+    :param *args: flask.Flask args
+    :param **kwargs : flask.Flask kwargs
 
     .. seealso::
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
@@ -90,7 +92,6 @@ class Pynuts(flask.Flask):
         class ModelView(view.ModelView):
             """Model view base class of the application."""
             _pynuts = self
-            
             # Create a new Jinja2 environment with Pynuts helpers
             environment = create_environment(_pynuts.jinja_env.loader)
 
@@ -105,7 +106,7 @@ class Pynuts(flask.Flask):
 
     def render_rest(self, document_type, part='index.rst.jinja2',
                     **kwargs):
-        """Return the rest of the document."""
+        """Return the generated ReST version of the document."""
         return self.documents[document_type].generate_rest(part, **kwargs)
 
     def create_context(self):
@@ -114,6 +115,9 @@ class Pynuts(flask.Flask):
 
 
 def static(filename):
-    """Return files from Pynuts static folder."""
+    """ Return files from Pynuts static folder.
+
+    :param filename: the basename of the file contained in Pynuts static folder
+    """
     return flask.send_from_directory(
         os.path.join(os.path.dirname(__file__), 'static'), filename)
