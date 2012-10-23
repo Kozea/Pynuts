@@ -4,7 +4,7 @@ Additional features
 Pynuts provides some javascript tools.
 
 
-Saving document ``contenteditable`` parts
+Saving document contenteditable parts
 -----------------------------------------
 
 If you use Pynuts document class and if you need the `Editable` Pynuts ReST directive in your documents (See here :ref:`api`), you probably want to save the edited contents. Pynuts allows that by using the `save_content` javascript function. It relies on jQuery so you must have imported it before. This function saves your content as simple git files.

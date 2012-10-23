@@ -17,7 +17,7 @@ Create 4 files at the root of your application:
 Then create the `templates` and `static` folders, in the same directory.
 
 
-Step 2: ``application.py``: defining the Pynuts application
+Step 2: application.py: defining the Pynuts application
 -----------------------------------------------------------
 
 First, import ``pynuts`` by calling::
@@ -43,7 +43,7 @@ Finally, create your pynuts application with the previous configuration
 
 .. _hybrid:
 
-Step 3: ``database.py``: the database model
+Step 3: database.py: the database model
 -------------------------------------------
 
 Import the pynuts application::
@@ -73,7 +73,7 @@ Then, create a ``SQLAlchemy.Model`` class.
     representative of an employee than simply its name or firstname.
     This property will be especially useful when displaying the employees list.
 
-Step 4: ``view.py``: the view model
+Step 4: view.py: the view model
 -----------------------------------
 
 Import some things from WTForms, the pynuts application and the database model::
