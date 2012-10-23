@@ -10,7 +10,7 @@ from .environment import create_environment
 
 
 class Pynuts(flask.Flask):
-    """Create the Pynuts class.
+    """Create the Pynuts class, inheriting from flask.Flask
 
     :param import_name: Flask application name
     :type import_name: str
@@ -20,8 +20,8 @@ class Pynuts(flask.Flask):
     :type config_file: str
     :param reflect: Create models with database data
     :type reflect: bool
-    :param *args: flask.Flask args
-    :param **kwargs : flask.Flask kwargs
+    :param args: flask.Flask args
+    :param kwargs: flask.Flask kwargs
 
     .. seealso::
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
