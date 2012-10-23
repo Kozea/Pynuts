@@ -18,7 +18,7 @@ Create a file named ``employee.py``::
     import flask
     from flask.ext.wtf import Form, TextField, IntegerField, Required
 
-    import pynuts    
+    import pynuts
 
     #The application
     CONFIG = {
@@ -26,19 +26,21 @@ Create a file named ``employee.py``::
         'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
 
     app = pynuts.Pynuts(__name__, config=CONFIG)
-    
+
+
     #The database
     class Employee(app.db.Model):
         __tablename__ = 'Employee'
         id = app.db.Column(app.db.Integer(), primary_key=True)
         name = app.db.Column(app.db.String())
-        
+
+
     #The view
     class EmployeeView(app.ModelView):
         model = Employee
 
         view_columns = ('id', 'name')
-    
+
         class Form(Form):
             id = IntegerField(u'ID', validators=[Required()])
             name = TextField(u'Surname', validators=[Required()])
@@ -53,6 +55,7 @@ Create a file named ``employee.py``::
         app.db.create_all()
         app.secret_key = 'Azerty'
         app.run(debug=True, host='127.0.0.1', port=5000)
+
 
 
 Then run the server ::
