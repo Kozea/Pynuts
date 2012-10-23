@@ -60,6 +60,7 @@ Contents:
     Installation
     Quickstart
     API
+    Configuration
     Additional features
     Tutorial
     Advanced tutorial
