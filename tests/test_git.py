@@ -1,3 +1,5 @@
+""" Test suite of the Git module. """
+
 import os.path
 import unittest
 import shutil
@@ -10,23 +12,29 @@ from pynuts.git import (Repo, Git, ObjectTypeError, NotFoundError,
 
 
 class TestGit(unittest.TestCase):
+    """Test suite for the Git module"""
+
     hello1_content = 'Hello, World!'
     hello2_content = ('{% from "sub/name.jinja" import name %}'
                      'Hello {{ name() }}!')
     name_content = '{% macro name() %}from Pynuts{% endmacro %}'
 
     def setUp(self):
+        """Create a temporary directory."""
         self.tempdir = tempfile.mkdtemp()
 
     def tearDown(self):
+        """Delete the temporary directory with its content."""
         shutil.rmtree(self.tempdir)
 
     def test_git(self):
+        """Test the behaviour of the Git object."""
         repo = Repo.init_bare(self.tempdir)
         git = Git(repo, branch='master')
         git2 = Git(repo, branch='master')
 
         def get_hello():
+            """Return the hello.jinja template."""
             env = jinja2.Environment(loader=git.jinja_loader('templates'))
             return env.get_template('hello.jinja')
 

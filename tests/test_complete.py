@@ -28,15 +28,21 @@ from . import (
     teardown_func, setup_func, setup_fixture as setup_module,
     teardown_fixture as teardown_module, PYNUTS_ROOT)
 from .helpers import with_client, request
+
+
 from complete.exception import NoPermission
 from complete.application import app
 
 
 class TestComplete(object):
+    """ Complete test suite """
+
     def setup(self):
+        """ Method called each time a test begins. """
         setup_func()
 
     def teardown(self):
+        """ Method called each time a test ends."""
         teardown_func()
 
     @with_client

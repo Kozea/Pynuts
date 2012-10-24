@@ -18,13 +18,13 @@ import pynuts
 from complete import application
 
 
-def execute_sql(application, filename, folder=None):
+def execute_sql(app, filename):
     """Execute a sql file in the sql folder for application.app"""
     path = os.path.join(PYNUTS_ROOT, 'tests', 'sql', filename)
-    with closing(sqlite3.connect(DATABASE)) as db:
-        with application.open_resource(path) as f:
-            db.cursor().executescript(f.read())
-        db.commit()
+    with closing(sqlite3.connect(DATABASE)) as database:
+        with app.open_resource(path) as sql_script:
+            database.cursor().executescript(sql_script.read())
+        database.commit()
 
 
 def setup_fixture():
@@ -47,13 +47,18 @@ def teardown_fixture():
 
 
 def setup_func():
+    """ Execute the database creation script and remove old Git Bare repo,
+        created during app setup or last test.
+    """
     execute_sql(application.app, 'database.sql')
     # Delete previous Git Bare repo, created during the setup or the last test
     shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
     shutil.copytree(
-        os.path.join(PYNUTS_ROOT, 'tests', 'dump', 'instance', 'documents.git'),
-        application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
+        os.path.join(
+            PYNUTS_ROOT, 'tests', 'dump', 'instance', 'documents.git'),
+            application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
 
 
 def teardown_func():
+    """ Remove the temporary database. """
     os.remove(DATABASE)
