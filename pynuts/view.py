@@ -439,8 +439,14 @@ class ModelView(object):
             for key, value in form_values.items():
                 if isinstance(value, FileStorage):
                     handler = getattr(self, key + '_handler', None)
-                    if handler:
+                    if not handler:
+                        raise ValueError(
+                            'You must define a %s_handler '
+                            'property on your view set to an UploadSet' % key)
+                    if value.filename:
                         setattr(self.data, key, handler.save(value))
+                    else:
+                        setattr(self.data, key, None)
 
             self.session.add(self.data)
         self.handle_errors(self.create_form)
@@ -467,7 +473,17 @@ class ModelView(object):
         if self.update_form.validate_on_submit():
             for key, value in self._get_form_attributes(
                     self.update_form).items():
-                setattr(self.data, key, value)
+                if isinstance(value, FileStorage):
+                    handler = getattr(self, key + '_handler', None)
+                    if not handler:
+                        raise ValueError(
+                            'You must define a %s_handler '
+                            'property on your view set to an UploadSet' % key)
+                    if value.filename:
+                        setattr(self.data, key, handler.save(value))
+
+                else:
+                    setattr(self.data, key, value)
             return True
         self.handle_errors(self.update_form)
         return False
