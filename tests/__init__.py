@@ -8,11 +8,11 @@ import sqlite3
 from tempfile import mkdtemp, mkstemp
 from contextlib import closing
 
-PATH = os.path.dirname(os.path.dirname(__file__))
+PYNUTS_ROOT = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 DATABASE = mkstemp()[1]
 
-sys.path.insert(0, os.path.join(PATH, 'doc', 'example'))
-sys.path.insert(0, PATH)
+sys.path.insert(0, os.path.join(PYNUTS_ROOT, 'doc', 'example'))
+sys.path.insert(0, PYNUTS_ROOT)
 
 import pynuts
 from complete import application
@@ -20,7 +20,7 @@ from complete import application
 
 def execute_sql(application, filename, folder=None):
     """Execute a sql file in the sql folder for application.app"""
-    path = os.path.join(PATH, 'tests', 'sql', filename)
+    path = os.path.join(PYNUTS_ROOT, 'tests', 'sql', filename)
     with closing(sqlite3.connect(DATABASE)) as db:
         with application.open_resource(path) as f:
             db.cursor().executescript(f.read())
@@ -42,17 +42,18 @@ def setup_fixture():
 
 def teardown_fixture():
     """Remove the temp directory after the tests."""
-    os.rmdir(os.path.dirname(
+    shutil.rmtree(os.path.dirname(
         application.app.config['PYNUTS_DOCUMENT_REPOSITORY']))
 
 
 def setup_func():
     execute_sql(application.app, 'database.sql')
+    # Delete previous Git Bare repo, created during the setup or the last test
+    shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
     shutil.copytree(
-        os.path.join(PATH, 'tests', 'dump', 'instance', 'documents.git'),
+        os.path.join(PYNUTS_ROOT, 'tests', 'dump', 'instance', 'documents.git'),
         application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
 
 
 def teardown_func():
     os.remove(DATABASE)
-    shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])

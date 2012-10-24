@@ -19,13 +19,14 @@
 
 import json
 from flask import url_for
+import os
 
 from pynuts.document import InvalidId
 from pynuts.git import ConflictError
 
 from . import (
     teardown_func, setup_func, setup_fixture as setup_module,
-    teardown_fixture as teardown_module)
+    teardown_fixture as teardown_module, PYNUTS_ROOT)
 from .helpers import with_client, request
 from complete.exception import NoPermission
 from complete.application import app
@@ -331,7 +332,7 @@ class TestComplete(object):
     @with_client
     def test_edit_image(self, client):
         """Test the endpoint."""
-        filename = 'tests/dump/static/img/test.png'
+        filename = os.path.join(PYNUTS_ROOT, 'tests/dump/static/img/test.png')
         with client.application.test_request_context():
             response = request(
                 client.get, url_for('edit_image', person_id=1))
@@ -347,7 +348,7 @@ class TestComplete(object):
         """Test the endpoint."""
         # Use Document from the test app, not from the vanilla app
         from complete.application import app
-        filename = 'tests/dump/static/img/test.png'
+        filename = os.path.join(PYNUTS_ROOT, 'tests/dump/static/img/test.png')
 
         class EmployeeDoc(app.Document):
             pass
