@@ -2,11 +2,11 @@
 
 import os
 import flask
-from werkzeug import cached_property
-from flask.ext.sqlalchemy import SQLAlchemy
+from werkzeug.utils import cached_property
+from flask_sqlalchemy import SQLAlchemy
 from dulwich.repo import Repo
 
-from . import document, git, rights, view, filters
+from . import document, rights, view
 from .environment import create_environment
 
 
@@ -34,7 +34,8 @@ class Pynuts(flask.Flask):
 
         self.config['CSRF_ENABLED'] = False  # Why False?
         if config_file:
-            self.config.from_pyfile(config_file)  # generate app config from file
+            # generate app config from file
+            self.config.from_pyfile(config_file)
         if config:
             self.config.update(config)  # generate app config from dict
 
@@ -49,10 +50,13 @@ class Pynuts(flask.Flask):
         # Set the document repository path
         self.document_repository_path = (
             os.path.join(
-                self.instance_path, self.config.get('PYNUTS_DOCUMENT_REPOSITORY') or 'documents.git'))
+                self.instance_path,
+                self.config.get('PYNUTS_DOCUMENT_REPOSITORY') 
+                    or 'documents.git')
+            )
 
-        # If self.document_repository_path does not exist, create it (and possible parent folders)
-        # and initialize the repo
+        # If self.document_repository_path does not exist, 
+        # create it (and possible parent folders) and initialize the repo
         if not os.path.exists(self.document_repository_path):
             os.makedirs(self.document_repository_path)
             Repo.init_bare(self.document_repository_path)

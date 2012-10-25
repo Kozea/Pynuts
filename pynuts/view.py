@@ -2,8 +2,8 @@
 
 import flask
 import jinja2
-from flask.ext.wtf import Form, TextField
-from werkzeug import cached_property
+from flask_wtf import Form, TextField
+from werkzeug.utils import cached_property
 from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import class_mapper
@@ -14,6 +14,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 class FormBase(Form):
 
     def handle_errors(self):
+        """Flash all the form errors."""
         if self.errors:
             for key, errors in self.errors.items():
                 flask.flash(jinja2.Markup(
@@ -24,27 +25,27 @@ class FormBase(Form):
 
 class MetaView(type):
     """Metaclass for view classes."""
-    def __init__(cls, name, bases, dict_):
-        if cls.model:
+    def __init__(mcs, name, bases, dict_):
+        if mcs.model:
             # TODO: find a better name than the name of the class
-            cls._pynuts.views[cls.__name__] = cls
-            cls._mapping = cls._mapping or class_mapper(cls.model)
-            column_names = [column.key for column in cls._mapping.columns]
-            cls.list_columns = (cls.list_column or column_names[0],)
-            cls.table_columns = cls.table_columns or column_names
-            cls.create_columns = cls.create_columns or column_names
-            cls.read_columns = cls.read_columns or column_names
-            cls.update_columns = cls.update_columns or column_names
-            if cls.Form:
+            mcs._pynuts.views[mcs.__name__] = mcs
+            mcs._mapping = mcs._mapping or class_mapper(mcs.model)
+            column_names = [column.key for column in mcs._mapping.columns]
+            mcs.list_columns = (mcs.list_column or column_names[0],)
+            mcs.table_columns = mcs.table_columns or column_names
+            mcs.create_columns = mcs.create_columns or column_names
+            mcs.read_columns = mcs.read_columns or column_names
+            mcs.update_columns = mcs.update_columns or column_names
+            if mcs.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
-                    columns = getattr(cls, '%s_columns' % action)
-                    setattr(cls, class_name, type(
-                        class_name, (cls.form_base_class,), dict(
+                    columns = getattr(mcs, '%s_columns' % action)
+                    setattr(mcs, class_name, type(
+                        class_name, (mcs.form_base_class,), dict(
                             (field_name, getattr(
-                                cls.Form, field_name, TextField(field_name)))
+                                mcs.Form, field_name, TextField(field_name)))
                             for field_name in columns)))
-        super(MetaView, cls).__init__(name, bases, dict_)
+        super(MetaView, mcs).__init__(name, bases, dict_)
 
 
 class ModelView(object):
@@ -205,7 +206,8 @@ class ModelView(object):
                     result[key.name] = key.data
         return result
 
-    def handle_errors(self, form):
+    @classmethod
+    def handle_errors(cls, form):
         """Flash all the errors contained in the form."""
         # Test for attribute if the form has not "handle_errors" method.
         form.handle_errors()

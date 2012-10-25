@@ -7,8 +7,9 @@ import tempfile
 
 import jinja2
 
-from pynuts.git import (Repo, Git, ObjectTypeError, NotFoundError,
+from pynuts.git import (Git, ObjectTypeError, NotFoundError,
                         ConflictError)
+from dulwich.repo import Repo
 
 
 class TestGit(unittest.TestCase):

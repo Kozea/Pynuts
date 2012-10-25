@@ -1,13 +1,11 @@
 # coding: utf8
+
+"""Git file for Pynuts."""
 import os
-import io
 import time
-import urllib
-import urlparse
-import mimetypes
 
 import jinja2
-from dulwich.repo import Repo, Blob, Tree, Commit
+from dulwich.repo import Blob, Tree, Commit
 
 
 class GitException(Exception):
@@ -74,9 +72,9 @@ class Git(object):
         prefix = sub_directory + '/' if sub_directory else ''
 
         def get_source(environment, template):
-            """ Return the template source, filename and a function `is_uptodate`
-            checking if the template is up to date. As a commit is immutable,
-            `is_uptodate` always returns True.
+            """ Return the template source, filename and a function
+            `is_uptodate` checking if the template is up to date.
+            As a commit is immutable, `is_uptodate` always returns True.
 
             If template can't be found, raises a jinja2.TemplateNotFound error.
 
@@ -264,8 +262,8 @@ class Git(object):
         """
         # TODO: store by chunks without reading everything in memory?
 
-        with open(filename, 'rb') as fd:
-            return self.store_bytes(fd.read())
+        with open(filename, 'rb') as bytes_file:
+            return self.store_bytes(bytes_file.read())
 
     def store_bytes(self, bytestring):
         """Store a byte string as a blob and return its ID.

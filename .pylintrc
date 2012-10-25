@@ -35,7 +35,7 @@ load-plugins=
 # Remove warning removal warning
 # Remove stupid warning on ** magic
 # Remove stupid reimport warning
-disable=I0011,W0142,W0404
+disable=I0011,W0142,W0404, W0105
 
 
 [REPORTS]
