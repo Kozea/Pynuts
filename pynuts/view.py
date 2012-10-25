@@ -50,13 +50,14 @@ class MetaView(type):
 class ModelView(object):
     """This class represents the view of a SQLAlchemy model class.
 
-    It grants CRUD operations and offers the view corresponding.
+    It grants CRUD (Create, Read, Update, Delete) operations
+    and provides a specific view for each of these operations.
 
-    :param keys: Your model primary keys
-    :type keys: String, Tuple
+    :param keys: Your model primary key(s)
+    :type keys: str, tuple
 
     :param data: Your model data
-    :type data: Dict
+    :type data: dict
 
     """
 
@@ -173,9 +174,9 @@ class ModelView(object):
         """Return all the model elements according to a query..
 
         :param query: The SQLAlchemy query
-        :type query: String
+        :type query: str
         :param elements: A model list (if present, does not execute query)
-        :type elements: List
+        :type elements: list
 
         """
         if elements is not None:
@@ -215,7 +216,7 @@ class ModelView(object):
         If the given endpoint is already an url, return as is.
 
         :param endpoint: The endpoint for the registered URL rule
-        :type endpoint: String, func(lambda)
+        :type endpoint: str, func(lambda)
 
         """
         if callable(endpoint):
@@ -232,7 +233,7 @@ class ModelView(object):
         """Return url_for for CRUD operation.
 
         :param action: Endpoint name
-        :type action: String
+        :type action: str
 
         """
         return self.template_url_for(
@@ -241,7 +242,7 @@ class ModelView(object):
     # Endpoints methods
     @classmethod
     def create_page(cls, function):
-        """Set the create_endpoint according to the function name."""
+        """Set the create_endpoint class property according to the function name."""
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.create_endpoint = classproperty(
             lambda cls: check_auth() and function.__name__)
@@ -249,7 +250,7 @@ class ModelView(object):
 
     @classmethod
     def read_page(cls, function):
-        """Set the read_endpoint according to the function name."""
+        """Set the read_endpoint class property according to the function name."""
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.read_endpoint = classproperty(
             lambda cls: check_auth() and (
@@ -259,7 +260,7 @@ class ModelView(object):
 
     @classmethod
     def update_page(cls, function):
-        """Set the update_endpoint according to the function name."""
+        """Set the update_endpoint class property according to the function name."""
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.update_endpoint = classproperty(
             lambda cls: check_auth() and (
@@ -269,7 +270,7 @@ class ModelView(object):
 
     @classmethod
     def delete_page(cls, function):
-        """Set the delete_endpoint according to the function name."""
+        """Set the delete_endpoint class property according to the function name."""
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.delete_endpoint = classproperty(
             lambda cls: check_auth() and (
@@ -279,7 +280,7 @@ class ModelView(object):
 
     @classmethod
     def table_page(cls, function):
-        """Set the table_endpoint according to the function name."""
+        """Set the table_endpoint class property according to the function name."""
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.table_endpoint = classproperty(
             lambda cls: check_auth() and function.__name__)
@@ -287,7 +288,7 @@ class ModelView(object):
 
     @classmethod
     def list_page(cls, function):
-        """Set the list_endpoint according to the function name."""
+        """Set the list_endpoint class property according to the function name."""
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.list_endpoint = classproperty(
             lambda cls: check_auth() and function.__name__)
@@ -300,12 +301,12 @@ class ModelView(object):
         """Render the HTML for list_template.
 
         :param query: The SQLAlchemy query used for rendering the list
-        :type query: String
-        :param no_result_message: The message displayed if not any result
+        :type query: str
+        :param no_result_message: The message displayed if no result
                                   is returned by the query
-        :type no_result_message: String
+        :type no_result_message: str
         :param elements: A model list replacing query
-        :type elements: List
+        :type elements: list
 
         """
         template = cls.environment.get_template(cls.list_template)
@@ -320,12 +321,12 @@ class ModelView(object):
         """Render the HTML for table_template.
 
         :param query: The SQLAlchemy query used for rendering the table
-        :type query: String
+        :type query: str
         :param no_result_message: The message displayed if not any result
                                   is returned by the query
-        :type no_result_message: String
+        :type no_result_message: str
         :param elements: A model list replacing query
-        :type elements: List
+        :type elements: list
 
         """
         template = cls.environment.get_template(cls.table_template)
@@ -371,10 +372,10 @@ class ModelView(object):
         """Return the list_template.
 
         :param template: The template you want to render
-        :type template: String
+        :type template: str
 
         :param endpoint: The endpoint for the registered URL rule
-        :type endpoint: String, func(lambda)
+        :type endpoint: str, func(lambda)
 
         """
         return flask.render_template(
@@ -385,10 +386,10 @@ class ModelView(object):
         """Return the table_template.
 
         :param template: The template you want to render
-        :type template: String
+        :type template: str
 
         :param endpoint: The endpoint for the registered URL rule
-        :type endpoint: String, func(lambda)
+        :type endpoint: str, func(lambda)
 
         """
         return flask.render_template(
@@ -398,7 +399,7 @@ class ModelView(object):
         """Render a template with the view, view_class and instance variables.
 
         :param template: The template to render
-        :type template: String
+        :type template: str
 
         """
         return flask.render_template(
@@ -413,13 +414,13 @@ class ModelView(object):
         Else : Display the form with errors.
 
         :param template: The template you want to render
-        :type template: String
+        :type template: str
 
         :param redirect: The URL where you want to redirect after the function
-        :type redirect: String, func(lambda)
+        :type redirect: str, func(lambda)
 
         :param values: The values of the object you want to create
-        :type values: Dict
+        :type values: dict
 
         """
         if self.handle_create_form(values):
@@ -429,7 +430,7 @@ class ModelView(object):
         return self.render(template, **kwargs)
 
     def handle_create_form(self, values=None):
-        """Handle the create form."""
+        """Handle the create form operation."""
         if self.create_form.validate_on_submit():
             form_values = self._get_form_attributes(self.create_form)
             if values:
@@ -456,10 +457,10 @@ class ModelView(object):
         """Return the update_template. See the create method for more details.
 
         :param template: The template you want to render
-        :type template: String
+        :type template: str
 
         :param redirect: The URL where you want to redirect after the function
-        :type redirect: String, func(lambda)
+        :type redirect: str, func(lambda)
 
         """
         if self.handle_update_form():
@@ -469,7 +470,7 @@ class ModelView(object):
         return self.render(template, **kwargs)
 
     def handle_update_form(self):
-        """Handle the update form."""
+        """Handle the update form operation."""
         if self.update_form.validate_on_submit():
             for key, value in self._get_form_attributes(
                     self.update_form).items():
@@ -492,7 +493,7 @@ class ModelView(object):
         """Return the view_template.
 
         :param template: The template you want to render
-        :type template: String
+        :type template: str
 
         """
         self.read_fields.process(obj=self.data)
@@ -504,10 +505,10 @@ class ModelView(object):
         """Delete an entry from the database.
 
         :param template: The template you want to render
-        :type template: String
+        :type template: str
 
         :param redirect: The URL where you want to redirect after the function
-        :type redirect: String, func(lambda)
+        :type redirect: str, func(lambda)
 
         """
         if flask.request.method == 'POST':

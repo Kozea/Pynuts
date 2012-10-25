@@ -66,9 +66,25 @@ class Git(object):
             self.tree = Tree()
 
     def jinja_loader(self, sub_directory=None):
+        """Return a jinja2.BaseLoader object with a `get_source` method
+        adapted to Git commits.
+
+        :param sub_directory: the name of a sub_directory located in the template environment
+        """
         prefix = sub_directory + '/' if sub_directory else ''
 
         def get_source(environment, template):
+            """ Return the template source, filename and a function `is_uptodate`
+            checking if the template is up to date. As a commit is immutable,
+            `is_uptodate` always returns True.
+
+            If template can't be found, raises a jinja2.TemplateNotFound error.
+
+            :param environment
+            :param template: the template name
+
+            :raises jinja2.TemplateNotFound
+            """
             path = prefix + template
             try:
                 source = self.read(path).decode('utf-8')
@@ -102,6 +118,9 @@ class Git(object):
             commit = self.repository.commit(commit.parents[0])
 
     def _lookup(self, path, create_trees=False):
+        """
+        :raises ValueError, NotFoundError, ObjectTypeError
+        """
         parts = [part for part in path.encode('utf8').split('/') if part]
         if not parts:
             raise ValueError('empty path: %r' % path)
@@ -129,7 +148,7 @@ class Git(object):
     def read(self, path):
         """Return as a byte string the content of the blob at `path`.
 
-        :raises: NotFoundError, ObjectTypeError
+        :raises: ObjectTypeError
 
         """
         _, blob = self._lookup(path)
@@ -143,6 +162,8 @@ class Git(object):
 
         :param path: path to the file to write
         :param bytestring: content of the file to write
+
+        :raises ObjectTypeError
 
         """
         steps, _ = self._lookup(path, create_trees=True)
@@ -167,7 +188,7 @@ class Git(object):
         :param author_email: commit author email
         :param message: commit message
 
-        :raises: ConflictError
+        :raises: ConflictError, GitException
 
         """
         if not self.ref:  # pragma: no cover
@@ -197,7 +218,7 @@ class Git(object):
         :param author_email: commit author email
         :param message: commit message
         :param parents: parent commits
-
+        :param timezone: the author timezone
 
         """
         author = '%s <%s>' % (author_name, author_email)

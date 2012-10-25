@@ -1,8 +1,8 @@
 Tutorial
 ========
 
-The first part of this tutorial describes how to basically make CRUD with a Pynuts application. 
-The second part explains 
+The first part of this tutorial describes how to implement step-by-step a Pynuts
+application granting CRUD operations over a simple data model.
 
 Step 1: Creating the files
 --------------------------
@@ -14,42 +14,44 @@ Create 4 files at the root of your application:
 - database.py
 - executable.py
 
-Then create the `templates` and `static` folders.
+Then create the `templates` and `static` folders, in the same directory.
 
 
-Step 2: Defining the Pynuts application
----------------------------------------
+Step 2: application.py: defining the Pynuts application
+-----------------------------------------------------------
 
-First, in ``application.py`` you have to import pynuts module by calling::
+First, import ``pynuts`` by calling::
 
     import pynuts   
 
-Then you have to specify the configuration like this::
+Then, specify its configuration::
 
     CONFIG = {
         'CSRF_ENABLED': False,
         'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
         
-`CSRF_ENABLED`
-    This is used by WTForms, see `WTForms documentation <http://packages.python.org/Flask-WTF>`_
+.. note::
     
-`SQLALCHEMY_DATABASE_URI` 
-    This is the database. In this tutorial we will use a SQLite database.
+    Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
 
-Finally you have to create your pynuts application with the configuration written before::
+Finally, create your pynuts application with the previous configuration
+
+.. sourcecode:: python
 
     app = pynuts.Pynuts(__name__, config=CONFIG)
 
 
-Step 3: The database model
---------------------------
+.. _hybrid:
 
-In ``database.py`` import the pynuts application::
+Step 3: database.py: the database model
+-------------------------------------------
+
+Import the pynuts application::
 
     from application import app
     from sqlalchemy.ext.hybrid import hybrid_property
     
-Then, create a SQLAlchemy class. 
+Then, create a ``SQLAlchemy.Model`` class. 
 `Learn more about SQLAlchemy <http://www.sqlalchemy.org>`_
 
 ::
@@ -64,47 +66,50 @@ Then, create a SQLAlchemy class.
         def fullname(self):
             return '%s - %s' % (self.firstname, self.name)
 
-We decided here to add a property in our model called `fullname`, which represents better the employee than a simple name or firstname.
 
-It will be useful to easily display the employees' list later.
+.. note:: 
+    
+    We decided here to add a ``fullname`` property in our model, being a better
+    representative of an employee than simply its name or firstname.
+    This property will be especially useful when displaying the employees list.
 
-Step 4: The view model
-----------------------
+Step 4: view.py: the view model
+-----------------------------------
 
-In ``view.py`` you have to import some things from WTForms, the pynuts application and the database model::
+Import some things from WTForms, the pynuts application and the database model::
 
     from flaskext.wtf import Form, TextField, Required
 
     import database
     from application import app
 
-Now you have to create the view class that represents the Employee class. It extends the pynuts ModelView::
+Create the view class that represents the Employee class. It extends the pynuts ModelView::
 
     class EmployeeView(app.ModelView):
         
 
-Then you have to specify the class attributes.
-
-Our database model class::
+Then, specify the following class attributes: the database model class,::
 
     model = database.Employee
       
-The column which represents the class::
+the column representing the class,::
 
     list_column = 'fullname'
     
-*Warning : This must be a String not a Tuple*
+.. warning:: 
+    ``list_column`` must be a str, not a tuple. It you want to display multiple arttributes for each element of the list,
+    use a ``hybrid_property``, as shown in :ref:`hybrid`
     
-The create_columns are the columns displayed in the view. 
+and the create_columns are the columns displayed in the view. 
 
 ::
 
     create_columns = ('name', 'firstname')
 
-To finish we have to create a form for our view class. The form is extended form the Flask-WTForms Form.
+To finish we have to create a form for our view class. The form is extended from the Flask-WTForms Form.
 See `Flask-WTForms <http://packages.python.org/Flask-WTF>`_ for more information.
 
-This form is used for representing the columns from the Employee class into HTML field using WTForms fields. Those fields will be displayed in CRUD views.
+This form is used for representing the columns from the Employee class into HTML field using WTForms fields. Those fields will be displayed in all CRUD views.
 ::
 
     class Form(Form):
@@ -152,14 +157,14 @@ This view allows the `POST` and `GET` methods. The `POST` one is used for adding
 The Main
 ~~~~~~~~
 
-The main looks like that::
+::
 
     if __name__ == '__main__':
         app.db.create_all()
         app.secret_key = 'Azerty'
         app.run(debug=True, host='127.0.0.1', port=5000)
 
-In the main, we initialize the SQLite database and then run the server.
+In the main, we initialize the SQLite and then run the server.
 Since the application is a Flask one, you have to set a `secret_key` if you want the server to run properly.  
 
 Step 6: The Templates
@@ -203,9 +208,9 @@ This template show a list of all employees present in the database.
 add_employee.html
 ~~~~~~~~~~~~~~~~~
 
-This template shows a form to create an employee.
+This template shows a form allowing to create an employee.
 
-`view` stands_for an instance of EmployeeView.
+`view` stands for an ``EmployeeView`` instance.
 
 .. sourcecode:: html+jinja
     
@@ -239,7 +244,7 @@ Step 7: Adding Style
 --------------------
 The final step to your little application. Everything should be working fine, it's time to add some style !
 
-Create a file `style.css` in the static folder, you can use the css below:
+Create a file `style.css` and paste the following CSS code in it:
 
 .. sourcecode:: css
 
@@ -261,4 +266,4 @@ Create a file `style.css` in the static folder, you can use the css below:
 
 ------
  
--> `Get the whole tutorial application <https://github.com/Kozea/Pynuts/tree/master/doc/example/simple>`_
+→ `See the tutorial source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/simple>`_

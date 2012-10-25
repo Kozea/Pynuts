@@ -18,6 +18,7 @@ class Editable(Directive):
       - `title`
       - `id`
       - `class`
+      - `contenteditable`
 
     """
     required_arguments = 1
