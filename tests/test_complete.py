@@ -37,6 +37,10 @@ from complete.application import app
 class TestComplete(object):
     """ Complete test suite """
 
+# All test methods could be functions according to pylint
+# but have to instanciated as methods.
+# pylint: disable=R0201,W0613
+
     def setup(self):
         """ Method called each time a test begins. """
         setup_func()
@@ -163,22 +167,27 @@ class TestComplete(object):
         with client.application.test_request_context():
             response = request(
                 client.post, url_for('create_employee'),
-                data={'login': 'Tester', 'password': 'test', 'firstname': 'Hired',
-                      'name': 'Tester2', 'company': '1'})
+                data={'login': 'Tester',
+                      'password': 'test',
+                      'firstname': 'Hired',
+                      'name': 'Tester2',
+                      'company': '1'})
             assert 'Hired Tester2' in response.data
 
     @with_client
     def test_check_company_have_employees(self, client):
         """Check company's employees."""
         with client.application.test_request_context():
-            response = request(client.get, url_for('read_company', company_id=1))
+            response = request(client.get, url_for(
+                'read_company', company_id=1))
             assert 'Hired Tester' in response.data
 
     @with_client
     def test_check_employee_in_company(self, client):
         """Check employee's company."""
         with client.application.test_request_context():
-            response = request(client.get, url_for('read_employee', person_id=3))
+            response = request(client.get, url_for(
+                'read_employee', person_id=3))
             assert 'Test Company 1' in response.data
 
     @with_client
@@ -367,3 +376,5 @@ class TestComplete(object):
         except ConflictError:
             return
         raise StandardError('This test must raise ConflictError')
+
+# pylint: enable=R0201,W0613

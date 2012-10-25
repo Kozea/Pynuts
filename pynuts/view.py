@@ -244,7 +244,9 @@ class ModelView(object):
     # Endpoints methods
     @classmethod
     def create_page(cls, function):
-        """Set the create_endpoint class property according to the function name."""
+        """ Set the create_endpoint class property according
+            to the function name.
+        """
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.create_endpoint = classproperty(
             lambda cls: check_auth() and function.__name__)
@@ -252,7 +254,9 @@ class ModelView(object):
 
     @classmethod
     def read_page(cls, function):
-        """Set the read_endpoint class property according to the function name."""
+        """ Set the read_endpoint class property according
+            to the function name.
+        """
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.read_endpoint = classproperty(
             lambda cls: check_auth() and (
@@ -262,7 +266,9 @@ class ModelView(object):
 
     @classmethod
     def update_page(cls, function):
-        """Set the update_endpoint class property according to the function name."""
+        """ Set the update_endpoint class property according
+            to the function name.
+        """
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.update_endpoint = classproperty(
             lambda cls: check_auth() and (
@@ -272,7 +278,9 @@ class ModelView(object):
 
     @classmethod
     def delete_page(cls, function):
-        """Set the delete_endpoint class property according to the function name."""
+        """ Set the delete_endpoint class property according
+            to the function name.
+        """
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.delete_endpoint = classproperty(
             lambda cls: check_auth() and (
@@ -282,7 +290,9 @@ class ModelView(object):
 
     @classmethod
     def table_page(cls, function):
-        """Set the table_endpoint class property according to the function name."""
+        """ Set the table_endpoint class property according
+            to the function name.
+        """
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.table_endpoint = classproperty(
             lambda cls: check_auth() and function.__name__)
@@ -290,7 +300,9 @@ class ModelView(object):
 
     @classmethod
     def list_page(cls, function):
-        """Set the list_endpoint class property according to the function name."""
+        """ Set the list_endpoint class property according
+            to the function name.
+        """
         check_auth = getattr(function, '_auth_fun', lambda: True)
         cls.list_endpoint = classproperty(
             lambda cls: check_auth() and function.__name__)

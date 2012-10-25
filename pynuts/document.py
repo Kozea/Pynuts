@@ -206,7 +206,9 @@ class Document(object):
 
         :param part: part of the document to render
         :param archive: return archive content if `True`
-        :param editable: if you use the 'Editable' pynuts' ReST directive and if you need to render html with 'contenteditable="false"', set this parameter to 'False'. For more info see :ref:`api`
+        :param editable: if you use the 'Editable' pynuts'
+            ReST directive and if you need to render html with 'contenteditable="false"',
+            set this parameter to 'False'. For more info see :ref:`api`
         """
         part = 'index.rst' if archive else part
         if archive:
@@ -232,7 +234,9 @@ class Document(object):
 
         :param part: part of the document to render
         :param archive: return archive content if `True`
-        :param editable: if you use the 'Editable' pynuts' ReST directive and if you need to render html with 'contenteditable="false"', set this parameter to 'False'. For more info see :ref:`api`
+        :param editable: if you use the 'Editable' pynuts'
+            ReST directive and if you need to render html with 'contenteditable="false"',
+            set this parameter to 'False'. For more info see :ref:`api`
 
         .. seealso::
            `Docutils writer publish parts
@@ -447,7 +451,9 @@ class Document(object):
         :param part: part of the document to render
         :param version: version of the document to render
         :param archive: return archive content if `True`
-        :param editable: if you use the 'Editable' pynuts' ReST directive and if you need to render html with 'contenteditable="false"', set this parameter to 'False'. For more info see :ref:`api`
+        :param editable: if you use the 'Editable' pynuts'
+            ReST directive and if you need to render html with 'contenteditable="false"',
+            set this parameter to 'False'. For more info see :ref:`api`
 
         """
         part = 'index.rst' if archive else part
@@ -465,7 +471,9 @@ class Document(object):
         :param version: version of the document to render
         :param archive: set it to 'True' if you render an archive
         :param html_part: the docutils publish part to render
-        :param editable: if you use the 'Editable' pynuts' ReST directive and if you need to render html with 'contenteditable="false"', set this parameter to 'False'. For more info see :ref:`api`
+        :param editable: if you use the 'Editable' pynuts'
+            ReST directive and if you need to render html with 'contenteditable="false"',
+            set this parameter to 'False'. For more info see :ref:`api`
 
         """
         part = 'index.rst' if archive else part
