@@ -34,7 +34,6 @@ class AllowedFile(object):
             field_label = field.label.text
             raise UploadNotAllowed('The %s field does not allow the upload of %s files.' % (
                 field_label, extension))
-            # TODO: render template instead?
 
 
 class MaxSize(object):
@@ -46,13 +45,27 @@ class MaxSize(object):
     def __init__(self, size=5):
         self.max_size = size
 
+    def __call__(self, form, field):
+        """Check if uploaded file is under specified max size."""
+        if self.byte_size < self.stream_size(field.data.stream):
+            raise UploadNotAllowed(
+                'Maximum authorized file size is %.1f MB.' % (self.max_size))
+
     @property
     def byte_size(self):
         return self.max_size * 1048576
 
-    def __call__(self, form, field):
-        """Check if uploaded file is under specified max size."""
-        if self.byte_size < len(field.data.stream.getvalue()):
-            raise UploadNotAllowed(
-                'Maximum authorized file size is %.1f MB.' % (self.max_size))
-            # TODO: render template instead?
+    @staticmethod
+    def stream_size(stream):
+        """Returns the size (in bytes) of a byte stream.
+
+        :seealso https://groups.google.com/forum/?fromgroups=\
+        #!searchin/pocoo-libs/FileStorage/pocoo-libs/n9S53qFqlwo/zwYiBcDwP8gJ
+        """
+        if hasattr(stream, "getvalue"):
+            file_size = len(stream.getvalue())
+        else:
+            stream.seek(0, 2)
+            file_size = stream.tell()
+            stream.seek(0)
+        return file_size
