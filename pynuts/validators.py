@@ -32,7 +32,7 @@ class AllowedFile(object):
         except UploadNotAllowed:
             extension = field.data.filename.split('.')[-1]
             field_label = field.label.text
-            raise UploadNotAllowed('The %s field does not allow the upload of %s files.' % (
+            raise ValidationError('The %s field does not allow the upload of %s files' % (
                 field_label, extension))
 
 
@@ -48,8 +48,8 @@ class MaxSize(object):
     def __call__(self, form, field):
         """Check if uploaded file is under specified max size."""
         if self.byte_size < self.stream_size(field.data.stream):
-            raise UploadNotAllowed(
-                'Maximum authorized file size is %.1f MB.' % (self.max_size))
+            raise ValidationError('Maximum authorized file size is %.1f MB.' % (
+                self.max_size))
 
     @property
     def byte_size(self):
