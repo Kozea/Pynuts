@@ -2,15 +2,15 @@
 import os
 from flask import current_app
 from flask.ext.wtf import ValidationError
-from flask.ext.uploads import UploadConfiguration, UploadNotAllowed
+from flask.ext.uploads import UploadConfiguration
 
 
 class AllowedFile(object):
+    """A validator ensuring that a file is allowed to be uploaded."""
     def __call__(self, form, field):
         """ Check if uploaded file can be saved, according to the rules
             defined by the corresponding UploadSet.
 
-            If no file, raise ValidationError.
             If the file breaks the UploadSet rule, raise UploadNotAllowed.
             Else, save the upload file in a subdirectory named after the
             UploadSet, located in the app instance path.
@@ -26,10 +26,8 @@ class AllowedFile(object):
         field.upload_set._config = UploadConfiguration(destination=os.path.join(
             current_app.uploads_default_dest, field.name))
         if not field.has_file():
-            raise ValidationError('FileField must not be empty.')
-        try:
-            field.upload_set.save(field.data)
-        except UploadNotAllowed:
+            return
+        if not field.upload_set.file_allowed(field.data, field.data.filename):
             extension = field.data.filename.split('.')[-1]
             field_label = field.label.text
             raise ValidationError('The %s field does not allow the upload of %s files' % (
