@@ -37,3 +37,22 @@ class AllowedFile(object):
             # TODO: render template instead?
 
 
+class MaxSize(object):
+    """A validator ensuring that uploaded file size is under a specified maximum size.
+
+    :param size: The maximum size to accept, in MB. The default value is 5MB.
+    :type size: float, int
+    """
+    def __init__(self, size=5):
+        self.max_size = size
+
+    @property
+    def byte_size(self):
+        return self.max_size * 1048576
+
+    def __call__(self, form, field):
+        """Check if uploaded file is under specified max size."""
+        if self.byte_size < len(field.data.stream.getvalue()):
+            raise UploadNotAllowed(
+                'Maximum authorized file size is %.1f MB.' % (self.max_size))
+            # TODO: render template instead?
