@@ -11,5 +11,5 @@ setup(
                              'static/javascript/*.js']},
     install_requires=[
         'Flask-SQLAlchemy', 'Flask-WTF', 'Flask-WeasyPrint', 'docutils',
-        'dulwich', 'docutils_html5_writer']
+        'dulwich', 'docutils_html5_writer', 'Flask-Uploads']
 )
