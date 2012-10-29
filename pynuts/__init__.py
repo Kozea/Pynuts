@@ -32,7 +32,7 @@ class Pynuts(flask.Flask):
                  reflect=False, *args, **kwargs):
         super(Pynuts, self).__init__(import_name, *args, **kwargs)
 
-        self.config['CSRF_ENABLED'] = False  # Why False?
+        self.config['CSRF_ENABLED'] = False
         if config_file:
             # generate app config from file
             self.config.from_pyfile(config_file)
@@ -51,11 +51,11 @@ class Pynuts(flask.Flask):
         self.document_repository_path = (
             os.path.join(
                 self.instance_path,
-                self.config.get('PYNUTS_DOCUMENT_REPOSITORY') 
+                self.config.get('PYNUTS_DOCUMENT_REPOSITORY')
                     or 'documents.git')
             )
 
-        # If self.document_repository_path does not exist, 
+        # If self.document_repository_path does not exist,
         # create it (and possible parent folders) and initialize the repo
         if not os.path.exists(self.document_repository_path):
             os.makedirs(self.document_repository_path)
@@ -65,6 +65,10 @@ class Pynuts(flask.Flask):
         # at the /_pynuts/static/<path:filename> URL
         self.add_url_rule('/_pynuts/static/<path:filename>',
                           '_pynuts-static', static)
+
+        # Uploads root directory
+        self.config['UPLOADS_DEFAULT_DEST'] = os.path.join(
+            self.instance_path, 'uploads')
 
         class Document(document.Document):
             """Document base class of the application."""
@@ -124,6 +128,10 @@ class Pynuts(flask.Flask):
         """Create the request context."""
         flask.g.context = self._context_class()
 
+    @property
+    def uploads_default_dest(self):
+        """Access to the UPLOADS_DEFAULT_DEST configuration."""
+        return self.config.get('UPLOADS_DEFAULT_DEST')
 
 def static(filename):
     """ Return files from Pynuts static folder.
