@@ -46,6 +46,8 @@ class MaxSize(object):
 
     def __call__(self, form, field):
         """Check if uploaded file is under specified max size."""
+        if not field.has_file():
+            return
         if self.byte_size < self.stream_size(field.data.stream):
             raise ValidationError('Maximum authorized file size is %.1f MB' % (
                 self.max_size))
