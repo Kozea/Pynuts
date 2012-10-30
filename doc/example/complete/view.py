@@ -4,7 +4,7 @@ from flask.ext.wtf import (Form, TextField, IntegerField,
 
 import database
 from application import app
-from pynuts.fields import UploadField
+from pynuts.fields import UploadField, ImageField
 from pynuts.validators import AllowedFile, MaxSize
 from files import UPLOAD_SETS
 
@@ -15,11 +15,11 @@ class EmployeeView(app.ModelView):
     list_column = 'fullname'
     table_columns = ('order', 'fullname', 'driving_license')
     create_columns = ('login', 'password', 'name', 'firstname', 'company',
-                      'resume', 'driving_license')
+                      'resume', 'photo', 'driving_license')
     read_columns = ('person_id', 'name', 'firstname', 'fullname', 'company',
-                    'resume', 'driving_license')
+                    'resume', 'photo', 'driving_license')
     update_columns = ('name', 'firstname', 'company', 'driving_license',
-                    'resume', 'order')
+                    'resume', 'photo', 'order')
 
     class Form(Form):
         person_id = IntegerField('ID')
@@ -31,7 +31,10 @@ class EmployeeView(app.ModelView):
         driving_license = BooleanField('Driving license')
         resume = UploadField(label='resume',
             upload_set=UPLOAD_SETS['resumes'],
-            validators=[AllowedFile(), MaxSize()])
+            validators=[AllowedFile(), MaxSize(1)])
+        photo = ImageField(label='photo',
+            upload_set=UPLOAD_SETS['images'],
+            validators=[AllowedFile(), MaxSize(1)])
         company = QuerySelectField(
             u'Company', get_label='name',
             query_factory=lambda: database.Company.query, allow_blank=True)

@@ -20,6 +20,7 @@ class Employee(app.db.Model, Orderable):
     password = app.db.Column(app.db.String())
     driving_license = app.db.Column(app.db.Boolean())
     resume = app.db.Column(app.db.String())
+    photo = app.db.Column(app.db.String())
     order = app.db.Column(app.db.Integer())
     company_id = app.db.Column(
         app.db.Integer(), app.db.ForeignKey('Company.company_id'))
