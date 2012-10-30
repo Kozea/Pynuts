@@ -18,8 +18,10 @@
 """Test for Pynuts (all the routes are tested)"""
 
 import json
-from flask import url_for
 import os
+
+from flask import url_for
+from cStringIO import StringIO
 
 from pynuts.document import InvalidId
 from pynuts.git import ConflictError
@@ -79,6 +81,8 @@ class TestComplete(object):
             assert 'name="name"' in response.data
             assert 'name="firstname' in response.data
             assert 'name="company"' in response.data
+            assert 'name="photo"' in response.data
+            assert 'name="resume"' in response.data
 
     @with_client
     def test_create_employee(self, client):
@@ -93,6 +97,62 @@ class TestComplete(object):
                 client.post, url_for('create_employee'),
                 data={'login': '', 'password': '', 'name': '', 'firstname': ''})
             assert 'This field is required' in response.data
+
+    @with_client
+    def test_create_employee_with_resume(self, client):
+        """Create an employee with a resume"""
+        with client.application.test_request_context():
+            resp = request(
+                client.post, url_for('create_employee'),
+                data={'resume': (StringIO('my file contents'), 'resume.pdf')})
+            assert 'resume.pdf' in resp.data
+
+    @with_client
+    def test_create_employee_with_resume_wrong_extension(self, client):
+        """Create an employee with a resume of forbidden extension"""
+        with client.application.test_request_context():
+            resp = request(
+                client.post, url_for('create_employee'),
+                data={'resume': (StringIO('my file contents'), 'resume.jpg')})
+            assert 'The resume field does not allow the upload '
+            'of jpg files.' in resp.data
+
+    @with_client
+    def test_create_employee_with_resume_too_heavy(self, client):
+        """Create an employee with a resume which size exceeds the maximum one."""
+        with client.application.test_request_context():
+            resp = request(
+                client.post, url_for('create_employee'),
+                data={'resume': (StringIO('X' * 1100000), 'resume.pdf')})
+            assert 'Maximum authorized file size is 1.0 MB' in resp.data
+
+    @with_client
+    def test_create_employee_with_photo(self, client):
+        """Create an employee with a photo"""
+        with client.application.test_request_context():
+            resp = request(
+                client.post, url_for('create_employee'),
+                data={'photo': (StringIO('my file contents'), 'photo.jpg')})
+            assert 'photo.jpg' in resp.data
+
+    @with_client
+    def test_create_employee_with_photo_wrong_extension(self, client):
+        """Create an employee with a resume of forbidden extension"""
+        with client.application.test_request_context():
+            resp = request(
+                client.post, url_for('create_employee'),
+                data={'photo': (StringIO('my file contents'), 'photo.txt')})
+            assert 'The resume field does not allow the upload '
+            'of txt files.' in resp.data
+
+    @with_client
+    def test_create_employee_with_photo_too_heavy(self, client):
+        """Create an employee with a resume which size exceeds the maximum one."""
+        with client.application.test_request_context():
+            resp = request(
+                client.post, url_for('create_employee'),
+                data={'photo': (StringIO('X' * 1100000), 'photo.jpg')})
+            assert 'Maximum authorized file size is 1.0 MB' in resp.data
 
     @with_client
     def test_update_fields(self, client):
