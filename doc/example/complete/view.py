@@ -4,7 +4,7 @@ from flask.ext.wtf import (Form, TextField, IntegerField,
 
 import database
 from application import app
-from pynuts.field import UploadField
+from pynuts.fields import UploadField
 from pynuts.validators import AllowedFile, MaxSize
 from files import UPLOAD_SETS
 

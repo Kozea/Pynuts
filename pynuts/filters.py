@@ -5,7 +5,7 @@
 from flask import escape
 from flask.ext.wtf import (
     QuerySelectField, QuerySelectMultipleField, BooleanField, DateField)
-from .field import UploadField
+from .fields import UploadField
 
 
 def data(field):
