@@ -46,9 +46,11 @@ def data(field):
         if field.data:
             return field.data.strftime(field.format)
     elif isinstance(field, ImageField):
-        return '<img src="%s">' % (field.upload_set.url(field.data))
+        if field.data:
+            return '<img src="%s">' % (field.upload_set.url(field.data))
     elif isinstance(field, UploadField):
-        return '<a href="%s">%s</a>' % (
-            field.upload_set.url(field.data),
-            field.data)
+        if field.data:
+            return '<a href="%s">%s</a>' % (
+                field.upload_set.url(field.data),
+                field.data)
     return escape(field.data)
