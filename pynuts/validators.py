@@ -1,8 +1,6 @@
 """Form validators for Pynuts."""
-import os
-from flask import current_app
+
 from flask.ext.wtf import ValidationError
-from flask.ext.uploads import UploadConfiguration
 
 
 class AllowedFile(object):
@@ -29,12 +27,12 @@ class AllowedFile(object):
         if not field.upload_set.file_allowed(field.data, field.data.filename):
             extension = field.data.filename.split('.')[-1]
             field_label = field.label.text
-            raise ValidationError('The %s field does not allow the upload of %s files' % (
-                field_label, extension))
+            raise ValidationError('The %s field does not allow the upload of '
+                '%s files' % (field_label, extension))
 
 
 class MaxSize(object):
-    """A validator ensuring that uploaded file size is under a specified maximum size.
+    """A validator ensuring that uploaded file size is under the allowed size.
 
     :param size: The maximum size to accept, in MB. The default value is 5MB.
     :type size: float, int
@@ -54,6 +52,7 @@ class MaxSize(object):
 
     @property
     def byte_size(self):
+        """Convert megabytes to bytes."""
         return self.max_size * 1048576
 
     @staticmethod

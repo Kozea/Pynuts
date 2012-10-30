@@ -95,7 +95,8 @@ class TestComplete(object):
             assert 'Tester Tester' in response.data
             response = request(
                 client.post, url_for('create_employee'),
-                data={'login': '', 'password': '', 'name': '', 'firstname': ''})
+                data={'login': '', 'password': '', 'name': '', 'firstname': ''}
+                )
             assert 'This field is required' in response.data
 
     @with_client
@@ -147,7 +148,9 @@ class TestComplete(object):
 
     @with_client
     def test_create_employee_with_photo_too_heavy(self, client):
-        """Create an employee with a resume which size exceeds the maximum one."""
+        """ Create an employee with a resume which size exceeds the
+            maximum one.
+        """
         with client.application.test_request_context():
             resp = request(
                 client.post, url_for('create_employee'),
@@ -180,7 +183,8 @@ class TestComplete(object):
     def test_delete_confirm(self, client):
         """Check the delete confimation."""
         with client.application.test_request_context():
-            response = request(client.get, url_for('delete_employee', person_id=2))
+            response = request(client.get, url_for(
+                'delete_employee', person_id=2))
             assert 'Do you really want to delete '
             '<strong>Tester Tester</strong>?' in response.data
 

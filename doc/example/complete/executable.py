@@ -9,7 +9,7 @@ from pynuts.directives import Editable
 from pynuts.document import Content
 import view
 import document
-from database import Employee, Company
+from database import Employee
 import rights as Is
 from exception import NoPermission
 from files import upload_sets
