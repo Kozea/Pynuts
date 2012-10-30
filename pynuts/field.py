@@ -2,9 +2,7 @@
 
 from wtforms import StringField
 from wtforms.widgets import html_params, HTMLString
-from flask.ext.uploads import UploadSet
 from flask.ext.wtf import FileField
-from flask import current_app
 
 
 class Editable(object):
@@ -23,10 +21,7 @@ class EditableField(StringField):
 
 
 class UploadField(FileField):
-    """Field handling the file upload operation and validation."""
+    """Field handling file uploads."""
     def __init__(self, upload_set, *args, **kwargs):
         super(UploadField, self).__init__(*args, **kwargs)
-        label, extensions = upload_set
-        self.upload_set = UploadSet(name=label,
-                                    extensions=extensions,
-                                    default_dest=lambda app: current_app.uploads_default_dest)
+        self.upload_set = upload_set
