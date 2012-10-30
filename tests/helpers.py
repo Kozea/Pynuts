@@ -18,6 +18,7 @@ Helpers for tests, with definition of decorator and function.
 
 """
 from complete import application
+from complete import files
 from functools import wraps
 
 
@@ -27,6 +28,7 @@ def with_client(function):
     def wrapper(self, *args, **kwargs):
         """Decorator for the client login."""
         client = application.app.test_client()
+        application.app.add_upload_sets(files.upload_sets())
         client.post('login', data={'login': 'admin', 'password': 'root'})
         return function(self, client=client, *args, **kwargs)
     return wrapper
