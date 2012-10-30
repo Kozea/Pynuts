@@ -25,3 +25,9 @@ class UploadField(FileField):
     def __init__(self, upload_set, *args, **kwargs):
         super(UploadField, self).__init__(*args, **kwargs)
         self.upload_set = upload_set
+
+
+class ImageField(UploadField):
+    """Field specifically handling image uploads."""
+    def __init__(self, *args, **kwargs):
+        super(ImageField, self).__init__(*args, **kwargs)

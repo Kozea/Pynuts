@@ -5,7 +5,7 @@
 from flask import escape
 from flask.ext.wtf import (
     QuerySelectField, QuerySelectMultipleField, BooleanField, DateField)
-from .fields import UploadField
+from .fields import UploadField, ImageField
 
 
 def data(field):
@@ -39,6 +39,8 @@ def data(field):
     elif isinstance(field, DateField):
         if field.data:
             return field.data.strftime(field.format)
+    elif isinstance(field, ImageField):
+        return '<img src="%s">' % (field.upload_set.url(field.data))
     elif isinstance(field, UploadField):
         return '<a href="%s">%s</a>' % (
             field.upload_set.url(field.data),
