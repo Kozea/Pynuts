@@ -17,6 +17,12 @@ def data(field):
       Renders the selected value.
     BooleanField
       Renders '✓' or '✕'
+    DateField
+      Renders the date
+    ImageField
+      Renders the Image
+    UploadField
+      Renders a link to the uploaded file
 
     Example:
 
