@@ -17,14 +17,13 @@ class AllowedFile(object):
 
             Example: a file uploaded via the following UploadField:
 
-            >>> UploadField(label=u'avatar', upload_set=('images', IMAGES), validators=[AllowedFile()])
+            >>> images = UploadSet('images', IMAGES)
+            >>> UploadField(label=u'avatar', upload_set=images validators=[AllowedFile()])
 
             will be stored in instance/uploads/images (instance/ being the app instance path).
 
-            raises: ValidationError, UploadNotAllowed
+            raises: ValidationError
         """
-        field.upload_set._config = UploadConfiguration(destination=os.path.join(
-            current_app.uploads_default_dest, field.name))
         if not field.has_file():
             return
         if not field.upload_set.file_allowed(field.data, field.data.filename):
@@ -39,6 +38,8 @@ class MaxSize(object):
 
     :param size: The maximum size to accept, in MB. The default value is 5MB.
     :type size: float, int
+
+    :raises ValidationError
     """
     def __init__(self, size=5):
         self.max_size = size
@@ -46,7 +47,7 @@ class MaxSize(object):
     def __call__(self, form, field):
         """Check if uploaded file is under specified max size."""
         if self.byte_size < self.stream_size(field.data.stream):
-            raise ValidationError('Maximum authorized file size is %.1f MB.' % (
+            raise ValidationError('Maximum authorized file size is %.1f MB' % (
                 self.max_size))
 
     @property
