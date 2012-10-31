@@ -129,10 +129,10 @@ class Pynuts(flask.Flask):
         """Create the request context."""
         flask.g.context = self._context_class()
 
-    def add_upload_sets(self, upload_sets):
+    def add_upload_sets(self, upload_sets, upload_max_size=16777216):
         """Configure the app with the argument upload sets."""
         configure_uploads(self, upload_sets)
-        patch_request_class(self)  # limit the size of uploads to 16MB
+        patch_request_class(self, upload_max_size)  # limit the size of uploads to 16MB
 
     @property
     def uploads_default_dest(self):
