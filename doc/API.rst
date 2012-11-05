@@ -41,10 +41,10 @@ Directives
    :members:
 
 
-Field
------
+Fields
+------
 
-.. automodule:: pynuts.field
+.. automodule:: pynuts.fields
    :members:
 
 Environment
@@ -59,3 +59,14 @@ Filters
 .. automodule:: pynuts.filters
     :members:
 
+Validators
+----------
+
+.. automodule:: pynuts.validators
+    :members:
+
+Models
+------
+
+.. automodule:: pynuts.model
+    :members:
