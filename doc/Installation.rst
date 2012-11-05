@@ -27,7 +27,7 @@ We also encourage you to install Pynuts in a virtualenv.
 Github
 ------
 
-Check out the development version on Github::
+Check out the development version on `Github <https://github.com/Kozea/Pynuts>`_ ::
 
     $ git clone git://github.com/Kozea/Pynuts
 
