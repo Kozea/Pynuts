@@ -32,6 +32,7 @@ Have a look at this comparison:
     |    @app.route('/employee/add', methods=('GET', 'POST'))             |     @app.route('/employee/add', methods=('GET', 'POST'))                            |
     |    def add_employee():                                              |     def add_employee():                                                             |
     |        form = EmployeeForm()                                        |         return EmployeeView().create('create_employee.html.jinja2')                 |
+    |        if form.validate_on_submit():                                |                                                                                     |
     |            employee = Employee()                                    |                                                                                     |
     |            form.populate_obj(employee)                              |                                                                                     |
     |            db.session.add(employee)                                 |                                                                                     |
