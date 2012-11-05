@@ -54,8 +54,8 @@ Add this function in ``executable.py``::
     @view.EmployeeView.update_page
     @app.route('/employee/update/<id>', methods=('POST', 'GET'))
     def update_employee(id):
-        return view.EmployeeView(id).update('update_employee.html',
-                                          redirect='employees')
+        return view.EmployeeView(id).update(
+            'update_employee.html', redirect='employees')
 
 .. note::
         
@@ -88,8 +88,8 @@ The, add this function in ``executable.py``::
     @view.EmployeeView.delete_page
     @app.route('/employee/delete/<id>')
     def delete_employee(id):
-        return view.EmployeeView(id).delete('delete_employee.html',
-                                            redirect='employees')
+        return view.EmployeeView(id).delete(
+            'delete_employee.html', redirect='employees')
                                             
 Read Employee
 ~~~~~~~~~~~~~
@@ -161,8 +161,8 @@ To do so, go back to the *create* route in ``executable.py`` and insert the foll
   @app.route('/employee/create/', methods=('POST', 'GET'))
   def create_employee():
       employee = view.EmployeeView()
-      response = employee.create('create_employee.html',
-                                 redirect='employees')
+      response = employee.create(
+          'create_employee.html', redirect='employees')
       if employee.create_form.validate_on_submit():
           document.EmployeeDoc.create(employee=employee)
       return response
@@ -171,7 +171,7 @@ This function performs the following operations:
 
 - Create an instance of EmployeeView
 - Call the create method of EmployeeView. 
-- reate a new document, if the employee `create_form` is validated.
+- Create a new document, if the employee `create_form` is validated.
 - Finally, redirect to the list of employees
 
 When the document is created for the first time, Pynuts make an initial commit of the folder which contains the model in a new branch. 
@@ -204,8 +204,8 @@ Then, insert the following snippet in ``executable.py``
     def edit_employee_report(id):
         employee = view.EmployeeView(id)
         doc = document.EmployeeDoc
-        return doc.edit('edit_employee_template.html',
-                        employee=employee)
+        return doc.edit(
+            'edit_employee_template.html', employee=employee)
 
 This function performs the following operations:
 
@@ -238,8 +238,8 @@ To download the PDF version of the document, call the ``download_pdf`` class met
     @app.route('/employee/download/<id>')
     def download_employee(id):
         doc = document.EmployeeDoc
-        return doc.download_pdf(filename='Employee %s report' % (id),
-                                employee=view.EmployeeView(id))
+        return doc.download_pdf(
+            filename='Employee %s report' % (id), employee=view.EmployeeView(id))
 
 
 Working with versions
@@ -277,6 +277,7 @@ In the following example, we generate a table:
   {% block main %}
     <h2>Employee</h2>
     {{ view.view_read() }}
+
     <h2>Document history</h2>
     <table>
       <tr>
@@ -305,9 +306,8 @@ Something like that for the `html_employee` view::
     @app.route('/employee/html/<id>/<version>')
     def html_employee(id, version=None):
         doc = document.EmployeeDoc
-        return doc.html('employee_report.html',
-                        employee=view.EmployeeView(id),
-                        version=version)
+        return doc.html(
+            'employee_report.html', employee=view.EmployeeView(id), version=version)
                         
 Finally, go back to the ``edit_employee_template.html`` template in order to add the version in parameter of the view classmethod of `EmployeeDoc`
 
@@ -364,15 +364,15 @@ Here, the access to the list of employees won't be granted if you aren't connect
 
 Of course, you can combine some rights, it implements the following operators:
 
-+-------+--------+
-| a & b | a and b|
-+-------+--------+
-| a | b | a or b |
-+-------+--------+
-| a ^ b | a xor b|
-+-------+--------+
-|  ~ a  |  not a |
-+-------+--------+
++-------+---------+
+| a & b | a and b |
++-------+---------+
+| a | b | a or b  |
++-------+---------+
+| a ^ b | a xor b |
++-------+---------+
+|  ~ a  |  not a  |
++-------+---------+
     
 You can write this for example: 
 

@@ -2,7 +2,7 @@ from flask.ext.wtf import Form, TextField, IntegerField, Required
 
 import pynuts
 
-#The application
+# The application
 CONFIG = {
     'CSRF_ENABLED': False,
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
@@ -10,14 +10,14 @@ CONFIG = {
 app = pynuts.Pynuts(__name__, config=CONFIG)
 
 
-#The database
+# The database
 class Employee(app.db.Model):
     __tablename__ = 'Employee'
     id = app.db.Column(app.db.Integer(), primary_key=True)
     name = app.db.Column(app.db.String())
 
 
-#The view
+# The view
 class EmployeeView(app.ModelView):
     model = Employee
     list_column = 'name'
@@ -27,7 +27,7 @@ class EmployeeView(app.ModelView):
         name = TextField(u'Surname', validators=[Required()])
 
 
-#The executable
+# The executable
 @app.route('/')
 def employees():
     return EmployeeView.list('list_employees.html')
@@ -35,8 +35,8 @@ def employees():
 
 @app.route('/add', methods=('POST', 'GET'))
 def add_employee():
-    return EmployeeView().create('add_employee.html',
-                                      redirect='employees')
+    return EmployeeView().create(
+        'add_employee.html', redirect='employees')
 
 if __name__ == '__main__':
     app.db.create_all()  # Reflect app models in DB

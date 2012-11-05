@@ -150,8 +150,8 @@ This view allows the `POST` and `GET` methods. The `POST` one is used for adding
 
     @app.route('/employee/add/', methods=('POST', 'GET'))
     def add_employee():
-        return view.EmployeeView().create('add_employee.html',
-                                          redirect='employees')
+        return view.EmployeeView().create(
+            'add_employee.html', redirect='employees')
 
 The Main
 ~~~~~~~~

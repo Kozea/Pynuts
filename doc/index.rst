@@ -49,6 +49,7 @@ Pynuts is based on
     - `SQLAlchemy <http://www.sqlalchemy.org/>`_
     - `WTForms <http://wtforms.simplecodes.com/>`_
     - `Flask Uploads <http://packages.python.org/Flask-Uploads/>`_
+    - `WeasyPrint <http://weasyprint.org/>`_
     - `Git <https://www.samba.org/~jelmer/dulwich/>`_
 
 
