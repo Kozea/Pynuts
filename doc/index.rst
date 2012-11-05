@@ -8,7 +8,7 @@ Welcome to Pynuts' documentation!
     
 Latest Version: 0.1
 
-Pynuts is a library which will simplify your code by creating some generic content.
+Pynuts is a Flask extension which will simplify your code by creating some generic content.
 
 It allows you to: 
  
@@ -48,6 +48,7 @@ Pynuts is based on
     - `Flask <https://github.com/mitsuhiko/flask>`_
     - `SQLAlchemy <http://www.sqlalchemy.org/>`_
     - `WTForms <http://wtforms.simplecodes.com/>`_
+    - `Flask Uploads <http://packages.python.org/Flask-Uploads/>`_
     - `Git <https://www.samba.org/~jelmer/dulwich/>`_
 
 
@@ -59,8 +60,8 @@ Contents:
 
     Installation
     Quickstart
-    Configuration
-    Additional features
     Tutorial
     Advanced tutorial
+    Additional features
+    Configuration
     API
