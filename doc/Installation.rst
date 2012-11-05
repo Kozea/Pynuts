@@ -16,7 +16,7 @@ We encourage you to install Pynuts in a virtualenv.
 
 .. warning::
 
-    Pynuts relates on `WeasyPrint <https://github.com/Kozea/WeasyPrint>`_ to generate PDF documents
+    Pynuts relies on `WeasyPrint <https://github.com/Kozea/WeasyPrint>`_ to generate PDF documents
     from from web documents (HTML, CSS, SVG, etc).
     Some of its dependencies, `pygobject <https://github.com/alexef/pygobject>`_ and
     `pycairo <http://www.cairographics.org/pycairo/>`_  cannot be installed with pip.

@@ -20,7 +20,7 @@ def data(field):
     DateField
       Renders the date
     ImageField
-      Renders the Image
+      Renders the image
     UploadField
       Renders a link to the uploaded file
 

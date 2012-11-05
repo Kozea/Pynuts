@@ -64,9 +64,3 @@ Validators
 
 .. automodule:: pynuts.validators
     :members:
-
-Models
-------
-
-.. automodule:: pynuts.model
-    :members:

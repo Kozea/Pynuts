@@ -18,7 +18,7 @@ It allows you to:
    Of course, you can use all the features that git provides and do what you want with your documents, that's why Pynuts is a powerful tool for developpers.
  - drastically reduce the amount of code to write.
 
-Take a look at this comparison:
+Have a look at this comparison:
 
 .. table::
     :class: compare-table
@@ -59,8 +59,8 @@ Contents:
 
     Installation
     Quickstart
-    API
     Configuration
     Additional features
     Tutorial
     Advanced tutorial
+    API
