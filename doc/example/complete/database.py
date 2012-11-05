@@ -1,6 +1,6 @@
 """SQLAlchemy models definition for complete example."""
 
-from complete.application import app
+from application import app
 from sqlalchemy.ext.hybrid import hybrid_property
 from pynuts.model import Orderable
 
