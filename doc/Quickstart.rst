@@ -66,5 +66,8 @@ So what did our code do?
 
 To stop the server, hit control-C.
 
+→ `See the quickstart source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/quickstart>`_
+
+
 .. seealso::
   `How to run a simple flask application <http://flask.pocoo.org/docs/quickstart/>`_
