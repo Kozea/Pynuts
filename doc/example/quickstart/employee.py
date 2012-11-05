@@ -33,7 +33,7 @@ def employees():
     return EmployeeView.list('list_employees.html')
 
 
-@app.route('add/', methods=('POST', 'GET'))
+@app.route('/add', methods=('POST', 'GET'))
 def add_employee():
     return EmployeeView().create('add_employee.html',
                                       redirect='employees')

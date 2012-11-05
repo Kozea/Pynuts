@@ -1,11 +1,18 @@
 <!Doctype html>
 <html>
-  <head>
-  </head>
-  <body>
-    <section>
-    {% block main %}
-    {% endblock main %}
-    </section>
-  </body>
+<head>
+  <title>Pynuts'</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<h1>Pynuts'</h1>
+<nav>
+  <a href="{{ url_for('employees') }}">Employee list</a>
+  <a href="{{ url_for('add_employee') }}">Add a new employee</a>
+</nav>
+<section>
+{% block main %}
+{% endblock main %}
+</section>
+</body>
 </html>
