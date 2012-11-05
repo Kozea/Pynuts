@@ -4,3 +4,4 @@
 /doc/_build
 /.coverage
 doc/example/instance
+instance/
