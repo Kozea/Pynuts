@@ -1,36 +1,7 @@
 #!/usr/bin/env python
-from flask.ext.wtf import (Form, IntegerField, TextField, Required)
-from sqlalchemy.ext.hybrid import hybrid_property
 
-import pynuts
-
-CONFIG = {'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/simple.db'}
-
-app = pynuts.Pynuts(__name__, config=CONFIG)
-
-
-class Employee(app.db.Model):
-        __tablename__ = 'Employee'
-        id = app.db.Column(app.db.Integer(), primary_key=True)
-        name = app.db.Column(app.db.String())
-        firstname = app.db.Column(app.db.String())
-
-        @hybrid_property
-        def fullname(self):
-            return '%s - %s' % (self.firstname, self.name)
-
-
-class EmployeeView(app.ModelView):
-    model = Employee
-
-    list_column = 'fullname'
-    create_columns = ('name', 'firstname')
-
-    class Form(Form):
-        id = IntegerField(u'ID')
-        name = TextField(u'Surname', validators=[Required()])
-        firstname = TextField(u'Firstname', validators=[Required()])
-        fullname = TextField(u'Fullname')
+from view import EmployeeView
+from application import app
 
 
 @app.route('/')

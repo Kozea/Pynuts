@@ -78,7 +78,7 @@ Step 4: view.py: the view model
 
 Import some things from WTForms, the pynuts application and the database model::
 
-    from flaskext.wtf import Form, TextField, Required
+    from flask.ext.wtf import Form, TextField, Required
 
     import database
     from application import app
@@ -112,8 +112,10 @@ This form is used for representing the columns from the Employee class into HTML
 ::
 
     class Form(Form):
+        id = IntegerField(u'ID')
         name = TextField(u'Surname', validators=[Required()])
         firstname = TextField(u'Firstname', validators=[Required()])
+        fullname = TextField(u'Fullname')
 
 
 Step 5: The executable
@@ -123,9 +125,9 @@ The executable file provides all the routing rules.
 
 In this file you have to import your pynuts application and your database by calling::
 
-
+    from view import EmployeeView
     from application import app
-    from pynuts import view
+
 
 The List View
 ~~~~~~~~~~~~~

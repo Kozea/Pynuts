@@ -1,11 +1,8 @@
 Advanced tutorial
 =================
 
-
 CRUD
-------
-The CRUD part is explained in the first tutorial. 
-
+----
 
 Table of Employees
 ~~~~~~~~~~~~~~~~~~
@@ -14,15 +11,11 @@ With advanced pynuts features, you can easily create an admin table which will p
 
 First, create a template called ``table_employees.html``:
 
-.. sourcecode:: html+jinja   
+.. literalinclude:: /example/advanced/templates/table_employees.html
+      :language: html+jinja
 
-    {% extends "_layout.html" %}
-    {% block main %}
-      <h2>Employees</h2>
-      {{ view_class.view_table() }}
-    {% endblock main %}
 
-This template calls the ``view_table`` method from pynuts, which display a table containing all employees and an `edit` and `delete` method for each of them.
+This template calls the pynuts ``view_table`` method, which display a table containing all employees and an `edit` and `delete` method for each of them.
 
 Then, use this template as argument of the ``EmployeeView.table`` method in ``executable.py``::
 
@@ -41,13 +34,9 @@ The primary key of the Employee table is ``id``, so we can call an `EmployeeView
 
 Create ``update_employee.html``:
 
-.. sourcecode:: html+jinja
+.. literalinclude:: /example/advanced/templates/update_employee.html
+      :language: html+jinja
 
-    {% extends "_layout.html" %}
-    {% block main %}
-      <h2>Update Employee</h2>
-      {{ view.view_update() }}
-    {% endblock main %}
 
 Add this function in ``executable.py``::
 
@@ -83,7 +72,7 @@ First, create the ``delete_employee.html`` template:
     {% endblock main %}
 
     
-The, add this function in ``executable.py``::
+Then, add this function in ``executable.py``::
 
     @view.EmployeeView.delete_page
     @app.route('/employee/delete/<id>')
@@ -101,7 +90,7 @@ Create the ``read_employee.html`` template:
 
     {% extends "_layout.html" %}
     {% block main %}
-      <h2>Employee</h2>
+      <h2>Delete Employee</h2>
       {{ view.view_read() }}
     {% endblock main %}
 
@@ -122,8 +111,7 @@ This part describes how to create documents, manage them using a version control
 
 Configuration
 ~~~~~~~~~~~~~
-If you want to use document archiving, you need to add the path to your document repository in the application config. 
-Go to ``application.py`` and add this ``'PYNUTS_DOCUMENT_REPOSITORY'`` as key to the CONFIG then put the path to the `repo.git`; In this tutorial we have `/tmp/employees.git` as value.
+If you want to use document archiving, you need to define the the path to your document repository in the application config, using the ``PYNUTS_DOCUMENT_REPOSITORY`` config.. 
 
 Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
     
@@ -133,15 +121,8 @@ Creating Our Document Class
 
 Start by creating the file ``document.py`` which will contain the Pynuts document class. 
 
-::
-
-    from application import app
-
-
-    class EmployeeDoc(app.Document):
-        model_path = 'models/'
-        document_id_template = '{employee.data.id}'
-
+.. literalinclude:: /example/advanced/document.py
+      :language: python
 
 `model_path` 
 The path to the folder where the model is stored. You have to create a file named `index.rst.jinja2` in this folder, this will be your document template written in ReST/Jinja2.
@@ -190,7 +171,7 @@ Create the file ``edit_employee_template.html``
 
 .. sourcecode:: html+jinja
 
-    % extends "_layout.html" %}
+    {% extends "_layout.html" %}
     {% block main %}
       {{ document.view_edit(employee=employee) }}
     {% endblock main %}
@@ -242,11 +223,8 @@ To download the PDF version of the document, call the ``download_pdf`` class met
             filename='Employee %s report' % (id), employee=view.EmployeeView(id))
 
 
-Working with versions
-~~~~~~~~~~~~~~~~~~~~~
-
-Get the version list
-````````````````````
+Working with versions: get the version list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To all the existing versions of the archived document, use the ``history`` property of a document instance. 
 We can create an instance by giving the id of an employee which is also the id of the document.
@@ -323,6 +301,7 @@ Now you can run the server and see that everything runs smoothly!
 
 Rights
 ------
+
 With pynuts, setting specific permissions on each endpoint is quite simple. First, create a ``rights.py`` file . In this file, import your app and the ``rights`` module::
 
   from application import app
@@ -382,7 +361,7 @@ This will grant the access for a connected person which isn't blacklisted or to 
 
 
 Help
-~~~~
+----
 You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/doc/example/advanced>`_.
 
 Something doesn't work ? You want a new feature ? Feel free to write some bug report or feature request on the `issue tracker <http://redmine.kozea.fr/projects/pynuts>`_.
