@@ -68,8 +68,9 @@ class Pynuts(flask.Flask):
                           '_pynuts-static', static)
 
         # Uploads root directory
-        self.config['UPLOADS_DEFAULT_DEST'] = os.path.join(
-            self.instance_path, 'uploads')
+        if self.config.get('UPLOADS_DEFAULT_DEST') is None:
+            self.config['UPLOADS_DEFAULT_DEST'] = os.path.join(
+                self.instance_path, 'uploads')
 
         class Document(document.Document):
             """Document base class of the application."""
