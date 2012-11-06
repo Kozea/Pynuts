@@ -188,9 +188,9 @@ ImageField
                 upload_set=UPLOAD_SETS['images'],
                 validators=[AllowedFile(), MaxSize(1)])
 
-An `Image` is a image upload field inheriting from the `UploadField` class.
+An `ImageField` is a image upload field inheriting from the `UploadField` class.
 At rendering (for example in a `read` view), an image uploaded with an `ImageField` will
-be represeted as an `<img>` HTML tag, and will thus be displayed.
+be represented as an `<img>` HTML tag, and will thus be displayed.
 
 
 Validators
@@ -200,6 +200,9 @@ Pynuts provides 2 built-in upload validators on top of `WTForms validators <http
 
  * `AllowedFile <API.html#pynuts.validators.AllowedFile>`_
  * `MaxSize <API.html#pynuts.validators.MaxSize>`_
+
+
+→ `See the complete example source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/example>`_ to see a workin example of file upload.
 
 
 Document
