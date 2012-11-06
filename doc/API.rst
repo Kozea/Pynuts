@@ -34,6 +34,9 @@ Git
 .. automodule:: pynuts.git
    :members:
 
+
+.. _directives:
+
 Directives
 ----------
 
