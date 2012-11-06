@@ -22,6 +22,7 @@ We also encourage you to install Pynuts in a virtualenv.
     `pycairo <http://www.cairographics.org/pycairo/>`_  cannot be installed with pip.
     You thus need to perform a system-wide install of these packages, and create the virtualenv
     with the ``--system-site-packages`` option.
+    See `the WeasyPrint 'install' page <http://weasyprint.org/docs/install/>`_ for more information.
 
 
 Github

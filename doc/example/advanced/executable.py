@@ -3,10 +3,12 @@ from flask import flash, redirect, session, request, render_template, g
 
 from application import app
 from pynuts.rights import allow_if
-# from pynuts.directives import Editable
 import view
 import document
 import rights as Is
+
+# Import the Editable directive for docutils, needed for document generation
+from pynuts.directives import Editable
 
 
 @app.errorhandler(403)
@@ -103,8 +105,8 @@ def update_employee(person_id=None):
 @app.route('/employee/delete/<int:person_id>', methods=('POST', 'GET'))
 @allow_if(Is.admin)
 def delete_employee(person_id):
-    return view.EmployeeView(person_id).delete('delete_employee.html',
-                                        redirect='employees')
+    return view.EmployeeView(person_id).delete(
+        'delete_employee.html', redirect='employees')
 
 
 @app.route('/employee/edit_template/<int:person_id>', methods=('POST', 'GET'))
@@ -114,9 +116,8 @@ def delete_employee(person_id):
 def edit_employee_report(person_id, version=None):
     employee = view.EmployeeView(person_id)
     doc = document.EmployeeDoc
-    return doc.edit('edit_employee_template.html',
-                    employee=employee,
-                    version=version)
+    return doc.edit(
+        'edit_employee_template.html', employee=employee, version=version)
 
 
 @app.route('/employee/html/<int:person_id>')

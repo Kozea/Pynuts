@@ -1,13 +1,13 @@
 <!Doctype html>
 <html>
   <head>
-    <title>Pynuts'</title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <title>Pynuts</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}" />
     {%- block head -%}
     {%- endblock head %}
   </head>
   <body>
-    <h1>Pynuts'</h1>
+    <h1>Pynuts</h1>
     <nav>
       <a href="{{ url_for('employees') }}">Employee list</a>
       <a href="{{ url_for('create_employee') }}">Add a new employee</a>
@@ -30,8 +30,8 @@
       {% endfor %}
     {% endwith -%}
     <section>
-    {%- block main -%}
-    {%- endblock main %}
+      {%- block main -%}
+      {%- endblock main %}
     </section>
   </body>
 </html>
