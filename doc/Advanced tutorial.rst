@@ -102,6 +102,98 @@ Add this function in ``executable.py``::
         return view.EmployeeView(id).read('read_employee.html')
 
 
+File uploads
+------------
+
+Pynuts relies on `Flask-Uploads <http://packages.python.org/Flask-Uploads/>`_ to handle file uploads, and also provides some built-in fields and validators.
+
+
+Defining uploading handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before using Pynuts upload fields, you need to create some `UploadSet <http://packages.python.org/Flask-Uploads/#upload-sets>`_ objects in which you define the upload logic of your app.
+
+We suggest you create these objects in a `files.py` file, if there are more than one.
+
+In this example, all pdf files will be stored into the `resumes` folder, and all images will be stored into
+the `images` folder.
+
+.. literalinclude:: /example/complete/files.py
+    :language: python
+
+.. note::
+  If no `UPLOADS_DEFAULT_DEST` configuration value is set, Pynuts will place all upload folders into the  `instance/uploads/` directory, where `instance/` is the app instance path.
+
+
+Configuring your app
+~~~~~~~~~~~~~~~~~~~~
+
+To configure your app with the created `UploadSets <http://packages.python.org/Flask-Uploads/#upload-sets>`_, pass an `upload_sets` parameter to the `add_upload_sets` app method.
+
+.. note::
+  The `upload_sets` parameter can be a single `UploadSet` or a tuple of `UploadSet`
+
+.. sourcecode:: python
+
+    if __name__ == '__main__':
+      app.db.create_all()
+      app.secret_key = 'Azerty'
+      app.add_upload_sets(upload_sets)  # insert this line
+      app.run(debug=True, host='127.0.0.1', port=8000)
+
+By default, the `add_upload_sets` method will also limit the size of uploaded files to 16777216 bytes (16Mb).
+You can change this limit by passing a `upload_max_size` parameter to it, with a value in bytes.
+
+
+Upload a file
+~~~~~~~~~~~~~
+
+When designing a form, you can upload files via 2 different Pynuts fields.
+
+UploadField
+^^^^^^^^^^^
+
+.. sourcecode:: python
+
+  from yourapp.files import UPLOAD_SETS
+  from flask.ext.wtf import Form
+
+  class Form(Form):
+    resume = UploadField(label='resume',
+                upload_set=UPLOAD_SETS['resumes'],
+                validators=[AllowedFile(), MaxSize(1)])
+
+An `UploadField` is a generic upload field.
+At rendering (for example in a `read` view), a file uploaded with an `UploadField` will
+be represented as a link serving the file.
+
+ImageField
+^^^^^^^^^^
+
+.. sourcecode:: python
+
+  from yourapp.files import UPLOAD_SETS
+  from flask.ext.wtf import Form
+
+  class Form(Form):
+    avatar = Image(label='avatar',
+                upload_set=UPLOAD_SETS['images'],
+                validators=[AllowedFile(), MaxSize(1)])
+
+An `Image` is a image upload field inheriting from the `UploadField` class.
+At rendering (for example in a `read` view), an image uploaded with an `ImageField` will
+be represeted as an `<img>` HTML tag, and will thus be displayed.
+
+
+Validators
+~~~~~~~~~~
+
+Pynuts provides 2 built-in upload validators on top of `WTForms validators <http://wtforms.simplecodes.com/docs/0.6.1/validators.html>`_:
+
+ * `AllowedFile <API.html#pynuts.validators.AllowedFile>`_
+ * `MaxSize <API.html#pynuts.validators.MaxSize>`_
+
+
 Document
 --------
 
