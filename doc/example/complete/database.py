@@ -1,4 +1,6 @@
-from application import app
+"""SQLAlchemy models definition for complete example."""
+
+from complete.application import app
 from sqlalchemy.ext.hybrid import hybrid_property
 from pynuts.model import Orderable
 
@@ -19,6 +21,8 @@ class Employee(app.db.Model, Orderable):
     login = app.db.Column(app.db.String())
     password = app.db.Column(app.db.String())
     driving_license = app.db.Column(app.db.Boolean())
+    resume = app.db.Column(app.db.String())
+    photo = app.db.Column(app.db.String())
     order = app.db.Column(app.db.Integer())
     company_id = app.db.Column(
         app.db.Integer(), app.db.ForeignKey('Company.company_id'))

@@ -2,6 +2,7 @@
 
 from wtforms import StringField
 from wtforms.widgets import html_params, HTMLString
+from flask.ext.wtf import FileField
 
 
 class Editable(object):
@@ -17,3 +18,16 @@ class Editable(object):
 class EditableField(StringField):
     """Contenteditable field."""
     widget = Editable()
+
+
+class UploadField(FileField):
+    """Field handling file uploads."""
+    def __init__(self, upload_set, *args, **kwargs):
+        super(UploadField, self).__init__(*args, **kwargs)
+        self.upload_set = upload_set
+
+
+class ImageField(UploadField):
+    """Field specifically handling image uploads."""
+    def __init__(self, *args, **kwargs):
+        super(ImageField, self).__init__(*args, **kwargs)

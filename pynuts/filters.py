@@ -5,6 +5,7 @@
 from flask import escape
 from flask.ext.wtf import (
     QuerySelectField, QuerySelectMultipleField, BooleanField, DateField)
+from .fields import UploadField, ImageField
 
 
 def data(field):
@@ -16,6 +17,12 @@ def data(field):
       Renders the selected value.
     BooleanField
       Renders '✓' or '✕'
+    DateField
+      Renders the date
+    ImageField
+      Renders the Image
+    UploadField
+      Renders a link to the uploaded file
 
     Example:
 
@@ -38,4 +45,12 @@ def data(field):
     elif isinstance(field, DateField):
         if field.data:
             return field.data.strftime(field.format)
+    elif isinstance(field, ImageField):
+        if field.data:
+            return '<img src="%s" alt="" />' % (field.upload_set.url(field.data))
+    elif isinstance(field, UploadField):
+        if field.data:
+            return '<a href="%s">%s</a>' % (
+                field.upload_set.url(field.data),
+                field.data)
     return escape(field.data)

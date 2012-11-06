@@ -9,9 +9,10 @@ from pynuts.directives import Editable
 from pynuts.document import Content
 import view
 import document
-from database import Employee, Company
+from database import Employee
 import rights as Is
 from exception import NoPermission
+from files import upload_sets
 
 
 @app.errorhandler(403)
@@ -262,4 +263,5 @@ def set_request_time():
 if __name__ == '__main__':  # pragma: no cover
     app.db.create_all()
     app.secret_key = 'Azerty'
+    app.add_upload_sets(upload_sets())
     app.run(debug=True, host='127.0.0.1', port=8000)

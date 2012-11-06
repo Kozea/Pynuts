@@ -453,11 +453,17 @@ class ModelView(object):
 
             for key, value in form_values.items():
                 if isinstance(value, FileStorage):
-                    handler = getattr(self, key + '_handler', None)
-                    if not handler:
-                        raise ValueError(
-                            'You must define a %s_handler '
-                            'property on your view set to an UploadSet' % key)
+                    if hasattr(self.create_form._fields[key], 'upload_set'):
+                        handler = self.create_form._fields[key].upload_set
+                        if not handler:
+                            raise RuntimeError('No UploadSet handler could be'
+                                'found for %s' % (key))
+                    else:
+                        handler = getattr(self, key + '_handler', None)
+                        if not handler:
+                            raise ValueError(
+                                'You must define a %s_handler '
+                                'property on your view set to an UploadSet' % key)
                     if value.filename:
                         setattr(self.data, key, handler.save(value))
                     else:
@@ -489,11 +495,17 @@ class ModelView(object):
             for key, value in self._get_form_attributes(
                     self.update_form).items():
                 if isinstance(value, FileStorage):
-                    handler = getattr(self, key + '_handler', None)
-                    if not handler:
-                        raise ValueError(
-                            'You must define a %s_handler '
-                            'property on your view set to an UploadSet' % key)
+                    if hasattr(self.create_form._fields[key], 'upload_set'):
+                        handler = self.create_form._fields[key].upload_set
+                        if not handler:
+                            raise RuntimeError('No UploadSet handler could be'
+                                'found for %s' % (key))
+                    else:
+                        handler = getattr(self, key + '_handler', None)
+                        if not handler:
+                            raise ValueError(
+                                'You must define a %s_handler '
+                                'property on your view set to an UploadSet' % key)
                     if value.filename:
                         setattr(self.data, key, handler.save(value))
 
