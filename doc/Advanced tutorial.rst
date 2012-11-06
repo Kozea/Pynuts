@@ -155,8 +155,12 @@ UploadField
 
 .. sourcecode:: python
 
-  from yourapp.files import UPLOAD_SETS
   from flask.ext.wtf import Form
+
+  from pynuts.fields import UploadSet
+  from pynuts.validators import AllowedFile, MaxSize
+
+  from yourapp.files import UPLOAD_SETS
 
   class Form(Form):
     resume = UploadField(label='resume',
@@ -172,8 +176,12 @@ ImageField
 
 .. sourcecode:: python
 
-  from yourapp.files import UPLOAD_SETS
   from flask.ext.wtf import Form
+
+  from pynuts.fields import UploadSet
+  from pynuts.validators import AllowedFile, MaxSize
+
+  from yourapp.files import UPLOAD_SETS
 
   class Form(Form):
     avatar = Image(label='avatar',
