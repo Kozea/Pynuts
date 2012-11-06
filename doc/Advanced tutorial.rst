@@ -184,7 +184,7 @@ ImageField
   from yourapp.files import UPLOAD_SETS
 
   class Form(Form):
-    avatar = Image(label='avatar',
+    avatar = ImageField(label='avatar',
                 upload_set=UPLOAD_SETS['images'],
                 validators=[AllowedFile(), MaxSize(1)])
 
