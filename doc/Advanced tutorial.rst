@@ -105,7 +105,7 @@ Add this function in ``executable.py``::
 File uploads
 ------------
 
-Pynuts relies on `Flask-Uploads <http://packages.python.org/Flask-Uploads/>`_ to handle file uploads, and also provides some built-in fields and validators.
+Pynuts relies on `Flask-Uploads <http://packages.python.org/Flask-Uploads/>`_ to handle file uploads, and also provides some built-in form fields and validators.
 
 
 Defining uploading handlers
@@ -130,9 +130,6 @@ Configuring your app
 
 To configure your app with the created `UploadSets <http://packages.python.org/Flask-Uploads/#upload-sets>`_, pass an `upload_sets` parameter to the `add_upload_sets` app method.
 
-.. note::
-  The `upload_sets` parameter can be a single `UploadSet` or a tuple of `UploadSet`
-
 .. sourcecode:: python
 
     if __name__ == '__main__':
@@ -140,6 +137,9 @@ To configure your app with the created `UploadSets <http://packages.python.org/F
       app.secret_key = 'Azerty'
       app.add_upload_sets(upload_sets)  # insert this line
       app.run(debug=True, host='127.0.0.1', port=8000)
+
+.. note::
+  The `upload_sets` parameter can be a single `UploadSet` or a tuple of `UploadSet`
 
 By default, the `add_upload_sets` method will also limit the size of uploaded files to 16777216 bytes (16Mb).
 You can change this limit by passing a `upload_max_size` parameter to it, with a value in bytes.
@@ -150,6 +150,8 @@ Upload a file
 
 When designing a form, you can upload files via 2 different Pynuts fields.
 
+.. _uploadfield:
+
 UploadField
 ^^^^^^^^^^^
 
@@ -157,7 +159,7 @@ UploadField
 
   from flask.ext.wtf import Form
 
-  from pynuts.fields import UploadSet
+  from pynuts.fields import UploadField
   from pynuts.validators import AllowedFile, MaxSize
 
   from yourapp.files import UPLOAD_SETS
@@ -178,7 +180,7 @@ ImageField
 
   from flask.ext.wtf import Form
 
-  from pynuts.fields import UploadSet
+  from pynuts.fields import ImageField
   from pynuts.validators import AllowedFile, MaxSize
 
   from yourapp.files import UPLOAD_SETS
@@ -188,7 +190,7 @@ ImageField
                 upload_set=UPLOAD_SETS['images'],
                 validators=[AllowedFile(), MaxSize(1)])
 
-An `ImageField` is a image upload field inheriting from the `UploadField` class.
+An `ImageField` is a image upload field inheriting from the :ref:`uploadfield` class.
 At rendering (for example in a `read` view), an image uploaded with an `ImageField` will
 be represented as an `<img>` HTML tag, and will thus be displayed.
 
@@ -202,7 +204,7 @@ Pynuts provides 2 built-in upload validators on top of `WTForms validators <http
  * `MaxSize <API.html#pynuts.validators.MaxSize>`_
 
 
-→ `See the complete example source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/example>`_ to see a workin example of file upload.
+→ `See the complete example source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/example>`_ to see a working example of a project using file upload.
 
 
 Document
