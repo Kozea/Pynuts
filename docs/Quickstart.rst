@@ -66,7 +66,7 @@ So what did our code do?
 
 To stop the server, hit control-C.
 
-→ `See the quickstart source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/quickstart>`_
+→ `See the quickstart source on GitHub <https://github.com/Kozea/Pynuts/tree/master/docs/example/quickstart>`_
 
 
 .. seealso::

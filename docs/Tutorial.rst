@@ -220,4 +220,4 @@ Create a file `style.css` and paste the following CSS code in it:
 
 ------
  
-→ `See the tutorial source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/simple>`_
+→ `See the tutorial source on GitHub <https://github.com/Kozea/Pynuts/tree/master/docs/example/simple>`_

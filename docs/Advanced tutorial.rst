@@ -204,7 +204,7 @@ Pynuts provides 2 built-in upload validators on top of `WTForms validators <http
  * `MaxSize <API.html#pynuts.validators.MaxSize>`_
 
 
-→ `See the complete example source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/example>`_ to see a working example of a project using file upload.
+→ `See the complete example source on GitHub <https://github.com/Kozea/Pynuts/tree/master/docs/example/example>`_ to see a working example of a project using file upload.
 
 
 Document
@@ -467,6 +467,6 @@ This will grant the access for a connected person which isn't blacklisted or to 
 
 Help
 ----
-You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/doc/example/advanced>`_.
+You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/docs/example/advanced>`_.
 
 Something doesn't work ? You want a new feature ? Feel free to write some bug report or feature request on the `issue tracker <http://redmine.kozea.fr/projects/pynuts>`_.

@@ -1,7 +1,7 @@
 *.pyc
 *.egg-info
 /build
-/doc/_build
+/docs/_build
 /.coverage
-doc/example/instance
+docs/example/instance
 instance/
