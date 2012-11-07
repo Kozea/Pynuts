@@ -1,11 +1,8 @@
 Advanced tutorial
 =================
 
-
 CRUD
-------
-The CRUD part is explained in the first tutorial. 
-
+----
 
 Table of Employees
 ~~~~~~~~~~~~~~~~~~
@@ -14,15 +11,11 @@ With advanced pynuts features, you can easily create an admin table which will p
 
 First, create a template called ``table_employees.html``:
 
-.. sourcecode:: html+jinja   
+.. literalinclude:: /example/advanced/templates/table_employees.html
+      :language: html+jinja
 
-    {% extends "_layout.html" %}
-    {% block main %}
-      <h2>Employees</h2>
-      {{ view_class.view_table() }}
-    {% endblock main %}
 
-This template calls the ``view_table`` method from pynuts, which display a table containing all employees and an `edit` and `delete` method for each of them.
+This template calls the pynuts ``view_table`` method, which display a table containing all employees and an `edit` and `delete` method for each of them.
 
 Then, use this template as argument of the ``EmployeeView.table`` method in ``executable.py``::
 
@@ -41,21 +34,17 @@ The primary key of the Employee table is ``id``, so we can call an `EmployeeView
 
 Create ``update_employee.html``:
 
-.. sourcecode:: html+jinja
+.. literalinclude:: /example/advanced/templates/update_employee.html
+      :language: html+jinja
 
-    {% extends "_layout.html" %}
-    {% block main %}
-      <h2>Update Employee</h2>
-      {{ view.view_update() }}
-    {% endblock main %}
 
 Add this function in ``executable.py``::
 
     @view.EmployeeView.update_page
     @app.route('/employee/update/<id>', methods=('POST', 'GET'))
     def update_employee(id):
-        return view.EmployeeView(id).update('update_employee.html',
-                                          redirect='employees')
+        return view.EmployeeView(id).update(
+            'update_employee.html', redirect='employees')
 
 .. note::
         
@@ -83,13 +72,13 @@ First, create the ``delete_employee.html`` template:
     {% endblock main %}
 
     
-The, add this function in ``executable.py``::
+Then, add this function in ``executable.py``::
 
     @view.EmployeeView.delete_page
     @app.route('/employee/delete/<id>')
     def delete_employee(id):
-        return view.EmployeeView(id).delete('delete_employee.html',
-                                            redirect='employees')
+        return view.EmployeeView(id).delete(
+            'delete_employee.html', redirect='employees')
                                             
 Read Employee
 ~~~~~~~~~~~~~
@@ -101,7 +90,7 @@ Create the ``read_employee.html`` template:
 
     {% extends "_layout.html" %}
     {% block main %}
-      <h2>Employee</h2>
+      <h2>Delete Employee</h2>
       {{ view.view_read() }}
     {% endblock main %}
 
@@ -113,6 +102,111 @@ Add this function in ``executable.py``::
         return view.EmployeeView(id).read('read_employee.html')
 
 
+File uploads
+------------
+
+Pynuts relies on `Flask-Uploads <http://packages.python.org/Flask-Uploads/>`_ to handle file uploads, and also provides some built-in form fields and validators.
+
+
+Defining uploading handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before using Pynuts upload fields, you need to create some `UploadSet <http://packages.python.org/Flask-Uploads/#upload-sets>`_ objects in which you define the upload logic of your app.
+
+We suggest you create these objects in a `files.py` file, if there are more than one.
+
+In this example, all pdf files will be stored into the `resumes` folder, and all images will be stored into
+the `images` folder.
+
+.. literalinclude:: /example/complete/files.py
+    :language: python
+
+.. note::
+  If no `UPLOADS_DEFAULT_DEST` configuration value is set, Pynuts will place all upload folders into the  `instance/uploads/` directory, where `instance/` is the app instance path.
+
+
+Configuring your app
+~~~~~~~~~~~~~~~~~~~~
+
+To configure your app with the created `UploadSets <http://packages.python.org/Flask-Uploads/#upload-sets>`_, pass an `upload_sets` parameter to the `add_upload_sets` app method.
+
+.. sourcecode:: python
+
+    if __name__ == '__main__':
+      app.db.create_all()
+      app.secret_key = 'Azerty'
+      app.add_upload_sets(upload_sets)  # insert this line
+      app.run(debug=True, host='127.0.0.1', port=8000)
+
+.. note::
+  The `upload_sets` parameter can be a single `UploadSet` or a tuple of `UploadSet`
+
+By default, the `add_upload_sets` method will also limit the size of uploaded files to 16777216 bytes (16Mb).
+You can change this limit by passing a `upload_max_size` parameter to it, with a value in bytes.
+
+
+Upload a file
+~~~~~~~~~~~~~
+
+When designing a form, you can upload files via 2 different Pynuts fields.
+
+.. _uploadfield:
+
+UploadField
+^^^^^^^^^^^
+
+.. sourcecode:: python
+
+  from flask.ext.wtf import Form
+
+  from pynuts.fields import UploadField
+  from pynuts.validators import AllowedFile, MaxSize
+
+  from yourapp.files import UPLOAD_SETS
+
+  class Form(Form):
+    resume = UploadField(label='resume',
+                upload_set=UPLOAD_SETS['resumes'],
+                validators=[AllowedFile(), MaxSize(1)])
+
+An `UploadField` is a generic upload field.
+At rendering (for example in a `read` view), a file uploaded with an `UploadField` will
+be represented as a link serving the file.
+
+ImageField
+^^^^^^^^^^
+
+.. sourcecode:: python
+
+  from flask.ext.wtf import Form
+
+  from pynuts.fields import ImageField
+  from pynuts.validators import AllowedFile, MaxSize
+
+  from yourapp.files import UPLOAD_SETS
+
+  class Form(Form):
+    avatar = ImageField(label='avatar',
+                upload_set=UPLOAD_SETS['images'],
+                validators=[AllowedFile(), MaxSize(1)])
+
+An `ImageField` is a image upload field inheriting from the :ref:`uploadfield` class.
+At rendering (for example in a `read` view), an image uploaded with an `ImageField` will
+be represented as an `<img>` HTML tag, and will thus be displayed.
+
+
+Validators
+~~~~~~~~~~
+
+Pynuts provides 2 built-in upload validators on top of `WTForms validators <http://wtforms.simplecodes.com/docs/0.6.1/validators.html>`_:
+
+ * `AllowedFile <API.html#pynuts.validators.AllowedFile>`_
+ * `MaxSize <API.html#pynuts.validators.MaxSize>`_
+
+
+→ `See the complete example source on GitHub <https://github.com/Kozea/Pynuts/tree/master/docs/example/example>`_ to see a working example of a project using file upload.
+
+
 Document
 --------
 
@@ -122,8 +216,7 @@ This part describes how to create documents, manage them using a version control
 
 Configuration
 ~~~~~~~~~~~~~
-If you want to use document archiving, you need to add the path to your document repository in the application config. 
-Go to ``application.py`` and add this ``'PYNUTS_DOCUMENT_REPOSITORY'`` as key to the CONFIG then put the path to the `repo.git`; In this tutorial we have `/tmp/employees.git` as value.
+If you want to use document archiving, you need to define the the path to your document repository in the application config, using the ``PYNUTS_DOCUMENT_REPOSITORY`` config.. 
 
 Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
     
@@ -133,15 +226,8 @@ Creating Our Document Class
 
 Start by creating the file ``document.py`` which will contain the Pynuts document class. 
 
-::
-
-    from application import app
-
-
-    class EmployeeDoc(app.Document):
-        model_path = 'models/'
-        document_id_template = '{employee.data.id}'
-
+.. literalinclude:: /example/advanced/document.py
+      :language: python
 
 `model_path` 
 The path to the folder where the model is stored. You have to create a file named `index.rst.jinja2` in this folder, this will be your document template written in ReST/Jinja2.
@@ -161,8 +247,8 @@ To do so, go back to the *create* route in ``executable.py`` and insert the foll
   @app.route('/employee/create/', methods=('POST', 'GET'))
   def create_employee():
       employee = view.EmployeeView()
-      response = employee.create('create_employee.html',
-                                 redirect='employees')
+      response = employee.create(
+          'create_employee.html', redirect='employees')
       if employee.create_form.validate_on_submit():
           document.EmployeeDoc.create(employee=employee)
       return response
@@ -171,7 +257,7 @@ This function performs the following operations:
 
 - Create an instance of EmployeeView
 - Call the create method of EmployeeView. 
-- reate a new document, if the employee `create_form` is validated.
+- Create a new document, if the employee `create_form` is validated.
 - Finally, redirect to the list of employees
 
 When the document is created for the first time, Pynuts make an initial commit of the folder which contains the model in a new branch. 
@@ -190,7 +276,7 @@ Create the file ``edit_employee_template.html``
 
 .. sourcecode:: html+jinja
 
-    % extends "_layout.html" %}
+    {% extends "_layout.html" %}
     {% block main %}
       {{ document.view_edit(employee=employee) }}
     {% endblock main %}
@@ -204,8 +290,8 @@ Then, insert the following snippet in ``executable.py``
     def edit_employee_report(id):
         employee = view.EmployeeView(id)
         doc = document.EmployeeDoc
-        return doc.edit('edit_employee_template.html',
-                        employee=employee)
+        return doc.edit(
+            'edit_employee_template.html', employee=employee)
 
 This function performs the following operations:
 
@@ -238,15 +324,12 @@ To download the PDF version of the document, call the ``download_pdf`` class met
     @app.route('/employee/download/<id>')
     def download_employee(id):
         doc = document.EmployeeDoc
-        return doc.download_pdf(filename='Employee %s report' % (id),
-                                employee=view.EmployeeView(id))
+        return doc.download_pdf(
+            filename='Employee %s report' % (id), employee=view.EmployeeView(id))
 
 
-Working with versions
-~~~~~~~~~~~~~~~~~~~~~
-
-Get the version list
-````````````````````
+Working with versions: get the version list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To all the existing versions of the archived document, use the ``history`` property of a document instance. 
 We can create an instance by giving the id of an employee which is also the id of the document.
@@ -277,6 +360,7 @@ In the following example, we generate a table:
   {% block main %}
     <h2>Employee</h2>
     {{ view.view_read() }}
+
     <h2>Document history</h2>
     <table>
       <tr>
@@ -305,9 +389,8 @@ Something like that for the `html_employee` view::
     @app.route('/employee/html/<id>/<version>')
     def html_employee(id, version=None):
         doc = document.EmployeeDoc
-        return doc.html('employee_report.html',
-                        employee=view.EmployeeView(id),
-                        version=version)
+        return doc.html(
+            'employee_report.html', employee=view.EmployeeView(id), version=version)
                         
 Finally, go back to the ``edit_employee_template.html`` template in order to add the version in parameter of the view classmethod of `EmployeeDoc`
 
@@ -323,6 +406,7 @@ Now you can run the server and see that everything runs smoothly!
 
 Rights
 ------
+
 With pynuts, setting specific permissions on each endpoint is quite simple. First, create a ``rights.py`` file . In this file, import your app and the ``rights`` module::
 
   from application import app
@@ -364,15 +448,15 @@ Here, the access to the list of employees won't be granted if you aren't connect
 
 Of course, you can combine some rights, it implements the following operators:
 
-+-------+--------+
-| a & b | a and b|
-+-------+--------+
-| a | b | a or b |
-+-------+--------+
-| a ^ b | a xor b|
-+-------+--------+
-|  ~ a  |  not a |
-+-------+--------+
++-------+---------+
+| a & b | a and b |
++-------+---------+
+| a | b | a or b  |
++-------+---------+
+| a ^ b | a xor b |
++-------+---------+
+|  ~ a  |  not a  |
++-------+---------+
     
 You can write this for example: 
 
@@ -382,7 +466,7 @@ This will grant the access for a connected person which isn't blacklisted or to 
 
 
 Help
-~~~~
-You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/doc/example/advanced>`_.
+----
+You need help with this tutorial ? The full source code is available on Github `here <https://github.com/Kozea/Pynuts/tree/master/docs/example/advanced>`_.
 
 Something doesn't work ? You want a new feature ? Feel free to write some bug report or feature request on the `issue tracker <http://redmine.kozea.fr/projects/pynuts>`_.

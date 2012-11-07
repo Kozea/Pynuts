@@ -1,8 +1,14 @@
+import re
+import os
 from setuptools import setup
+
+VERSION = re.search("__version__ = '([^']+)'", open(
+    os.path.join(os.path.dirname(__file__), 'pynuts', '__init__.py')
+).read().strip()).group(1)
 
 setup(
     name="Pynuts",
-    version="0.1",
+    version=VERSION,
     url="http://www.pynuts.org/",
     license="BSD",
     platforms="Any",

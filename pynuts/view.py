@@ -444,7 +444,17 @@ class ModelView(object):
         return self.render(template, **kwargs)
 
     def handle_create_form(self, values=None):
-        """Handle the create form operation."""
+        """Handle the create form operation.
+
+        If the field value is a ``FileStorage`` instance
+        and has a specified UploadSet, the save operation
+        will be performed by this UploadSet.
+
+        If the ``FileStorage`` does not have an associated UploadSet,
+        it will look for a save handler method named ``{name}_handler``
+        (where ``{name}`` is the field name).
+
+        """
         if self.create_form.validate_on_submit():
             form_values = self._get_form_attributes(self.create_form)
             if values:
@@ -490,7 +500,17 @@ class ModelView(object):
         return self.render(template, **kwargs)
 
     def handle_update_form(self):
-        """Handle the update form operation."""
+        """Handle the update form operation.
+
+        If the field value is a ``FileStorage`` instance
+        and has a specified UploadSet, the save operation
+        will be performed by this UploadSet.
+
+        If the ``FileStorage`` does not have an associated UploadSet,
+        it will look for a save handler method named ``{name}_handler``
+        (where ``{name}`` is the field name).
+
+        """
         if self.update_form.validate_on_submit():
             for key, value in self._get_form_attributes(
                     self.update_form).items():

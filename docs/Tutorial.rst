@@ -78,7 +78,7 @@ Step 4: view.py: the view model
 
 Import some things from WTForms, the pynuts application and the database model::
 
-    from flaskext.wtf import Form, TextField, Required
+    from flask.ext.wtf import Form, TextField, Required
 
     import database
     from application import app
@@ -106,27 +106,28 @@ and the create_columns are the columns displayed in the view.
 
     create_columns = ('name', 'firstname')
 
-To finish we have to create a form for our view class. The form is extended from the Flask-WTForms Form.
-See `Flask-WTForms <http://packages.python.org/Flask-WTF>`_ for more information.
+To finish we have to create a form for our view class. The form is extended from the `Flask-WTForms <http://packages.python.org/Flask-WTF>`_ Form.
 
 This form is used for representing the columns from the Employee class into HTML field using WTForms fields. Those fields will be displayed in all CRUD views.
 ::
 
     class Form(Form):
+        id = IntegerField(u'ID')
         name = TextField(u'Surname', validators=[Required()])
         firstname = TextField(u'Firstname', validators=[Required()])
+        fullname = TextField(u'Fullname')
 
 
 Step 5: The executable
 -----------------------
 
-The executable file provides all the routes.
+The executable file provides all the routing rules.
 
 In this file you have to import your pynuts application and your database by calling::
 
-
+    from view import EmployeeView
     from application import app
-    from pynuts import view
+
 
 The List View
 ~~~~~~~~~~~~~
@@ -151,8 +152,8 @@ This view allows the `POST` and `GET` methods. The `POST` one is used for adding
 
     @app.route('/employee/add/', methods=('POST', 'GET'))
     def add_employee():
-        return view.EmployeeView().create('add_employee.html',
-                                          redirect='employees')
+        return view.EmployeeView().create(
+            'add_employee.html', redirect='employees')
 
 The Main
 ~~~~~~~~
@@ -176,55 +177,23 @@ _layout.html
 ~~~~~~~~~~~~
 This template contains the HTML skeleton.
 
-.. sourcecode:: html+jinja
+.. literalinclude:: /example/simple/templates/_layout.html
+    :language: html+jinja
 
-    <!Doctype html>
-    <html>
-      <head>
-      </head>
-      <body>
-        <section>
-        {% block main %}
-        {% endblock main %}
-        </section>
-      </body>
-    </html>
-    
 list_employees.html
 ~~~~~~~~~~~~~~~~~~~
-This template show a list of all employees present in the database.
+.. literalinclude:: /example/simple/templates/list_employees.html
+    :language: html+jinja
 
-`view_class` stands for the EmployeeView class.
-
-.. sourcecode:: html+jinja
-
-    {% extends "_layout.html" %}
-
-    {% block main %}
-      <h2>Employee List</h2>
-      {{ view_class.view_list() }}
-    {% endblock main %}
-    
 add_employee.html
 ~~~~~~~~~~~~~~~~~
-
-This template shows a form allowing to create an employee.
-
-`view` stands for an ``EmployeeView`` instance.
-
-.. sourcecode:: html+jinja
-    
-    {% extends "_layout.html" %}
-
-    {% block main %}
-      <h2>Add New Employee</h2>
-      {{ view.view_create() }}
-    {% endblock main %}
+.. literalinclude:: /example/simple/templates/add_employee.html
+    :language: html+jinja
 
 Handling form errors
 ~~~~~~~~~~~~~~~~~~~~
 
-Handling errors is really simple. Just add this code to your ``_layout.html``
+Handling errors is really simple. Just add this code to your ``_layout.html`` template
 
 .. sourcecode:: html+jinja
 
@@ -246,24 +215,9 @@ The final step to your little application. Everything should be working fine, it
 
 Create a file `style.css` and paste the following CSS code in it:
 
-.. sourcecode:: css
-
-    body            { font-family: sans-serif; background: #eee;
-                        margin: 0; padding: 0; width: 80%; margin-left: 10%; }
-    a, h1, h2       { color: #377BA8; }
-    h1, h2          { font-family: 'Georgia', serif; margin: 0; }
-    h1              { border-bottom: 2px solid #eee; text-align: center; }
-    h2              { font-size: 1.2em; }
-
-    nav             { text-align: center; margin: 1em; }
-    nav a           { margin: 1em; }
-
-    section         { border: 1px solid #ddd; }
-
-    form            { margin: 0.5em; }
-
-    .error ul       { background: #F0D6D6; }
+.. literalinclude:: /example/simple/static/style.css
+    :language: css
 
 ------
  
-→ `See the tutorial source on GitHub <https://github.com/Kozea/Pynuts/tree/master/doc/example/simple>`_
+→ `See the tutorial source on GitHub <https://github.com/Kozea/Pynuts/tree/master/docs/example/simple>`_

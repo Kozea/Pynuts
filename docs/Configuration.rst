@@ -1,18 +1,13 @@
-Configuration file
-==================
+Configuration
+=============
 
-Configuration values
---------------------
-
-`CSRF_ENABLED`
-    This is used by WTForms, see `WTForms documentation <http://packages.python.org/Flask-WTF>`_
-
-`SQLALCHEMY_DATABASE_URI``
-    The URI to your database. For example: ``sqlite:////tmp/test.db'``.
+Configuration keys
+------------------
 
 `PYNUTS_DOCUMENT_REPOSITORY`
     The path to the document repository.
-    If you supply a relative path, it will be taken relatively to the app instance folder. See `Flask documentation <http://flask.pocoo.org/docs/config/#instance-folders>`_.
+
+    If you supply a relative path, it will be taken relatively to the app instance folder (see `Flask documentation <http://flask.pocoo.org/docs/config/#instance-folders>`_).
     If you do not supply anything, the document repository will be stored in a `documents.git` folder, placed in the app instance folder.
 
 

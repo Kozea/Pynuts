@@ -6,9 +6,9 @@
 Welcome to Pynuts' documentation!
 ==================================
     
-Latest Version: 0.1
+Latest Version: |version|
 
-Pynuts is a library which will simplify your code by creating some generic content.
+Pynuts is a Flask extension which will simplify your code by creating some generic content.
 
 It allows you to: 
  
@@ -18,7 +18,7 @@ It allows you to:
    Of course, you can use all the features that git provides and do what you want with your documents, that's why Pynuts is a powerful tool for developpers.
  - drastically reduce the amount of code to write.
 
-Take a look at this comparison:
+Have a look at this comparison:
 
 .. table::
     :class: compare-table
@@ -32,6 +32,7 @@ Take a look at this comparison:
     |    @app.route('/employee/add', methods=('GET', 'POST'))             |     @app.route('/employee/add', methods=('GET', 'POST'))                            |
     |    def add_employee():                                              |     def add_employee():                                                             |
     |        form = EmployeeForm()                                        |         return EmployeeView().create('create_employee.html.jinja2')                 |
+    |        if form.validate_on_submit():                                |                                                                                     |
     |            employee = Employee()                                    |                                                                                     |
     |            form.populate_obj(employee)                              |                                                                                     |
     |            db.session.add(employee)                                 |                                                                                     |
@@ -48,6 +49,8 @@ Pynuts is based on
     - `Flask <https://github.com/mitsuhiko/flask>`_
     - `SQLAlchemy <http://www.sqlalchemy.org/>`_
     - `WTForms <http://wtforms.simplecodes.com/>`_
+    - `Flask Uploads <http://packages.python.org/Flask-Uploads/>`_
+    - `WeasyPrint <http://weasyprint.org/>`_
     - `Git <https://www.samba.org/~jelmer/dulwich/>`_
 
 
@@ -59,8 +62,8 @@ Contents:
 
     Installation
     Quickstart
-    API
-    Configuration
-    Additional features
     Tutorial
     Advanced tutorial
+    Additional features
+    Configuration
+    API

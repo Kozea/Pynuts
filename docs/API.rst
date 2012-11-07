@@ -34,6 +34,9 @@ Git
 .. automodule:: pynuts.git
    :members:
 
+
+.. _directives:
+
 Directives
 ----------
 
@@ -41,10 +44,10 @@ Directives
    :members:
 
 
-Field
------
+Fields
+------
 
-.. automodule:: pynuts.field
+.. automodule:: pynuts.fields
    :members:
 
 Environment
@@ -59,3 +62,8 @@ Filters
 .. automodule:: pynuts.filters
     :members:
 
+Validators
+----------
+
+.. automodule:: pynuts.validators
+    :members:

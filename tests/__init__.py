@@ -11,7 +11,7 @@ from contextlib import closing
 PYNUTS_ROOT = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 DATABASE = mkstemp()[1]
 
-sys.path.insert(0, os.path.join(PYNUTS_ROOT, 'doc', 'example'))
+sys.path.insert(0, os.path.join(PYNUTS_ROOT, 'docs', 'example'))
 sys.path.insert(0, PYNUTS_ROOT)
 
 import pynuts
