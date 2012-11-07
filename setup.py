@@ -1,8 +1,10 @@
 from setuptools import setup
 
+import pynuts
+
 setup(
     name="Pynuts",
-    version="0.1",
+    version=pynuts.__version__,
     url="http://www.pynuts.org/",
     license="BSD",
     platforms="Any",

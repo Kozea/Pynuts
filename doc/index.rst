@@ -6,7 +6,7 @@
 Welcome to Pynuts' documentation!
 ==================================
     
-Latest Version: 0.1
+Latest Version: |version|
 
 Pynuts is a Flask extension which will simplify your code by creating some generic content.
 
