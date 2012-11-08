@@ -8,16 +8,6 @@ class AllowedFile(object):
     defined by the corresponding UploadSet.
 
     If the file breaks the UploadSet rule, raise a ``ValidationError``.
-    Else, save the upload file in a subdirectory named after the
-    UploadSet, located in the app instance path.
-
-    Example: a file uploaded via the following UploadField
-    will be stored in ``instance/uploads/images`` (``instance/``
-    being the app instance path).
-
-    >>> images = UploadSet('images', IMAGES)
-    >>> UploadField(label=u'avatar', upload_set=images,
-    ...    validators=[AllowedFile()])
 
     :raises: ValidationError
     """
