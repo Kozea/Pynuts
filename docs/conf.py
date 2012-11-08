@@ -252,7 +252,7 @@ texinfo_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 autodoc_member_order = 'bysource'
-themes_path = os.path.abspath(os.path.join('..', 'flask-sphinx-themes'))
+themes_path = os.path.abspath('_sphinx-themes')
 sys.path.append(themes_path)
 html_theme_path = [themes_path]
 html_theme = 'flask'
