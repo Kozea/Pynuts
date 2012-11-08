@@ -169,11 +169,11 @@ Since the application is a Flask one, you have to set a `secret_key` if you want
 Step 6: The Templates
 ---------------------
 
-For more information about the templates, you can see the `Jinja2 documentation <http://jinja.pocoo.org/docs/templates>`_
+For more information about the templating system, you can read the `Jinja2 documentation <http://jinja.pocoo.org/docs/templates>`_
 
 _layout.html
 ~~~~~~~~~~~~
-This template contains the HTML skeleton.
+This template contains the HTML skeleton of all pages.
 
 .. literalinclude:: /example/simple/templates/_layout.html
     :language: html+jinja

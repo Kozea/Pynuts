@@ -30,9 +30,9 @@ Update Employee
 ~~~~~~~~~~~~~~~
 
 You need to pass the model primary keys as route parameters in order to have access to an employee object.
-The primary key of the Employee table is ``id``, so we can call an `EmployeeView` instance according to an `id`.
+The primary key of the Employee table is `id`, so we can call an `EmployeeView` instance according to an `id`.
 
-Create ``update_employee.html``:
+Create the ``update_employee.html`` template:
 
 .. literalinclude:: /example/advanced/templates/update_employee.html
       :language: html+jinja
@@ -51,8 +51,6 @@ Add this function in ``executable.py``::
     If you want to make this function available from the interface, you have to set the `update_endpoint` in your view class.
     
     If you do not, you can call a decorator to automatically set this endpoint according to the route you've created. Just add `@view.EmployeeView.update_page` before the `@app.route`.
-    
-    For more information, see the `delete` function below.
 
 
 .. _delete:
@@ -121,7 +119,7 @@ the `images` folder.
 .. literalinclude:: /example/complete/files.py
     :language: python
 
-.. note::
+.. important::
   If no `UPLOADS_DEFAULT_DEST` configuration value is set, Pynuts will place all upload folders into the  `instance/uploads/` directory, where `instance/` is the app instance path.
 
 
@@ -217,7 +215,7 @@ This part describes how to create documents, manage them using a version control
 
 Configuration
 ~~~~~~~~~~~~~
-If you want to use document archiving, you need to define the the path to your document repository in the application config, using the ``PYNUTS_DOCUMENT_REPOSITORY`` config.. 
+If you want to use document archiving, you need to define the the path to your document repository in the application config, using the `PYNUTS_DOCUMENT_REPOSITORY` config.
 
 Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
     
@@ -225,7 +223,7 @@ Refer to the Pynuts `configuration <Configuration.html>`_ page for more informat
 Creating Our Document Class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Start by creating the file ``document.py`` which will contain the Pynuts document class. 
+Start by creating the ``document.py`` file, which will contain the Pynuts document class. 
 
 .. literalinclude:: /example/advanced/document.py
       :language: python
@@ -273,7 +271,7 @@ Editing Document
 Now that the document has been created, you may want to edit it and add some information for one specific employee.
 Pynuts document handling makes these operations very simple to perform.
 
-Create the file ``edit_employee_template.html``
+Create the ``edit_employee_template.html`` template:
 
 .. sourcecode:: html+jinja
 
@@ -302,7 +300,7 @@ This function performs the following operations:
 
 Rendering Document in HTML
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Create the``employee_report.html`` template:
+Create the ``employee_report.html`` template:
 
 .. sourcecode:: html+jinja
 
