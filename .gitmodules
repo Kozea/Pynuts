@@ -1,6 +1,6 @@
 [submodule "docs/example/complete/static/javascript/TeddyBar"]
 	path = docs/example/complete/static/javascript/TeddyBar
 	url = git://github.com/Kozea/TeddyBar.git
-[submodule "flask-sphinx-themes"]
-	path = flask-sphinx-themes
+[submodule "docs/_sphinx-themes"]
+	path = docs/_sphinx-themes
 	url = git://github.com/Kozea/flask-sphinx-themes.git
