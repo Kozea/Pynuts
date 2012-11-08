@@ -73,9 +73,9 @@ User's guide
     :maxdepth: 2
 
     Installation
+    Configuration
     Quickstart
     Tutorial
     Advanced tutorial
     Additional features
-    Configuration
     API
