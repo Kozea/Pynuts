@@ -18,31 +18,43 @@ It allows you to:
    Of course, you can use all the features that git provides and do what you want with your documents, that's why Pynuts is a powerful tool for developpers.
  - drastically reduce the amount of code to write.
 
-Have a look at this comparison:
 
-.. table::
-    :class: compare-table
+A create view, powered by Pynuts
+--------------------------------
+Let's compare the code you would have to write, without and with Pynuts, to implement a basic `create` view:
 
-    +---------------------------------------------------------------------+-------------------------------------------------------------------------------------+
-    | Without Pynuts:                                                     |  With Pynuts:                                                                       |
-    +=====================================================================+=====================================================================================+
-    | .. sourcecode:: python                                              | .. sourcecode:: python                                                              |
-    |                                                                     |                                                                                     |
-    |                                                                     |     @EmployeeView.create_page                                                       |
-    |    @app.route('/employee/add', methods=('GET', 'POST'))             |     @app.route('/employee/add', methods=('GET', 'POST'))                            |
-    |    def add_employee():                                              |     def add_employee():                                                             |
-    |        form = EmployeeForm()                                        |         return EmployeeView().create('create_employee.html.jinja2')                 |
-    |        if form.validate_on_submit():                                |                                                                                     |
-    |            employee = Employee()                                    |                                                                                     |
-    |            form.populate_obj(employee)                              |                                                                                     |
-    |            db.session.add(employee)                                 |                                                                                     |
-    |            db.session.commit()                                      |                                                                                     |
-    |            return redirect(url_for(                                 |                                                                                     |
-    |                'read_employee', employee_id=employee.employee_id))  |                                                                                     |
-    |        else:                                                        |                                                                                     |
-    |            return render_template(url_for('add_employee'))          |                                                                                     |
-    |                                                                     |                                                                                     |
-    +---------------------------------------------------------------------+-------------------------------------------------------------------------------------+
+Without Pynuts
+""""""""""""""
+
+.. code-block:: python
+    
+    app.route('/employee/add', methods=('GET', 'POST'))
+    def add_employee():
+        form = EmployeeForm()
+        if form.validate_on_submit():
+            employee = Employee()
+            form.populate_obj(employee)
+            db.session.add(employee)
+            db.session.commit()
+            return redirect(url_for(
+                'read_employee', employee_id=employee.employee_id))
+        else:
+            return render_template(url_for('add_employee'))
+
+
+With Pynuts
+"""""""""""
+
+.. code-block:: python
+
+    @EmployeeView.create_page
+    @app.route('/employee/add', methods=('GET', 'POST'))
+    def add_employee():
+        return EmployeeView().create('create_employee.html.jinja2')
+
+
+Dependencies
+------------
 
 Pynuts is based on
 
@@ -54,8 +66,8 @@ Pynuts is based on
     - `Git <https://www.samba.org/~jelmer/dulwich/>`_
 
 
-Contents:
----------
+User's guide
+------------
 
 .. toctree::
     :maxdepth: 2
