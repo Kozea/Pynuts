@@ -74,48 +74,46 @@ Then, create a ``SQLAlchemy.Model`` class.
     This property will be especially useful when displaying the employees list.
 
 Step 4: view.py: the view model
------------------------------------
+-------------------------------
 
-Import some things from WTForms, the pynuts application and the database model::
+Define your view class representing your Employee class by extending Pynuts `app.ModelView` view class.
+Then specify the following class attributes:
 
-    from flask.ext.wtf import Form, TextField, Required
+* `model`: the database model class
+* `list_column`: the database column used for representing an instance of the class in the `list` views. 
+    .. note::
+
+        `list_column` must be a `str`, not a `tuple`. It you want to display multiple arttributes for each element of the list,
+        use a `hybrid_property`, as shown in :ref:`hybrid`.
+
+* `create_column`: a tuple containing the database columns used by the form creating an instance.
+
+
+To finish, create a form for the view class. This form extends the `Flask-WTForms <http://packages.python.org/Flask-WTF>`_ Form.
+
+It is used for representing the columns from the Employee class into HTML field using WTForms fields. Those fields will be displayed in all CRUD views.
+
+
+.. sourcecode:: python
+
+    from flask.ext.wtf import Form, TextField, Required, IntegerField
 
     import database
     from application import app
 
-Create the view class that represents the Employee class. It extends the pynuts ModelView::
 
     class EmployeeView(app.ModelView):
-        
+        model = database.Employee
 
-Then, specify the following class attributes: the database model class,::
+        list_column = 'fullname'
+        create_columns = ('name', 'firstname')
 
-    model = database.Employee
-      
-the column representing the class,::
+        class Form(Form):
+            id = IntegerField(u'ID')
+            name = TextField(u'Surname', validators=[Required()])
+            firstname = TextField(u'Firstname', validators=[Required()])
+            fullname = TextField(u'Fullname')
 
-    list_column = 'fullname'
-    
-.. warning:: 
-    ``list_column`` must be a str, not a tuple. It you want to display multiple arttributes for each element of the list,
-    use a ``hybrid_property``, as shown in :ref:`hybrid`
-    
-and the create_columns are the columns displayed in the view. 
-
-::
-
-    create_columns = ('name', 'firstname')
-
-To finish we have to create a form for our view class. The form is extended from the `Flask-WTForms <http://packages.python.org/Flask-WTF>`_ Form.
-
-This form is used for representing the columns from the Employee class into HTML field using WTForms fields. Those fields will be displayed in all CRUD views.
-::
-
-    class Form(Form):
-        id = IntegerField(u'ID')
-        name = TextField(u'Surname', validators=[Required()])
-        firstname = TextField(u'Firstname', validators=[Required()])
-        fullname = TextField(u'Fullname')
 
 
 Step 5: The executable
