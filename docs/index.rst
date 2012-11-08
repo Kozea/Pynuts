@@ -21,7 +21,8 @@ It allows you to:
 
 A create view function, powered by Pynuts
 -----------------------------------------
-Let's compare the code you would have to write, without and with Pynuts, to implement a basic `create` view:
+Let’s compare the code you would have to write, without and with Pynuts, in order to implement a basic create view:
+
 
 Without Pynuts
 """"""""""""""
