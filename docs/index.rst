@@ -8,19 +8,19 @@ Welcome to Pynuts' documentation!
     
 Latest Version: |version|
 
-Pynuts is a Flask extension which will simplify your code by creating some generic content.
+Pynuts is a Flask extension simplifying the implementation of the generic views of your app.
 
 It allows you to: 
  
- - implement some basic CRUD (Create, Read, Update and Delete) view functions for administration in a few lines.
- - secure your application by easily manage permissions using the request context.
- - handle HTML and PDF documents with git, you can store anything you want for any instance you created.
-   Of course, you can use all the features that git provides and do what you want with your documents, that's why Pynuts is a powerful tool for developpers.
- - drastically reduce the amount of code to write.
+ - implement and configure `CRUD <https://en.wikipedia.org/wiki/Create,_read,_update_and_delete>`_ view functions in a few lines, using your database schema.
+ - secure your application by easily managing user permissions using the request context.
+ - generate HTML and PDF documents containing data from any model instance you created.
+ - manage different versions of these document with an embedded git repository.
+ - drastically reduce the amount of code to write and development time by focusing on your application logic and deferring the boring parts to Pynuts.
 
 
-A create view, powered by Pynuts
---------------------------------
+A create view fuction, powered by Pynuts
+----------------------------------------
 Let's compare the code you would have to write, without and with Pynuts, to implement a basic `create` view:
 
 Without Pynuts
