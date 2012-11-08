@@ -155,6 +155,10 @@ When designing a form, you can upload files via 2 different Pynuts fields.
 UploadField
 ^^^^^^^^^^^
 
+An `UploadField` is a generic upload field.
+At rendering (for example in a `read` view), a file uploaded with an `UploadField` will
+be represented as a link serving the file.
+
 .. sourcecode:: python
 
   from flask.ext.wtf import Form
@@ -169,12 +173,13 @@ UploadField
                 upload_set=UPLOAD_SETS['resumes'],
                 validators=[AllowedFile(), MaxSize(1)])
 
-An `UploadField` is a generic upload field.
-At rendering (for example in a `read` view), a file uploaded with an `UploadField` will
-be represented as a link serving the file.
 
 ImageField
 ^^^^^^^^^^
+
+An `ImageField` is a image upload field inheriting from the :ref:`uploadfield` class.
+At rendering (for example in a `read` view), an image uploaded with an `ImageField` will
+be represented as an `<img>` HTML tag, and will thus be displayed.
 
 .. sourcecode:: python
 
@@ -189,10 +194,6 @@ ImageField
     avatar = ImageField(label='avatar',
                 upload_set=UPLOAD_SETS['images'],
                 validators=[AllowedFile(), MaxSize(1)])
-
-An `ImageField` is a image upload field inheriting from the :ref:`uploadfield` class.
-At rendering (for example in a `read` view), an image uploaded with an `ImageField` will
-be represented as an `<img>` HTML tag, and will thus be displayed.
 
 
 Validators
