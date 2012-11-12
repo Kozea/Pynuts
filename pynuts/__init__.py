@@ -45,6 +45,7 @@ class Pynuts(object):
         class Document(document.Document):
             """Document base class of the application."""
             _pynuts = self
+            _app = self.app
 
         self.Document = Document
 

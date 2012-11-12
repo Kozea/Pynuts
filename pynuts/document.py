@@ -29,18 +29,18 @@ class MetaDocument(type):
             if not mcs.type_name:
                 mcs.type_name = mcs.__name__
             mcs._pynuts.documents[mcs.type_name] = mcs
-            mcs._pynuts.add_url_rule(
+            mcs._app.add_url_rule(
                 '/_pynuts/resource/%s/<document_id>/'
                 '<version>/<path:filename>' % (
                     mcs.type_name),
                 endpoint='_pynuts-resource/' + mcs.type_name,
                 view_func=mcs.static_route)
-            mcs._pynuts.add_url_rule(
+            mcs._app.add_url_rule(
                 '/_pynuts/update_content', '_pynuts-update_content',
                 mcs.update_content, methods=('POST',))
             if mcs.model_path and not os.path.isabs(mcs.model_path):
                 mcs.model_path = os.path.join(
-                    mcs._pynuts.root_path, mcs.model_path)
+                    mcs._app.root_path, mcs.model_path)
             mcs.document_id_template = unicode(mcs.document_id_template)
             super(MetaDocument, mcs).__init__(name, bases, dict_)
 
