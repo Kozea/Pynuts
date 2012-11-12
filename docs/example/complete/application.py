@@ -1,5 +1,12 @@
-import pynuts
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+from pynuts import Pynuts
+
 
 CONFIG = {'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
 
-app = pynuts.Pynuts(__name__, config=CONFIG)
+app = Flask(__name__)
+app.config.update(CONFIG)
+app.db = SQLAlchemy(app)
+nuts = Pynuts(app)
