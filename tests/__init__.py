@@ -55,11 +55,8 @@ def teardown_fixture():
 
 
 def setup_func():
-    """ Execute the database creation script and remove old Git Bare repo,
-        created during app setup or last test.
-    """
+    """ Execute the database creation script and populate the document repository."""
     execute_sql(application.app, 'database.sql')
-    # Delete previous Git Bare repo, created during the setup or the last test
     shutil.copytree(
         os.path.join(
             PYNUTS_ROOT, 'tests', 'dump', 'instance', 'documents.git'),
@@ -67,6 +64,6 @@ def setup_func():
 
 
 def teardown_func():
-    """ Remove the temporary database. """
+    """ Remove the temporary database and the document repository."""
     os.remove(DATABASE)
     shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])

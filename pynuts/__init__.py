@@ -13,7 +13,7 @@ from .environment import create_environment
 
 
 class Pynuts(object):
-    """Create the Pynuts class, inheriting from flask.Flask
+    """Create the Pynuts class
 
     :param app: a Flask application object
     :type app: flask.Flask
