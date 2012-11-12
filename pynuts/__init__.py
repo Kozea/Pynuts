@@ -42,8 +42,6 @@ class Pynuts(object):
         self.app.add_url_rule('/_pynuts/static/<path:filename>',
                           '_pynuts-static', static)
 
-        self.document_repository  # initialize git repo
-
         class Document(document.Document):
             """Document base class of the application."""
             _pynuts = self

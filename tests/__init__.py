@@ -50,7 +50,7 @@ def setup_fixture():
 
 def teardown_fixture():
     """Remove the temp directory after the tests."""
-    shutil.rmtree(os.path.dirname(
+    os.rmdir(os.path.dirname(
         application.app.config['PYNUTS_DOCUMENT_REPOSITORY']))
 
 
@@ -60,7 +60,6 @@ def setup_func():
     """
     execute_sql(application.app, 'database.sql')
     # Delete previous Git Bare repo, created during the setup or the last test
-    shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
     shutil.copytree(
         os.path.join(
             PYNUTS_ROOT, 'tests', 'dump', 'instance', 'documents.git'),
@@ -70,3 +69,4 @@ def setup_func():
 def teardown_func():
     """ Remove the temporary database. """
     os.remove(DATABASE)
+    shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
