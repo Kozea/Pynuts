@@ -81,7 +81,7 @@ class Pynuts(object):
             """Model view base class of the application."""
             _pynuts = self
             # Create a new Jinja2 environment with Pynuts helpers
-            environment = create_environment(_pynuts.jinja_env.loader)
+            environment = create_environment(self.app.jinja_env.loader)
 
         self.ModelView = ModelView
 
