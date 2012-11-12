@@ -3,10 +3,10 @@ from flask.ext.wtf import (Form, TextField, IntegerField,
                            QuerySelectMultipleField)
 
 import database
-from application import app
+from application import nuts
 
 
-class EmployeeView(app.ModelView):
+class EmployeeView(nuts.ModelView):
     model = database.Employee
 
     list_column = 'fullname'
@@ -27,7 +27,7 @@ class EmployeeView(app.ModelView):
             query_factory=lambda: database.Company.query, allow_blank=True)
 
 
-class CompanyView(app.ModelView):
+class CompanyView(nuts.ModelView):
     model = database.Company
 
     list_column = 'name'
