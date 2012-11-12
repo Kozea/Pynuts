@@ -178,7 +178,7 @@ The Main
         app.secret_key = 'Azerty'
         app.run(debug=True, host='127.0.0.1', port=5000)
 
-In the main, we initialize the SQLite and then run the server.
+In the main, we initialize the SQLite database and then run the server.
 Since the application is a Flask one, you have to set a `secret_key` if you want the server to run properly.  
 
 Step 6: The Templates

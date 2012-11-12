@@ -57,7 +57,7 @@ Now head over to `http://127.0.0.1:5000/ <http://127.0.0.1:5000/>`_, to list all
 
 So what did our code do?
 
-#. Import what we need to create this small application: Flask (to run a simple WSGI server) and Pynuts.
+#. Import what we need to create this small application: Flask (to run a simple WSGI server) Pynuts, and Flask-SQLAlchemy.
 #. Instanciate and configure a Flask application.
 #. Associate a SQLAchemy ORM object to it.
 #. Instanciate a Pynuts object based on our Flask application.
