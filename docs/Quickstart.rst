@@ -58,6 +58,9 @@ Now head over to `http://127.0.0.1:5000/ <http://127.0.0.1:5000/>`_, to list all
 So what did our code do?
 
 #. Import what we need to create this small application: Flask (to run a simple WSGI server) and Pynuts.
+#. Instanciate and configure a Flask application.
+#. Associate a SQLAchemy ORM object to it.
+#. Instanciate a Pynuts object based on our Flask application.
 #. Create a model for an employee, defining how it will be reflected in database.
 #. Create a view for an employee
 #. Set the ``list_column`` which will define how your employee will be displayed when listed,

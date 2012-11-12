@@ -133,7 +133,7 @@ To configure your app with the created `UploadSets <http://packages.python.org/F
     if __name__ == '__main__':
       app.db.create_all()
       app.secret_key = 'Azerty'
-      app.add_upload_sets(upload_sets)  # insert this line
+      nuts.add_upload_sets(upload_sets)  # insert this line
       app.run(debug=True, host='127.0.0.1', port=8000)
 
 .. note::
@@ -406,16 +406,16 @@ Now you can run the server and see that everything runs smoothly!
 Rights
 ------
 
-With pynuts, setting specific permissions on each endpoint is quite simple. First, create a ``rights.py`` file . In this file, import your app and the ``rights`` module::
+With pynuts, setting specific permissions on each endpoint is quite simple. First, create a ``rights.py`` file . In this file, import your Pynuts object and the ``rights`` module::
 
-  from application import app
+  from application import nuts
   from pynuts.rights import acl
  
-Then, create a `Context` class, inheriting from your application context. Here you can define some properties that will be used for the context of your rights.
+Then, create a `Context` class, inheriting from the Pynuts context. Here you can define some properties that will be used for the context of your rights.
 
 For example, we decided here to create a property called `person` which will stands for the current logged on user::
 
-    class Context(app.Context):
+    class Context(nuts.Context):
     
         @property
         def person(self):

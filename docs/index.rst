@@ -80,3 +80,4 @@ User's guide
     Advanced tutorial
     Additional features
     API
+    Changelog
