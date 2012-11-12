@@ -5,7 +5,6 @@ __version__ = '0.3'
 import os
 import flask
 from werkzeug.utils import cached_property
-from flask_sqlalchemy import SQLAlchemy
 from flask.ext.uploads import configure_uploads, patch_request_class
 from dulwich.repo import Repo
 
