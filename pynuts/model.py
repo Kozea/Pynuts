@@ -63,3 +63,10 @@ class Orderable(object):
              .query.filter(cond).filter(context)
              .filter(getattr(self.__class__, pkey) != getattr(self, pkey))
              .update(values))
+
+
+def reflect(app):
+    """ Load all available table definitions from the application database
+        and reflect their metadata into the SQLALchemy metadata.
+    """
+    app.db.metadata.reflect(bind=app.db.get_engine(app))
