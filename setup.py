@@ -8,6 +8,7 @@ VERSION = re.search("__version__ = '([^']+)'", open(
 
 setup(
     name="Pynuts",
+    author="Kozea",
     version=VERSION,
     url="http://www.pynuts.org/",
     license="BSD",
