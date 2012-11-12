@@ -3,13 +3,13 @@ from flask.ext.wtf import (Form, TextField, IntegerField,
                            QuerySelectMultipleField, BooleanField)
 
 import database
-from application import app
+from application import nuts
 from pynuts.fields import UploadField, ImageField
 from pynuts.validators import AllowedFile, MaxSize
 from files import UPLOAD_SETS
 
 
-class EmployeeView(app.ModelView):
+class EmployeeView(nuts.ModelView):
     model = database.Employee
 
     list_column = 'fullname'
@@ -40,7 +40,7 @@ class EmployeeView(app.ModelView):
             query_factory=lambda: database.Company.query, allow_blank=True)
 
 
-class CompanyView(app.ModelView):
+class CompanyView(nuts.ModelView):
     model = database.Company
 
     list_column = 'name'
