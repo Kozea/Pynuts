@@ -85,7 +85,7 @@ class Pynuts(object):
 
         self.ModelView = ModelView
 
-        self.before_request(self.create_context)
+        self.app.before_request(self.create_context)
 
     @cached_property
     def document_repository(self):
