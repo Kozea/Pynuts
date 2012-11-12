@@ -129,12 +129,6 @@ class Pynuts(object):
         patch_request_class(self.app, upload_max_size)  # limit the size of uploads to 16MB
 
 
-    @property
-    def uploads_default_dest(self):
-        """Access to the UPLOADS_DEFAULT_DEST configuration."""
-        return self.config.get('UPLOADS_DEFAULT_DEST')
-
-
 def static(filename):
     """ Return files from Pynuts static folder.
 
