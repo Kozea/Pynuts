@@ -45,7 +45,6 @@ def setup_fixture():
     model.reflect(app)
     application.app = app
     application.nuts = pynuts.Pynuts(app)
-    application.nuts.document_repository  # initialize git repo
     import complete.executable
 
 
