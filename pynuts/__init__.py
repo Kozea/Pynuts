@@ -89,8 +89,31 @@ class Pynuts(object):
 
     @cached_property
     def document_repository(self):
-        """Return the path to the document repository."""
-        return Repo(self.document_repository_path)
+        """ Return the application bare git document repository.
+
+            If the application has a `PYNUTS_DOCUMENT_REPOSITORY`
+            configuration key expressed as an absolute path, the repo
+            will be located at this path. If this configuration key
+            is expressed as a relative path, its location will be taken
+            relatively to the application instance path.
+            Finally, if no such configuration is found, a bare git
+            repository will be created in the `documents.git` directory,
+            located at the application instance path.
+
+            All parent directories will be created if needed, and if
+            non-existent, the repository will be initialized.
+        """
+        self.document_repository_path = (
+            os.path.join(
+                self.app.instance_path,
+                self.app.config.get('PYNUTS_DOCUMENT_REPOSITORY')))
+        # If document_repository_path does not exist,
+        # create it (and possible parent folders) and initialize the bare repo
+        if os.path.exists(self.document_repository_path):
+            return Repo(self.document_repository_path)
+        else:
+            os.makedirs(self.document_repository_path)
+            return Repo.init_bare(self.document_repository_path)
 
     def render_rest(self, document_type, part='index.rst.jinja2',
                     **kwargs):
