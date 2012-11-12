@@ -13,42 +13,19 @@ from . import document, rights, view
 from .environment import create_environment
 
 
-class Pynuts(flask.Flask):
+class Pynuts(object):
     """Create the Pynuts class, inheriting from flask.Flask
 
-    :param import_name: Flask application name
-    :type import_name: str
-    :param config: Flask application configuration
-    :type config: dict
-    :param config_file: path of the application configuration file
-    :type config_file: str
-    :param reflect: Create models with database data
-    :type reflect: bool
-    :param args: flask.Flask args
-    :param kwargs: flask.Flask kwargs
+    :param app: a Flask application object
+    :type app: flask.Flask
 
     .. seealso::
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
 
     """
-    def __init__(self, import_name, config=None, config_file=None,
-                 reflect=False, *args, **kwargs):
-        super(Pynuts, self).__init__(import_name, *args, **kwargs)
+    def __init__(self, app, *args, **kwargs):
 
-        self.config['CSRF_ENABLED'] = False
-        if config_file:
-            # generate app config from file
-            self.config.from_pyfile(config_file)
-        if config:
-            self.config.update(config)  # generate app config from dict
-
-        self.db = SQLAlchemy(self)  # bind the SQLAlchemy controller to the Pynuts app
-        self.documents = {}
-        self.views = {}
-
-        if reflect:
-            # Automatically create models from the database existent data
-            self.db.metadata.reflect(bind=self.db.get_engine(self))
+        self.app = app
 
         # Set the document repository path
         self.document_repository_path = (
@@ -66,7 +43,7 @@ class Pynuts(flask.Flask):
 
         # Serve files from the Pynuts static folder
         # at the /_pynuts/static/<path:filename> URL
-        self.add_url_rule('/_pynuts/static/<path:filename>',
+        self.app.add_url_rule('/_pynuts/static/<path:filename>',
                           '_pynuts-static', static)
 
         # Uploads root directory
@@ -134,8 +111,9 @@ class Pynuts(flask.Flask):
 
     def add_upload_sets(self, upload_sets, upload_max_size=16777216):
         """Configure the app with the argument upload sets."""
-        configure_uploads(self, upload_sets)
-        patch_request_class(self, upload_max_size)  # limit the size of uploads to 16MB
+        configure_uploads(self.app, upload_sets)
+        patch_request_class(self.app, upload_max_size)  # limit the size of uploads to 16MB
+
 
     @property
     def uploads_default_dest(self):
