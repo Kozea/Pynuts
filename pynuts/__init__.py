@@ -22,7 +22,7 @@ class Pynuts(object):
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
 
     """
-    def __init__(self, app, *args, **kwargs):
+    def __init__(self, app):
 
         self.app = app
 
