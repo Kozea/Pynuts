@@ -33,7 +33,7 @@ from .helpers import with_client, request
 
 
 from complete.exception import NoPermission
-from complete.application import app
+from complete.application import nuts
 
 
 class TestComplete(object):
@@ -392,7 +392,7 @@ class TestComplete(object):
     def test_InvalidId(self):
         """Test InvalidId exception."""
         # Use Document from the vanilla app, not from the test app
-        class EmployeeDoc(app.Document):
+        class EmployeeDoc(nuts.Document):
             document_id_template = '/'
         try:
             EmployeeDoc.create()
@@ -426,10 +426,10 @@ class TestComplete(object):
     def test_conflict_error(self, client):
         """Test the endpoint."""
         # Use Document from the test app, not from the vanilla app
-        from complete.application import app
+        from complete.application import nuts
         filename = os.path.join(PYNUTS_ROOT, 'tests/dump/static/img/test.png')
 
-        class EmployeeDoc(app.Document):
+        class EmployeeDoc(nuts.Document):
             pass
 
         content1 = EmployeeDoc(1).get_content('logo.png')

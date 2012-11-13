@@ -20,11 +20,13 @@ Then create the `templates` and `static` folders, in the same directory.
 Step 2: application.py: defining the Pynuts application
 -----------------------------------------------------------
 
-First, import ``pynuts`` by calling::
+First, import the ``Pynuts``, ``Flask`` and ``SQLAlchemy`` classes by calling::
 
-    import pynuts   
+    from flask import Flask
+    from flask_sqlalchemy import SQLAlchemy
+    from pynuts import Pynuts
 
-Then, specify its configuration::
+Then, specify the Flask app configuration::
 
     CONFIG = {
         'CSRF_ENABLED': False,
@@ -32,13 +34,26 @@ Then, specify its configuration::
         
 .. note::
     
-    Refer to the Pynuts `configuration <Configuration.html>`_ page for more information.
+    Refer to the Pynuts `configuration <Configuration.html>`_ page for more information specific to the Pynuts configuration.
 
-Finally, create your pynuts application with the previous configuration
+Create your Flask application with the previous configuration
 
 .. sourcecode:: python
 
-    app = pynuts.Pynuts(__name__, config=CONFIG)
+    app = Flask(__name__)
+    app.config.update(CONFIG)
+
+Associate an SQLAlchemy ORM to the Flask application.
+
+.. sourcecode:: python
+    
+    app.db = SQLAlchemy(app)
+
+Finally, create a Pynuts object, associated with the Flask app.
+
+.. sourcecode:: python
+
+    nuts = Pynuts(app)
 
 
 .. _hybrid:
@@ -99,10 +114,10 @@ It is used for representing the columns from the Employee class into HTML field 
     from flask.ext.wtf import Form, TextField, Required, IntegerField
 
     import database
-    from application import app
+    from application import nuts
 
 
-    class EmployeeView(app.ModelView):
+    class EmployeeView(nuts.ModelView):
         model = database.Employee
 
         list_column = 'fullname'
@@ -163,7 +178,7 @@ The Main
         app.secret_key = 'Azerty'
         app.run(debug=True, host='127.0.0.1', port=5000)
 
-In the main, we initialize the SQLite and then run the server.
+In the main, we initialize the SQLite database and then run the server.
 Since the application is a Flask one, you have to set a `secret_key` if you want the server to run properly.  
 
 Step 6: The Templates

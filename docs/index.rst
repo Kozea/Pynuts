@@ -29,7 +29,7 @@ Without Pynuts
 
 .. code-block:: python
     
-    app.route('/employee/add', methods=('GET', 'POST'))
+    @app.route('/employee/add', methods=('GET', 'POST'))
     def add_employee():
         form = EmployeeForm()
         if form.validate_on_submit():
@@ -80,3 +80,4 @@ User's guide
     Advanced tutorial
     Additional features
     API
+    Changelog

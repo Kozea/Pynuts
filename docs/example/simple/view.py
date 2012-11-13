@@ -1,10 +1,10 @@
 from flask.ext.wtf import Form, TextField, Required, IntegerField
 
 import database
-from application import app
+from application import nuts
 
 
-class EmployeeView(app.ModelView):
+class EmployeeView(nuts.ModelView):
     model = database.Employee
 
     list_column = 'fullname'

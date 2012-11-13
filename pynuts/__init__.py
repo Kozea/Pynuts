@@ -1,11 +1,10 @@
 """__init__ file for Pynuts."""
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 import os
 import flask
 from werkzeug.utils import cached_property
-from flask_sqlalchemy import SQLAlchemy
 from flask.ext.uploads import configure_uploads, patch_request_class
 from dulwich.repo import Repo
 
@@ -13,70 +12,40 @@ from . import document, rights, view
 from .environment import create_environment
 
 
-class Pynuts(flask.Flask):
-    """Create the Pynuts class, inheriting from flask.Flask
+class Pynuts(object):
+    """Create the Pynuts class
 
-    :param import_name: Flask application name
-    :type import_name: str
-    :param config: Flask application configuration
-    :type config: dict
-    :param config_file: path of the application configuration file
-    :type config_file: str
-    :param reflect: Create models with database data
-    :type reflect: bool
-    :param args: flask.Flask args
-    :param kwargs: flask.Flask kwargs
+    :param app: a Flask application object
+    :type app: flask.Flask
 
     .. seealso::
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
 
     """
-    def __init__(self, import_name, config=None, config_file=None,
-                 reflect=False, *args, **kwargs):
-        super(Pynuts, self).__init__(import_name, *args, **kwargs)
+    def __init__(self, app):
 
-        self.config['CSRF_ENABLED'] = False
-        if config_file:
-            # generate app config from file
-            self.config.from_pyfile(config_file)
-        if config:
-            self.config.update(config)  # generate app config from dict
+        self.app = app
 
-        self.db = SQLAlchemy(self)  # bind the SQLAlchemy controller to the Pynuts app
+        # Pynuts default config
+        # Can be overwritten by setting these parameters in the application config
+        self.app.config.setdefault('CSRF_ENABLED', False)
+        self.app.config.setdefault('UPLOADS_DEFAULT_DEST',
+            os.path.join(app.instance_path, 'uploads'))
+        self.app.config.setdefault('PYNUTS_DOCUMENT_REPOSITORY',
+            'documents.git')
+
         self.documents = {}
         self.views = {}
 
-        if reflect:
-            # Automatically create models from the database existent data
-            self.db.metadata.reflect(bind=self.db.get_engine(self))
-
-        # Set the document repository path
-        self.document_repository_path = (
-            os.path.join(
-                self.instance_path,
-                self.config.get('PYNUTS_DOCUMENT_REPOSITORY')
-                    or 'documents.git')
-            )
-
-        # If self.document_repository_path does not exist,
-        # create it (and possible parent folders) and initialize the repo
-        if not os.path.exists(self.document_repository_path):
-            os.makedirs(self.document_repository_path)
-            Repo.init_bare(self.document_repository_path)
-
         # Serve files from the Pynuts static folder
         # at the /_pynuts/static/<path:filename> URL
-        self.add_url_rule('/_pynuts/static/<path:filename>',
+        self.app.add_url_rule('/_pynuts/static/<path:filename>',
                           '_pynuts-static', static)
-
-        # Uploads root directory
-        if self.config.get('UPLOADS_DEFAULT_DEST') is None:
-            self.config['UPLOADS_DEFAULT_DEST'] = os.path.join(
-                self.instance_path, 'uploads')
 
         class Document(document.Document):
             """Document base class of the application."""
             _pynuts = self
+            _app = self.app
 
         self.Document = Document
 
@@ -112,16 +81,39 @@ class Pynuts(flask.Flask):
             """Model view base class of the application."""
             _pynuts = self
             # Create a new Jinja2 environment with Pynuts helpers
-            environment = create_environment(_pynuts.jinja_env.loader)
+            environment = create_environment(self.app.jinja_env.loader)
 
         self.ModelView = ModelView
 
-        self.before_request(self.create_context)
+        self.app.before_request(self.create_context)
 
     @cached_property
     def document_repository(self):
-        """Return the path to the document repository."""
-        return Repo(self.document_repository_path)
+        """ Return the application bare git document repository.
+
+            If the application has a `PYNUTS_DOCUMENT_REPOSITORY`
+            configuration key expressed as an absolute path, the repo
+            will be located at this path. If this configuration key
+            is expressed as a relative path, its location will be taken
+            relatively to the application instance path.
+            Finally, if no such configuration is found, a bare git
+            repository will be created in the `documents.git` directory,
+            located at the application instance path.
+
+            All parent directories will be created if needed, and if
+            non-existent, the repository will be initialized.
+        """
+        self.document_repository_path = (
+            os.path.join(
+                self.app.instance_path,
+                self.app.config.get('PYNUTS_DOCUMENT_REPOSITORY')))
+        # If document_repository_path does not exist,
+        # create it (and possible parent folders) and initialize the bare repo
+        if os.path.exists(self.document_repository_path):
+            return Repo(self.document_repository_path)
+        else:
+            os.makedirs(self.document_repository_path)
+            return Repo.init_bare(self.document_repository_path)
 
     def render_rest(self, document_type, part='index.rst.jinja2',
                     **kwargs):
@@ -134,13 +126,8 @@ class Pynuts(flask.Flask):
 
     def add_upload_sets(self, upload_sets, upload_max_size=16777216):
         """Configure the app with the argument upload sets."""
-        configure_uploads(self, upload_sets)
-        patch_request_class(self, upload_max_size)  # limit the size of uploads to 16MB
-
-    @property
-    def uploads_default_dest(self):
-        """Access to the UPLOADS_DEFAULT_DEST configuration."""
-        return self.config.get('UPLOADS_DEFAULT_DEST')
+        configure_uploads(self.app, upload_sets)
+        patch_request_class(self.app, upload_max_size)  # limit the size of uploads to 16MB
 
 
 def static(filename):

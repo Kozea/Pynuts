@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import (
     flash, redirect, session, request, render_template, url_for, g)
 
-from application import app
+from application import app, nuts
 from pynuts.rights import allow_if
 from pynuts.directives import Editable
 from pynuts.document import Content
@@ -263,5 +263,5 @@ def set_request_time():
 if __name__ == '__main__':  # pragma: no cover
     app.db.create_all()
     app.secret_key = 'Azerty'
-    app.add_upload_sets(upload_sets())
+    nuts.add_upload_sets(upload_sets())
     app.run(debug=True, host='127.0.0.1', port=8000)

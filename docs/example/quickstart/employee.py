@@ -1,13 +1,18 @@
+from flask import Flask
 from flask.ext.wtf import Form, TextField, IntegerField, Required
+from flask_sqlalchemy import SQLAlchemy
 
-import pynuts
+from pynuts import Pynuts
 
 # The application
 CONFIG = {
     'CSRF_ENABLED': False,
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
 
-app = pynuts.Pynuts(__name__, config=CONFIG)
+app = Flask(__name__)
+app.config.update(CONFIG)
+app.db = SQLAlchemy(app)
+nuts = Pynuts(app)
 
 
 # The database
@@ -18,7 +23,7 @@ class Employee(app.db.Model):
 
 
 # The view
-class EmployeeView(app.ModelView):
+class EmployeeView(nuts.ModelView):
     model = Employee
     list_column = 'name'
 
