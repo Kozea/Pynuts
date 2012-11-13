@@ -39,9 +39,13 @@ class MetaView(type):
             if mcs.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
+                    classes = [FormBase]
+                    form_class = dict_['Form']
+                    if form_class:
+                        classes.extend(form_class.__bases__)
                     columns = getattr(mcs, '%s_columns' % action)
                     setattr(mcs, class_name, type(
-                        class_name, (mcs.form_base_class,), dict(
+                        class_name, tuple(classes), dict(
                             (field_name, getattr(
                                 mcs.Form, field_name, TextField(field_name)))
                             for field_name in columns)))
@@ -70,8 +74,6 @@ class ModelView(object):
 
     #: SQLAlchemy model
     model = None
-
-    form_base_class = FormBase
 
     Form = None
     """
