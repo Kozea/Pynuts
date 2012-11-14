@@ -11,6 +11,10 @@ from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 
+class PynutsMROException:
+    pass
+
+
 class FormBase(Form):
 
     def handle_errors(self):
@@ -46,11 +50,17 @@ class MetaView(type):
                         bases.extend(classes)
                         classes = bases
                     columns = getattr(mcs, '%s_columns' % action)
-                    setattr(mcs, class_name, type(
-                        class_name, tuple(classes), dict(
-                            (field_name, getattr(
-                                mcs.Form, field_name, TextField(field_name)))
-                            for field_name in columns)))
+                    try:
+                        inst = type(
+                            class_name, tuple(classes), dict(
+                                (field_name, getattr(
+                                    mcs.Form, field_name, TextField(field_name)))
+                                for field_name in columns))
+                    except TypeError:
+                        raise PynutsMROException(
+                            'The form must inherit from the pynuts.view.FormBase class.')
+                    setattr(mcs, class_name, inst)
+
         super(MetaView, mcs).__init__(name, bases, dict_)
 
 

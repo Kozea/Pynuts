@@ -1,4 +1,4 @@
-from flask.ext.wtf import (Form, TextField, IntegerField,
+from flask.ext.wtf import (TextField, IntegerField,
                            PasswordField, Required, QuerySelectField,
                            QuerySelectMultipleField, BooleanField)
 
@@ -6,7 +6,12 @@ import database
 from application import nuts
 from pynuts.fields import UploadField, ImageField
 from pynuts.validators import AllowedFile, MaxSize
+from pynuts.view import FormBase
 from files import UPLOAD_SETS
+
+
+class CustomizedForm(FormBase):
+    pass
 
 
 class EmployeeView(nuts.ModelView):
@@ -21,7 +26,7 @@ class EmployeeView(nuts.ModelView):
     update_columns = ('name', 'firstname', 'company', 'driving_license',
                     'resume', 'photo', 'order')
 
-    class Form(Form):
+    class Form(CustomizedForm):
         person_id = IntegerField('ID')
         login = TextField(u'Login', validators=[Required()])
         password = PasswordField(u'Password', validators=[Required()])
@@ -49,7 +54,7 @@ class CompanyView(nuts.ModelView):
 
     list_template = 'list.jinja2'
 
-    class Form(Form):
+    class Form(CustomizedForm):
         company_id = IntegerField('Company')
         name = TextField('Company name')
         employees = QuerySelectMultipleField(
