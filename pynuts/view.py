@@ -42,7 +42,9 @@ class MetaView(type):
                     classes = [FormBase]
                     form_class = dict_['Form']
                     if form_class:
-                        classes.extend(form_class.__bases__)
+                        bases = list(form_class.__bases__)
+                        bases.extend(classes)
+                        classes = bases
                     columns = getattr(mcs, '%s_columns' % action)
                     setattr(mcs, class_name, type(
                         class_name, tuple(classes), dict(
