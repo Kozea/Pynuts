@@ -1,8 +1,10 @@
 from flask import Flask
-from flask.ext.wtf import Form, TextField, IntegerField, Required
+from flask.ext.wtf import TextField, IntegerField, Required
 from flask_sqlalchemy import SQLAlchemy
 
 from pynuts import Pynuts
+from pynuts.view import BaseForm
+
 
 # The application
 CONFIG = {
@@ -27,7 +29,7 @@ class EmployeeView(nuts.ModelView):
     model = Employee
     list_column = 'name'
 
-    class Form(Form):
+    class Form(BaseForm):
         id = IntegerField(u'ID', validators=[Required()])
         name = TextField(u'Surname', validators=[Required()])
 

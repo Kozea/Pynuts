@@ -159,14 +159,13 @@ be represented as a link serving the file.
 
 .. sourcecode:: python
 
-  from flask.ext.wtf import Form
-
   from pynuts.fields import UploadField
+  from pynuts.view import BaseForm
   from pynuts.validators import AllowedFile, MaxSize
 
   from yourapp.files import UPLOAD_SETS
 
-  class Form(Form):
+  class Form(BaseForm):
     resume = UploadField(label='resume',
                 upload_set=UPLOAD_SETS['resumes'],
                 validators=[AllowedFile(), MaxSize(1)])
@@ -181,14 +180,13 @@ be represented as an `<img>` HTML tag, and will thus be displayed.
 
 .. sourcecode:: python
 
-  from flask.ext.wtf import Form
-
   from pynuts.fields import ImageField
+  from pynuts.view import BaseForm
   from pynuts.validators import AllowedFile, MaxSize
 
   from yourapp.files import UPLOAD_SETS
 
-  class Form(Form):
+  class Form(BaseForm):
     avatar = ImageField(label='avatar',
                 upload_set=UPLOAD_SETS['images'],
                 validators=[AllowedFile(), MaxSize(1)])

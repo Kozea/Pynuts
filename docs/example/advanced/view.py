@@ -1,6 +1,8 @@
-from flask.ext.wtf import (Form, TextField, IntegerField,
+from flask.ext.wtf import (TextField, IntegerField,
                            PasswordField, Required, QuerySelectField,
                            QuerySelectMultipleField)
+
+from pynuts.view import BaseForm
 
 import database
 from application import nuts
@@ -15,7 +17,7 @@ class EmployeeView(nuts.ModelView):
     read_columns = ('person_id', 'name', 'firstname', 'fullname', 'company')
     update_columns = ('name', 'firstname')
 
-    class Form(Form):
+    class Form(BaseForm):
         person_id = IntegerField('ID')
         login = TextField(u'Login', validators=[Required()])
         password = PasswordField(u'Password', validators=[Required()])
@@ -34,7 +36,7 @@ class CompanyView(nuts.ModelView):
     create_columns = ('name', 'employees')
     read_columns = ('name', 'employees')
 
-    class Form(Form):
+    class Form(BaseForm):
         company_id = IntegerField('Company')
         name = TextField('Company name')
         employees = QuerySelectMultipleField(

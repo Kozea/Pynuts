@@ -111,7 +111,9 @@ It is used for representing the columns from the Employee class into HTML field 
 
 .. sourcecode:: python
 
-    from flask.ext.wtf import Form, TextField, Required, IntegerField
+    from flask.ext.wtf import TextField, Required, IntegerField
+
+    from pynuts.view import BaseForm
 
     import database
     from application import nuts
@@ -123,7 +125,7 @@ It is used for representing the columns from the Employee class into HTML field 
         list_column = 'fullname'
         create_columns = ('name', 'firstname')
 
-        class Form(Form):
+        class Form(BaseForm):
             id = IntegerField(u'ID')
             name = TextField(u'Surname', validators=[Required()])
             firstname = TextField(u'Firstname', validators=[Required()])
