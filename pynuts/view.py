@@ -15,7 +15,7 @@ class PynutsMROException:
     pass
 
 
-class FormBase(Form):
+class BaseForm(Form):
 
     def handle_errors(self):
         """Flash all the form errors."""
@@ -43,9 +43,9 @@ class MetaView(type):
             if mcs.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
-                    classes = [FormBase]
+                    classes = [BaseForm]
                     form_class = dict_['Form']
-                    if form_class:
+                    if form_class and BaseForm not in list(form_class.__bases__):
                         bases = list(form_class.__bases__)
                         bases.extend(classes)
                         classes = bases
@@ -58,7 +58,7 @@ class MetaView(type):
                                 for field_name in columns))
                     except TypeError:
                         raise PynutsMROException(
-                            'The form must inherit from the pynuts.view.FormBase class.')
+                            'The form must inherit from the pynuts.view.BaseForm class.')
                     setattr(mcs, class_name, inst)
 
         super(MetaView, mcs).__init__(name, bases, dict_)
