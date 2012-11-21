@@ -16,6 +16,13 @@ View
    :members:
 
 
+Model
+-----
+
+.. automodule:: pynuts.model
+   :members:
+
+
 Document
 --------
 
@@ -28,7 +35,7 @@ Rights
 .. automodule:: pynuts.rights
    :members:
 
-Git 
+Git
 ---
 
 .. automodule:: pynuts.git
@@ -55,7 +62,7 @@ Environment
 
 .. automodule:: pynuts.environment
    :members:
-   
+
 Filters
 -------
 
