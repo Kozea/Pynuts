@@ -142,12 +142,10 @@ class ModelView(object):
         return getattr(self.data, self.list_column)
 
     def __init__(self, keys=None, data=None):
-        if keys:
+        if keys is not None:
             self.data = self.model.query.get_or_404(keys)
-        elif data:
-            self.data = data
         else:
-            self.data = None
+            self.data = data
 
     # @classproperty
     # def list_field(cls):
