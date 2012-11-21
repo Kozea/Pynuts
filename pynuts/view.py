@@ -11,7 +11,7 @@ from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 
-class PynutsMROException:
+class PynutsMROException(Exception):
     pass
 
 
