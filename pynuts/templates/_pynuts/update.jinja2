@@ -1,5 +1,5 @@
 <form {% if action %} action="{{ action }}" {% endif %} method="post" enctype="multipart/form-data">
-{%- for field in view.update_form %}
+{%- for field in view.update_fields %}
   {%- if field.widget.input_type != 'hidden' %}
     {%- if not field.flags.no_label %}
       {%- if field.errors %}
