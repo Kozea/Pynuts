@@ -50,8 +50,11 @@ def setup_fixture():
 
 def teardown_fixture():
     """Remove the temp directory after the tests."""
-    os.rmdir(os.path.dirname(
-        application.app.config['PYNUTS_DOCUMENT_REPOSITORY']))
+    path = os.path.dirname(
+            application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
+    if os.path.exists(path):
+        os.rmdir(path)
+
 
 
 def setup_func():
@@ -65,5 +68,8 @@ def setup_func():
 
 def teardown_func():
     """ Remove the temporary database and the document repository."""
-    os.remove(DATABASE)
-    shutil.rmtree(application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
+    if os.path.exists(DATABASE):
+        os.remove(DATABASE)
+    path = application.app.config['PYNUTS_DOCUMENT_REPOSITORY']
+    if os.path.exists(path):
+        shutil.rmtree(path)

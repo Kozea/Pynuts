@@ -31,40 +31,40 @@ class MetaView(type):
     """Metaclass for view classes."""
     def __init__(cls, name, bases, dict_):
         super(MetaView, cls).__init__(name, bases, dict_)
+        # For middle class
+        if not cls.Form:
+            return
 
-        if cls.model:
-            # TODO: find a better name than the name of the class
-            cls._pynuts.views[cls.__name__] = cls
-            cls._mapping = cls._mapping or class_mapper(cls.model)
-            column_names = [column.key for column in cls._mapping.columns]
-            cls.list_columns = (cls.list_column or column_names[0],)
-            cls.table_columns = cls.table_columns or column_names
-            cls.create_columns = cls.create_columns or column_names
-            cls.read_columns = cls.read_columns or column_names
-            cls.update_columns = cls.update_columns or column_names
-            # Re implement inheritancy
-            if cls.Form:
-                for action in ('list', 'table', 'create', 'read', 'update'):
-                    class_name = '%sForm' % action.capitalize()
-                    classes = [BaseForm]
-                    form_class = cls.Form
-                    if form_class and BaseForm not in form_class.__bases__:
-                        bases = list(form_class.__bases__)
-                        bases.extend(classes)
-                        classes = bases
-                    columns = getattr(cls, '%s_columns' % action)
-                    try:
-                        inst = type(
-                            class_name, tuple(classes), dict(
-                                (field_name, getattr(
-                                    cls.Form, field_name,
-                                    TextField(field_name)))
-                                for field_name in columns))
-                    except TypeError:
-                        raise PynutsMROException(
-                            'The form must inherit from the '
-                            'pynuts.view.BaseForm class.')
-                    setattr(cls, class_name, inst)
+        # TODO: find a better name than the name of the class
+        cls._pynuts.views[cls.__name__] = cls
+
+        cls.list_columns = cls.list_column and (cls.list_column,)
+
+        for action in ('list', 'table', 'create', 'read', 'update'):
+            columns = getattr(cls, '%s_columns' % action)
+            if not columns:
+                continue
+
+            class_name = '%sForm' % action.capitalize()
+            classes = [BaseForm]
+            form_class = cls.Form
+            if form_class and BaseForm not in form_class.__bases__:
+                bases = list(form_class.__bases__)
+                bases.extend(classes)
+                classes = bases
+
+            fields = dict(
+                (field_name, getattr(
+                    cls.Form, field_name,
+                    TextField(field_name)))
+                for field_name in columns)
+            try:
+                form = type(class_name, tuple(classes), fields)
+            except TypeError as e:
+                raise PynutsMROException(
+                    'The form must inherit from the '
+                    'pynuts.view.BaseForm class. (%r)' % e)
+            setattr(cls, class_name, form)
 
 
 class ModelView(object):
@@ -150,23 +150,13 @@ class ModelView(object):
         else:
             self.data = data
 
-    # @classproperty
-    # def list_field(cls):
-    #     """Return the list field."""
-    #     return cls.ListForm()._fields[cls.list_column]
-
-    @classproperty
-    def table_fields(cls):
-        """Return the table fields."""
-        return cls.TableForm()._fields
-
     @cached_property
     def create_form(self):
         """Return the create fields."""
         return self.CreateForm()
 
     @cached_property
-    def read_fields(self):
+    def read_form(self):
         """Return the read fields."""
         return self.ReadForm(obj=self.data)
 
@@ -175,10 +165,33 @@ class ModelView(object):
         """Return the update fields."""
         return self.UpdateForm(obj=self.data)
 
+    @cached_property
+    def create_fields(self):
+        """Return the create fields."""
+        return [
+            getattr(self.create_form, field) for field in self.create_columns]
+
+    @cached_property
+    def read_fields(self):
+        """Return the read fields."""
+        return [
+            getattr(self.read_form, field) for field in self.read_columns]
+
+    @cached_property
+    def update_fields(self):
+        """Return the update fields."""
+        return [
+            getattr(self.update_form, field) for field in self.update_columns]
+
+    @classproperty
+    def table_fields(cls):
+        """Return the table fields."""
+        return cls.TableForm()._fields
+
     @classproperty
     def mapping(cls):
         """Table mapping."""
-        return cls._mapping
+        return getattr(cls, '_mapping') or class_mapper(cls.model)
 
     @classproperty
     def session(cls):
@@ -373,7 +386,7 @@ class ModelView(object):
         """
         template = self.environment.get_template(self.create_template)
         return jinja2.Markup(template.render(view=self, action=action,
-            **kwargs))
+                                             **kwargs))
 
     def view_read(self, **kwargs):
         """Render the HTML for read_template."""
@@ -388,7 +401,7 @@ class ModelView(object):
         """
         template = self.environment.get_template(self.update_template)
         return jinja2.Markup(template.render(view=self, action=action,
-            **kwargs))
+                                             **kwargs))
 
     def view_delete(self, **kwargs):
         """Render the HTML for delete_template."""
@@ -482,13 +495,14 @@ class ModelView(object):
                         handler = self.create_form._fields[key].upload_set
                         if not handler:
                             raise RuntimeError('No UploadSet handler could be'
-                                'found for %s' % (key))
+                                               'found for %s' % (key))
                     else:
                         handler = getattr(self, key + '_handler', None)
                         if not handler:
                             raise ValueError(
                                 'You must define a %s_handler '
-                                'property on your view set to an UploadSet' % key)
+                                'property on your view set to an UploadSet' %
+                                key)
                     if value.filename:
                         setattr(self.data, key, handler.save(value))
                     else:
@@ -534,13 +548,14 @@ class ModelView(object):
                         handler = self.create_form._fields[key].upload_set
                         if not handler:
                             raise RuntimeError('No UploadSet handler could be'
-                                'found for %s' % (key))
+                                               'found for %s' % (key))
                     else:
                         handler = getattr(self, key + '_handler', None)
                         if not handler:
                             raise ValueError(
                                 'You must define a %s_handler '
-                                'property on your view set to an UploadSet' % key)
+                                'property on your view set to an UploadSet' %
+                                key)
                     if value.filename:
                         setattr(self.data, key, handler.save(value))
 
@@ -557,7 +572,7 @@ class ModelView(object):
         :type template: str
 
         """
-        self.read_fields.process(obj=self.data)
+        self.read_form.process(obj=self.data)
         return flask.render_template(
             template, view=self, view_class=type(self), instance=self.data,
             **kwargs)

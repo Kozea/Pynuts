@@ -2,62 +2,63 @@
   <table>
     <thead>
       <tr>
-      {%- for field_name in view_class.table_columns %}
-        {%- if field_name != 'csrf_token' %}
-        <th>{{ view_class.table_fields[field_name].label.text }}</th>
-        {%- endif -%}
-      {% endfor -%}
-      {%- if not no_default_actions %}
-        {%- if view_class.update_endpoint %}
-          <th>Edit</th>
-        {%- endif %}
-        {%- if view_class.delete_endpoint %}
-          <th>Delete</th>
+        {%- for field_name in view_class.table_columns %}
+          {%- if field_name != 'csrf_token' %}
+            <th>{{ view_class.table_fields[field_name].label.text }}</th>
+          {%- endif -%}
+        {% endfor -%}
+        {%- if not no_default_actions %}
+          {%- if view_class.update_endpoint %}
+            <th>Edit</th>
+          {%- endif %}
+          {%- if view_class.delete_endpoint %}
+            <th>Delete</th>
+          {% endif -%}
         {% endif -%}
-      {% endif -%}
-      {% for action in actions %}
-        <th>{{ action.title or action.label }}</th>
-      {% endfor %}
+        {% for action in actions %}
+          <th>{{ action.title or action.label }}</th>
+        {% endfor %}
       </tr>
     </thead>
     <tbody>
-    {%- for view in views %}
-      <tr>
-      {%- for column in view_class.table_columns %}
-        <td>
-          {%- if loop.index == 1 -%}
-              {%- if endpoint -%}
-                <a href="{{ endpoint(view=view, **(ctx_args or {})) }}">
-              {%- elif view.read_endpoint -%}
-                <a href="{{ view.action_url_for('read', **(ctx_args or {})) }}">
+      {%- for view in views %}
+        <tr>
+          {% set form = view.TableForm(obj=view.data, formdata=None) %}
+          {%- for column in view_class.table_columns %}
+            <td>
+              {%- if loop.index == 1 -%}
+                {%- if endpoint -%}
+                  <a href="{{ endpoint(view=view, **(ctx_args or {})) }}">
+                {%- elif view.read_endpoint -%}
+                  <a href="{{ view.action_url_for('read', **(ctx_args or {})) }}">
+                {%- endif -%}
+                {{ form[column] | data }}
+                {%- if endpoint or view.read_endpoint -%}
+                  </a>
+                {%- endif -%}
+              {%- else -%}
+                {{ form[column] | data }}
               {%- endif -%}
-              {{ view.TableForm(obj=view.data, formdata=None)[column] | data }}
-              {%- if endpoint or view.read_endpoint -%}
-                </a>
-              {%- endif -%}
-          {%- else -%}
-            {{ view.TableForm(obj=view.data, formdata=None)[column] | data }}
-          {%- endif -%}
-        </td>
+            </td>
+          {%- endfor %}
+          {%- if not no_default_actions %}
+            {%- if view.update_endpoint %}
+              <td><a href="{{ view.action_url_for('update', **(ctx_args or {})) }}">></a></td>
+            {%- endif %}
+            {%- if view.delete_endpoint %}
+              <td><a href="{{ view.action_url_for('delete', **(ctx_args or {})) }}">x</a></td>
+            {%- endif %}
+          {% endif %}
+          {% for action in actions %}
+            {# Update the dict in line with `or` hack #}
+            <td><a href="{{ action.data.update(view.primary_keys) or action.data.update(ctx_args or {}) or url_for(action.endpoint, **action.data) }}">{{ action.label }}</a></td>
+          {% endfor %}
+        </tr>
       {%- endfor %}
-      {%- if not no_default_actions %}
-        {%- if view.update_endpoint %}
-          <td><a href="{{ view.action_url_for('update', **(ctx_args or {})) }}">></a></td>
-        {%- endif %}
-        {%- if view.delete_endpoint %}
-          <td><a href="{{ view.action_url_for('delete', **(ctx_args or {})) }}">x</a></td>
-        {%- endif %}
-      {% endif %}
-      {% for action in actions %}
-        {# Update the dict in line with `or` hack #}
-        <td><a href="{{ action.data.update(view.primary_keys) or action.data.update(ctx_args or {}) or url_for(action.endpoint, **action.data) }}">{{ action.label }}</a></td>
-      {% endfor %}
-      </tr>
-    {%- endfor %}
     </tbody>
   </table>
-  {%- else -%}
-    {%- if no_result_message %}
-      <p>{{ no_result_message }}</p>
-    {%- endif -%}
+{%- else -%}
+  {%- if no_result_message %}
+    <p>{{ no_result_message }}</p>
+  {%- endif -%}
 {% endshowonmatch %}

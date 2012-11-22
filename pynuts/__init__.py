@@ -27,7 +27,7 @@ class Pynuts(object):
         self.app = app
 
         # Pynuts default config
-        # Can be overwritten by setting 
+        # Can be overwritten by setting
         # these parameters in the application config
         self.app.config.setdefault('CSRF_ENABLED', False)
         self.app.config.setdefault('UPLOADS_DEFAULT_DEST',
