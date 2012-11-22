@@ -27,12 +27,13 @@ class Pynuts(object):
         self.app = app
 
         # Pynuts default config
-        # Can be overwritten by setting these parameters in the application config
+        # Can be overwritten by setting 
+        # these parameters in the application config
         self.app.config.setdefault('CSRF_ENABLED', False)
         self.app.config.setdefault('UPLOADS_DEFAULT_DEST',
-            os.path.join(app.instance_path, 'uploads'))
+                                   os.path.join(app.instance_path, 'uploads'))
         self.app.config.setdefault('PYNUTS_DOCUMENT_REPOSITORY',
-            'documents.git')
+                                   'documents.git')
 
         self.documents = {}
         self.views = {}
@@ -40,7 +41,7 @@ class Pynuts(object):
         # Serve files from the Pynuts static folder
         # at the /_pynuts/static/<path:filename> URL
         self.app.add_url_rule('/_pynuts/static/<path:filename>',
-                          '_pynuts-static', static)
+                              '_pynuts-static', static)
 
         class Document(document.Document):
             """Document base class of the application."""
@@ -127,7 +128,8 @@ class Pynuts(object):
     def add_upload_sets(self, upload_sets, upload_max_size=16777216):
         """Configure the app with the argument upload sets."""
         configure_uploads(self.app, upload_sets)
-        patch_request_class(self.app, upload_max_size)  # limit the size of uploads to 16MB
+        # Limit the size of uploads to 16MB
+        patch_request_class(self.app, upload_max_size)
 
 
 def static(filename):

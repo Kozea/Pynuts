@@ -29,39 +29,42 @@ class BaseForm(Form):
 
 class MetaView(type):
     """Metaclass for view classes."""
-    def __init__(mcs, name, bases, dict_):
-        if mcs.model:
+    def __init__(cls, name, bases, dict_):
+        super(MetaView, cls).__init__(name, bases, dict_)
+
+        if cls.model:
             # TODO: find a better name than the name of the class
-            mcs._pynuts.views[mcs.__name__] = mcs
-            mcs._mapping = mcs._mapping or class_mapper(mcs.model)
-            column_names = [column.key for column in mcs._mapping.columns]
-            mcs.list_columns = (mcs.list_column or column_names[0],)
-            mcs.table_columns = mcs.table_columns or column_names
-            mcs.create_columns = mcs.create_columns or column_names
-            mcs.read_columns = mcs.read_columns or column_names
-            mcs.update_columns = mcs.update_columns or column_names
-            if mcs.Form:
+            cls._pynuts.views[cls.__name__] = cls
+            cls._mapping = cls._mapping or class_mapper(cls.model)
+            column_names = [column.key for column in cls._mapping.columns]
+            cls.list_columns = (cls.list_column or column_names[0],)
+            cls.table_columns = cls.table_columns or column_names
+            cls.create_columns = cls.create_columns or column_names
+            cls.read_columns = cls.read_columns or column_names
+            cls.update_columns = cls.update_columns or column_names
+            # Re implement inheritancy
+            if cls.Form:
                 for action in ('list', 'table', 'create', 'read', 'update'):
                     class_name = '%sForm' % action.capitalize()
                     classes = [BaseForm]
-                    form_class = dict_['Form']
-                    if form_class and BaseForm not in list(form_class.__bases__):
+                    form_class = cls.Form
+                    if form_class and BaseForm not in form_class.__bases__:
                         bases = list(form_class.__bases__)
                         bases.extend(classes)
                         classes = bases
-                    columns = getattr(mcs, '%s_columns' % action)
+                    columns = getattr(cls, '%s_columns' % action)
                     try:
                         inst = type(
                             class_name, tuple(classes), dict(
                                 (field_name, getattr(
-                                    mcs.Form, field_name, TextField(field_name)))
+                                    cls.Form, field_name,
+                                    TextField(field_name)))
                                 for field_name in columns))
                     except TypeError:
                         raise PynutsMROException(
-                            'The form must inherit from the pynuts.view.BaseForm class.')
-                    setattr(mcs, class_name, inst)
-
-        super(MetaView, mcs).__init__(name, bases, dict_)
+                            'The form must inherit from the '
+                            'pynuts.view.BaseForm class.')
+                    setattr(cls, class_name, inst)
 
 
 class ModelView(object):
