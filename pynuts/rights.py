@@ -1,6 +1,6 @@
 """Rights for Pynuts."""
 
-from flask import abort
+from flask import abort, request
 from functools import wraps
 
 
@@ -30,8 +30,10 @@ class acl(object):  # pylint: disable=C0103
         self.__name__ = function.__name__
         self.function = function
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         """Call the ACL function."""
+        if self.function.__code__.co_argcount:
+            return self.function(kwargs or request.view_args)
         return self.function()
 
     def __or__(self, other):
