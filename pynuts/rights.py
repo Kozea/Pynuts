@@ -32,67 +32,65 @@ class acl(object):  # pylint: disable=C0103
 
     def __call__(self, **kwargs):
         """Call the ACL function."""
-        if self.function.__code__.co_argcount:
-            return self.function(kwargs or request.view_args)
-        return self.function()
+        return self.function(**(kwargs or request.view_args))
 
     def __or__(self, other):
         """Or operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the or operator."""
-            return self() or other()
+            return self(**kwargs) or other(**kwargs)
         result.__name__ = '%s | %s' % (self.__name__, other.__name__)
         return acl(result)
 
     def __ror__(self, other):
         """Right or operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the right or operator."""
-            return other() or self()
+            return other(**kwargs) or self(**kwargs)
         result.__name__ = '%s | %s' % (other.__name__, self.__name__)
         return acl(result)
 
     def __and__(self, other):
         """And operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the and operator."""
-            return self() and other()
+            return self(**kwargs) and other(**kwargs)
         result.__name__ = '%s & %s' % (self.__name__, other.__name__)
         return acl(result)
 
     def __rand__(self, other):
         """Right and operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the right and operator."""
-            return other() and self()
+            return other(**kwargs) and self(**kwargs)
         result.__name__ = '%s & %s' % (other.__name__, self.__name__)
         return acl(result)
 
     def __xor__(self, other):
         """Exclusive or operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the exclusive or operator."""
             return (
-                self() and not other() or
-                other() and not self())
+                self(**kwargs) and not other(**kwargs) or
+                other(**kwargs) and not self(**kwargs))
         result.__name__ = '%s ^ %s' % (self.__name__, other.__name__)
         return acl(result)
 
     def __rxor__(self, other):
         """Right exclusive or operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the right exclusive or operator."""
             return (
-                other() and not self() or
-                self() and not other())
+                other(**kwargs) and not self(**kwargs) or
+                self(**kwargs) and not other(**kwargs))
         result.__name__ = '%s ^ %s' % (other.__name__, self.__name__)
         return acl(result)
 
     def __invert__(self):
         """Invert operator."""
-        def result():
+        def result(**kwargs):
             """Closure for the invert operator."""
-            return not self()
+            return not self(**kwargs)
         result.__name__ = '~%s' % self.__name__
         return acl(result)
 
