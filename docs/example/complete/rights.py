@@ -26,23 +26,23 @@ class Context(nuts.Context):
 
 
 @acl
-def connected():
+def connected(**params):
     """Returns whether the user is connected."""
     return g.context.person is not None
 
 
 @acl
-def connected_user():
+def connected_user(**params):
     """Returns the connected user."""
     if g.context.person:
         return g.context.person == request.view_args.get('person_id')
 
 
 @acl
-def admin():
+def admin(**params):
     """Returns whether the user is connected."""
     return session.get('login') == 'admin'
 
 
-def dummy():
+def dummy(**params):
     return False

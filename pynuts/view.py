@@ -351,10 +351,10 @@ class ModelView(object):
         :type elements: list
 
         """
-        template = cls.environment.get_template(cls.list_template)
-        return jinja2.Markup(template.render(
+        return flask.render_template(
+            cls.environment.get_template(cls.list_template),
             views=cls.query(query, elements), endpoint=endpoint,
-            view_class=cls, no_result_message=no_result_message, **kwargs))
+            view_class=cls, no_result_message=no_result_message, **kwargs)
 
     @classmethod
     def view_table(cls, query=None, endpoint=None, no_result_message=None,
@@ -371,8 +371,8 @@ class ModelView(object):
         :type elements: list
 
         """
-        template = cls.environment.get_template(cls.table_template)
-        return jinja2.Markup(template.render(
+        return jinja2.Markup(flask.render_template(
+            cls.environment.get_template(cls.table_template).name,
             views=cls.query(query, elements), endpoint=endpoint,
             view_class=cls, no_result_message=no_result_message,
             actions=actions or [], no_default_actions=no_default_actions,
@@ -384,14 +384,15 @@ class ModelView(object):
         :param action: the URL for the create form validation.
 
         """
-        template = self.environment.get_template(self.create_template)
-        return jinja2.Markup(template.render(view=self, action=action,
-                                             **kwargs))
+        return jinja2.Markup(flask.render_template(
+            self.environment.get_template(self.create_template).name,
+            view=self, action=action, **kwargs))
 
     def view_read(self, **kwargs):
         """Render the HTML for read_template."""
-        template = self.environment.get_template(self.read_template)
-        return jinja2.Markup(template.render(view=self, **kwargs))
+        return jinja2.Markup(flask.render_template(
+            self.environment.get_template(self.read_template).name,
+            view=self, **kwargs))
 
     def view_update(self, action=None, **kwargs):
         """Render the HTML for update_template.
@@ -399,14 +400,15 @@ class ModelView(object):
         :param action: the URL for the update form validation.
 
         """
-        template = self.environment.get_template(self.update_template)
-        return jinja2.Markup(template.render(view=self, action=action,
-                                             **kwargs))
+        return jinja2.Markup(flask.render_template(
+            self.environment.get_template(self.update_template).name,
+            view=self, **kwargs))
 
     def view_delete(self, **kwargs):
         """Render the HTML for delete_template."""
-        template = self.environment.get_template(self.delete_template)
-        return jinja2.Markup(template.render(view=self, **kwargs))
+        return jinja2.Markup(flask.render_template(
+            self.environment.get_template(self.delete_template).name,
+            view=self, **kwargs))
 
     # CRUD methods
     @classmethod

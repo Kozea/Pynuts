@@ -83,3 +83,11 @@ def create_environment(loader):
     environment.globals.update({'url_for': flask.url_for})
     environment.filters['data'] = filters.data
     return environment
+
+
+def alter_environment(environment):
+    """Create a new Jinja2 environment with Pynuts helpers."""
+    environment.loader = ChoiceLoader(
+        (environment.loader, PackageLoader('pynuts', 'templates')))
+    environment.add_extension(ShowOnMatch)
+    environment.filters['data'] = filters.data

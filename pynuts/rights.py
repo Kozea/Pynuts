@@ -32,7 +32,7 @@ class acl(object):  # pylint: disable=C0103
 
     def __call__(self, **kwargs):
         """Call the ACL function."""
-        return self.function(**(kwargs or request.view_args))
+        return self.function(**(kwargs or request.view_args or {}))
 
     def __or__(self, other):
         """Or operator."""

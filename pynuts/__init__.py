@@ -9,7 +9,7 @@ from flask.ext.uploads import configure_uploads, patch_request_class
 from dulwich.repo import Repo
 
 from . import document, rights, view
-from .environment import create_environment
+from .environment import alter_environment
 
 
 class Pynuts(object):
@@ -82,7 +82,9 @@ class Pynuts(object):
             """Model view base class of the application."""
             _pynuts = self
             # Create a new Jinja2 environment with Pynuts helpers
-            environment = create_environment(self.app.jinja_env.loader)
+            environment = self.app.jinja_env
+
+        alter_environment(self.app.jinja_env)
 
         self.ModelView = ModelView
 
