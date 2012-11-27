@@ -180,18 +180,28 @@ class ModelView(object):
 
     @cached_property
     def create_form(self):
-        """Return the create fields."""
+        """Return the create form."""
         return self.CreateForm()
 
     @cached_property
     def read_form(self):
-        """Return the read fields."""
+        """Return the read form."""
         return self.ReadForm(obj=self.data)
 
     @cached_property
     def update_form(self):
-        """Return the update fields."""
+        """Return the update form."""
         return self.UpdateForm(obj=self.data)
+
+    @cached_property
+    def table_form(self):
+        """Return the table form."""
+        return self.TableForm(obj=self.data)
+
+    @cached_property
+    def list_form(self):
+        """Return the list form."""
+        return self.ListForm(obj=self.data)
 
     @cached_property
     def create_fields(self):
@@ -211,10 +221,17 @@ class ModelView(object):
         return [
             getattr(self.update_form, field) for field in self.update_columns]
 
-    @classproperty
-    def table_fields(cls):
+    @cached_property
+    def table_fields(self):
         """Return the table fields."""
-        return cls.TableForm()._fields
+        return [
+            getattr(self.table_form, field) for field in self.table_columns]
+
+    @cached_property
+    def list_fields(self):
+        """Return the list fields."""
+        return [
+            getattr(self.list_form, field) for field in self.list_columns]
 
     @classproperty
     def mapping(cls):
@@ -336,7 +353,7 @@ class ModelView(object):
         return wrapper
 
     @classmethod
-    def view_list(cls, query=None, endpoint=None, no_result_message=None,
+    def view_list(cls, query=None, no_result_message=None,
                   elements=None, **kwargs):
         """Render the HTML for list_template.
 
@@ -351,11 +368,11 @@ class ModelView(object):
         """
         return jinja2.Markup(flask.render_template(
             cls.environment.get_template(cls.view_list_template),
-            views=cls.query(query, elements), endpoint=endpoint,
+            views=cls.query(query, elements),
             view_class=cls, no_result_message=no_result_message, **kwargs))
 
     @classmethod
-    def view_table(cls, query=None, endpoint=None, no_result_message=None,
+    def view_table(cls, query=None, no_result_message=None,
                    elements=None, actions=None, no_default_actions=False,
                    **kwargs):
         """Render the HTML for table_template.
@@ -371,7 +388,7 @@ class ModelView(object):
         """
         return jinja2.Markup(flask.render_template(
             cls.environment.get_template(cls.view_table_template).name,
-            views=cls.query(query, elements), endpoint=endpoint,
+            views=cls.query(query, elements),
             view_class=cls, no_result_message=no_result_message,
             actions=actions or [], no_default_actions=no_default_actions,
             **kwargs))

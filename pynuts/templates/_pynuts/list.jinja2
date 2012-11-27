@@ -2,15 +2,9 @@
   <ul>
     {%- for view in views  %}
       <li>
-        {%- if endpoint -%}
-          <a href="{{ endpoint(view=view, **(ctx_args or {})) }}">
-        {%- elif view.read_endpoint -%}
-          <a href="{{ view.action_url_for('read', **(ctx_args or {})) }}">
-        {%- endif -%}
-        {{ view.ListForm(obj=view.data, formdata=None)[view.list_column] | data }}
-        {%- if endpoint or view.read_endpoint -%}
-          </a>
-        {%- endif -%}
+        <a href="{{ view.action_url_for('read', **(ctx_args or {})) }}">
+          {{ view.list_form[view.list_column] | data }}
+        </a>
       </li>
     {%- endfor %}
   </ul>
