@@ -48,7 +48,7 @@ class CompanyView(nuts.ModelView):
     create_columns = ('name', 'employees')
     read_columns = ('name', 'employees')
 
-    list_template = 'list.jinja2'
+    view_list_template = 'list.jinja2'
 
     class Form(BaseForm):
         company_id = IntegerField('Company')

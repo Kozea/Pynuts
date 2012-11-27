@@ -30,7 +30,7 @@
 
   <h2>Employee Content</h2>
   <img src="data:image/png;base64,{{ content.read().encode('base64') }}"/>
-  <a href="{{ url_for('edit_image', person_id=instance.person_id) }}">Edit it !</a>
+  <a href="{{ url_for('edit_image', person_id=view.data.person_id) }}">Edit it !</a>
   
   <h2>Current report</h2>
   <a href="{{ url_for('edit_employee_report', **view.primary_keys) }}" class="edit_report">  >> Edit employee's model</a>

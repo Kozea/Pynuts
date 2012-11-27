@@ -3,6 +3,7 @@
 import flask
 import jinja2
 from flask_wtf import Form, TextField
+from functools import wraps
 from werkzeug.utils import cached_property
 from werkzeug.datastructures import FileStorage
 
@@ -40,11 +41,29 @@ class MetaView(type):
 
         cls.list_columns = cls.list_column and (cls.list_column,)
 
-        for action in ('list', 'table', 'create', 'read', 'update'):
-            columns = getattr(cls, '%s_columns' % action)
+        for action in ('list', 'table', 'create', 'read', 'update', 'delete'):
+            # Make action_page
+            def make_action_page(action):
+                def action_page(cls, function):
+                    """ Set the action_endpoint class property according
+                    to the function name.
+                    """
+                    check_auth = getattr(function, '_auth_fun', lambda x: True)
+                    setattr(cls, '%s_auth' % action, check_auth)
+                    setattr(cls, '%s_endpoint' % action, function.__name__)
+
+                    return function
+
+                action_page.__name__ = '%s_page' % action
+                return action_page
+            setattr(cls, '%s_page' % action,
+                    classmethod(make_action_page(action)))
+
+            columns = getattr(cls, '%s_columns' % action, None)
             if not columns:
                 continue
 
+            # Make actionForm
             class_name = '%sForm' % action.capitalize()
             classes = [BaseForm]
             form_class = cls.Form
@@ -109,12 +128,19 @@ class ModelView(object):
     table_endpoint = None
 
     # Templates
-    list_template = '_pynuts/list.jinja2'
-    table_template = '_pynuts/table.jinja2'
-    create_template = '_pynuts/create.jinja2'
-    read_template = '_pynuts/read.jinja2'
-    update_template = '_pynuts/update.jinja2'
-    delete_template = '_pynuts/delete.jinja2'
+    view_list_template = '_pynuts/list.jinja2'
+    view_table_template = '_pynuts/table.jinja2'
+    view_create_template = '_pynuts/create.jinja2'
+    view_read_template = '_pynuts/read.jinja2'
+    view_update_template = '_pynuts/update.jinja2'
+    view_delete_template = '_pynuts/delete.jinja2'
+
+    list_template = None
+    table_template = None
+    create_template = None
+    read_template = None
+    update_template = None
+    delete_template = None
 
     #: The column which represents your class
     list_column = None
@@ -131,6 +157,14 @@ class ModelView(object):
     #: The columns you can edit
     update_columns = None
 
+    _cached_create_form = None
+
+    def __init__(self, keys=None, data=None):
+        if keys is not None:
+            self.data = self.model.query.get_or_404(keys)
+        else:
+            self.data = data
+
     # Properties
     @property
     def primary_keys(self):
@@ -143,12 +177,6 @@ class ModelView(object):
     def name(self):
         """Common name."""
         return getattr(self.data, self.list_column)
-
-    def __init__(self, keys=None, data=None):
-        if keys is not None:
-            self.data = self.model.query.get_or_404(keys)
-        else:
-            self.data = data
 
     @cached_property
     def create_form(self):
@@ -240,6 +268,23 @@ class ModelView(object):
         # Test for attribute if the form has not "handle_errors" method.
         form.handle_errors()
 
+    def action_url_for(self, action, **kwargs):
+        """Return url_for for CRUD operation.
+
+        :param action: Endpoint name
+        :type action: str
+
+        """
+        ep = getattr(self, '%s_endpoint' % action, None)
+        if ep is not None:
+            if action in ('read', 'update', 'delete'):
+                dict_args = dict(self.primary_keys)
+                dict_args.update(kwargs)
+            else:
+                dict_args = kwargs
+            if getattr(self, '%s_auth' % action)(**dict_args):
+                return self.template_url_for(ep, **dict_args)
+
     def template_url_for(self, endpoint, **kwargs):
         """Return endpoint if callable, url_for this endpoint else.
 
@@ -249,94 +294,47 @@ class ModelView(object):
         :type endpoint: str, func(lambda)
 
         """
-        if callable(endpoint):
+        if '/' in endpoint:
+            return endpoint
+        if endpoint in (
+                self.read_endpoint,
+                self.update_endpoint,
+                self.delete_endpoint):
             dict_args = dict(self.primary_keys)
             dict_args.update(kwargs)
-            return endpoint(self, **dict_args)
-        elif endpoint:
-            if '/' in endpoint:
-                return endpoint
+            kwargs = dict_args
+        return flask.url_for(endpoint, **kwargs)
+
+    @classmethod
+    def allow_if(cls, auth_fun, exception=None):
+
+        def wrapper(function):
+            old_auth_fun = getattr(function, '_auth_fun', None)
+
+            @wraps(function)
+            def check_auth(*args, **kwargs):
+                """Function wrapper."""
+                first = not (len(args) > 0 and issubclass(args[0], ModelView))
+
+                if auth_fun():
+                    if not first:
+                        args = args[1:]
+                    return function(cls, *args, **kwargs)
+                elif first:
+                    if exception:
+                        raise exception
+                    else:
+                        flask.abort(403)
+                else:
+                    return function(*args, **kwargs)
+            if old_auth_fun:
+                check_auth._auth_fun = old_auth_fun | auth_fun
             else:
-                return flask.url_for(endpoint, **kwargs)
+                check_auth._auth_fun = auth_fun
+            return check_auth
 
-    def action_url_for(self, action, **kwargs):
-        """Return url_for for CRUD operation.
+        return wrapper
 
-        :param action: Endpoint name
-        :type action: str
-
-        """
-        return self.template_url_for(
-            getattr(type(self), '%s_endpoint' % action), **kwargs)
-
-    # Endpoints methods
-    @classmethod
-    def create_page(cls, function):
-        """ Set the create_endpoint class property according
-            to the function name.
-        """
-        check_auth = getattr(function, '_auth_fun', lambda: True)
-        cls.create_endpoint = classproperty(
-            lambda cls: check_auth() and function.__name__)
-        return function
-
-    @classmethod
-    def read_page(cls, function):
-        """ Set the read_endpoint class property according
-            to the function name.
-        """
-        check_auth = getattr(function, '_auth_fun', lambda: True)
-        cls.read_endpoint = classproperty(
-            lambda cls: check_auth() and (
-                lambda cls, **primary_keys:
-                flask.url_for(function.__name__, **primary_keys)))
-        return function
-
-    @classmethod
-    def update_page(cls, function):
-        """ Set the update_endpoint class property according
-            to the function name.
-        """
-        check_auth = getattr(function, '_auth_fun', lambda: True)
-        cls.update_endpoint = classproperty(
-            lambda cls: check_auth() and (
-                lambda cls, **primary_keys:
-                flask.url_for(function.__name__, **primary_keys)))
-        return function
-
-    @classmethod
-    def delete_page(cls, function):
-        """ Set the delete_endpoint class property according
-            to the function name.
-        """
-        check_auth = getattr(function, '_auth_fun', lambda: True)
-        cls.delete_endpoint = classproperty(
-            lambda cls: check_auth() and (
-                lambda cls, **primary_keys:
-                flask.url_for(function.__name__, **primary_keys)))
-        return function
-
-    @classmethod
-    def table_page(cls, function):
-        """ Set the table_endpoint class property according
-            to the function name.
-        """
-        check_auth = getattr(function, '_auth_fun', lambda: True)
-        cls.table_endpoint = classproperty(
-            lambda cls: check_auth() and function.__name__)
-        return function
-
-    @classmethod
-    def list_page(cls, function):
-        """ Set the list_endpoint class property according
-            to the function name.
-        """
-        check_auth = getattr(function, '_auth_fun', lambda: True)
-        cls.list_endpoint = classproperty(
-            lambda cls: check_auth() and function.__name__)
-        return function
-
-    # View methods
     @classmethod
     def view_list(cls, query=None, endpoint=None, no_result_message=None,
                   elements=None, **kwargs):
@@ -351,10 +349,10 @@ class ModelView(object):
         :type elements: list
 
         """
-        return flask.render_template(
-            cls.environment.get_template(cls.list_template),
+        return jinja2.Markup(flask.render_template(
+            cls.environment.get_template(cls.view_list_template),
             views=cls.query(query, elements), endpoint=endpoint,
-            view_class=cls, no_result_message=no_result_message, **kwargs)
+            view_class=cls, no_result_message=no_result_message, **kwargs))
 
     @classmethod
     def view_table(cls, query=None, endpoint=None, no_result_message=None,
@@ -372,7 +370,7 @@ class ModelView(object):
 
         """
         return jinja2.Markup(flask.render_template(
-            cls.environment.get_template(cls.table_template).name,
+            cls.environment.get_template(cls.view_table_template).name,
             views=cls.query(query, elements), endpoint=endpoint,
             view_class=cls, no_result_message=no_result_message,
             actions=actions or [], no_default_actions=no_default_actions,
@@ -385,13 +383,13 @@ class ModelView(object):
 
         """
         return jinja2.Markup(flask.render_template(
-            self.environment.get_template(self.create_template).name,
+            self.environment.get_template(self.view_create_template).name,
             view=self, action=action, **kwargs))
 
     def view_read(self, **kwargs):
         """Render the HTML for read_template."""
         return jinja2.Markup(flask.render_template(
-            self.environment.get_template(self.read_template).name,
+            self.environment.get_template(self.view_read_template).name,
             view=self, **kwargs))
 
     def view_update(self, action=None, **kwargs):
@@ -401,13 +399,13 @@ class ModelView(object):
 
         """
         return jinja2.Markup(flask.render_template(
-            self.environment.get_template(self.update_template).name,
+            self.environment.get_template(self.view_update_template).name,
             view=self, **kwargs))
 
     def view_delete(self, **kwargs):
         """Render the HTML for delete_template."""
         return jinja2.Markup(flask.render_template(
-            self.environment.get_template(self.delete_template).name,
+            self.environment.get_template(self.view_delete_template).name,
             view=self, **kwargs))
 
     # CRUD methods
@@ -423,7 +421,8 @@ class ModelView(object):
 
         """
         return flask.render_template(
-            template, view_class=cls, query=query, **kwargs)
+            template or cls.list_template,
+            view_class=cls, query=query, **kwargs)
 
     @classmethod
     def table(cls, template=None, query=None, **kwargs):
@@ -437,18 +436,8 @@ class ModelView(object):
 
         """
         return flask.render_template(
-            template, view_class=cls, query=query, **kwargs)
-
-    def render(self, template, **kwargs):
-        """Render a template with the view, view_class and instance variables.
-
-        :param template: The template to render
-        :type template: str
-
-        """
-        return flask.render_template(
-            template, view=self, view_class=type(self), instance=self.data,
-            **kwargs)
+            template or cls.read_template,
+            view_class=cls, query=query, **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
         """Define the create method. Also check the values in the form: \
@@ -465,13 +454,15 @@ class ModelView(object):
 
         :param values: The values of the object you want to create
         :type values: dict
-
         """
+
         if self.handle_create_form(values):
             self.session.commit()
-            return flask.redirect(
-                self.template_url_for(redirect or type(self).read_endpoint))
-        return self.render(template, **kwargs)
+            rv = flask.redirect(
+                self.template_url_for(redirect or self.read_endpoint))
+            return rv
+        return flask.render_template(
+            template or self.create_template, view=self, **kwargs)
 
     def handle_create_form(self, values=None):
         """Handle the create form operation.
@@ -485,34 +476,37 @@ class ModelView(object):
         (where ``{name}`` is the field name).
 
         """
-        if self.create_form.validate_on_submit():
-            form_values = self._get_form_attributes(self.create_form)
-            if values:
-                form_values.update(values)
-            self.data = self.model(**form_values)
+        if not self.create_form.validate_on_submit():
+            self.handle_errors(self.create_form)
+            return False
 
-            for key, value in form_values.items():
-                if isinstance(value, FileStorage):
-                    if hasattr(self.create_form._fields[key], 'upload_set'):
-                        handler = self.create_form._fields[key].upload_set
-                        if not handler:
-                            raise RuntimeError('No UploadSet handler could be'
-                                               'found for %s' % (key))
-                    else:
-                        handler = getattr(self, key + '_handler', None)
-                        if not handler:
-                            raise ValueError(
-                                'You must define a %s_handler '
-                                'property on your view set to an UploadSet' %
-                                key)
-                    if value.filename:
-                        setattr(self.data, key, handler.save(value))
-                    else:
-                        setattr(self.data, key, None)
+        form_values = self._get_form_attributes(self.create_form)
+        if values:
+            form_values.update(values)
+        data = self.model(**form_values)
 
-            self.session.add(self.data)
-        self.handle_errors(self.create_form)
-        return self.data
+        for key, value in form_values.items():
+            if isinstance(value, FileStorage):
+                if hasattr(self.create_form._fields[key], 'upload_set'):
+                    handler = self.create_form._fields[key].upload_set
+                    if not handler:
+                        raise RuntimeError('No UploadSet handler could be'
+                                           'found for %s' % (key))
+                else:
+                    handler = getattr(self, key + '_handler', None)
+                    if not handler:
+                        raise ValueError(
+                            'You must define a %s_handler '
+                            'property on your view set to an UploadSet' %
+                            key)
+                if value.filename:
+                    setattr(data, key, handler.save(value))
+                else:
+                    setattr(data, key, None)
+
+        self.data = data
+        self.session.add(data)
+        return True
 
     def update(self, template=None, redirect=None, **kwargs):
         """Return the update_template. See the create method for more details.
@@ -527,8 +521,9 @@ class ModelView(object):
         if self.handle_update_form():
             self.session.commit()
             return flask.redirect(
-                self.template_url_for(redirect or type(self).read_endpoint))
-        return self.render(template, **kwargs)
+                self.template_url_for(redirect or self.read_endpoint))
+        return flask.render_template(
+            template or self.update_template, view=self, **kwargs)
 
     def handle_update_form(self):
         """Handle the update form operation.
@@ -576,8 +571,7 @@ class ModelView(object):
         """
         self.read_form.process(obj=self.data)
         return flask.render_template(
-            template, view=self, view_class=type(self), instance=self.data,
-            **kwargs)
+            template or self.read_template, view=self, **kwargs)
 
     def delete(self, template=None, redirect=None, **kwargs):
         """Delete an entry from the database.
@@ -597,5 +591,4 @@ class ModelView(object):
                     redirect or type(self).list_endpoint or
                     type(self).table_endpoint))
         return flask.render_template(
-            template, view=self, view_class=type(self), instance=self.data,
-            **kwargs)
+            template or self.delete_template, view=self, **kwargs)
