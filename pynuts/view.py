@@ -58,8 +58,9 @@ class MetaView(type):
                     """ Set the action_endpoint class property according
                     to the function name.
                     """
-                    check_auth = getattr(function, '_auth_fun', lambda x: True)
-                    setattr(cls, '%s_auth' % action, check_auth)
+                    check_auth = getattr(function, '_auth_fun',
+                                         lambda **kwargs: True)
+                    setattr(cls, '%s_auth' % action, staticmethod(check_auth))
                     setattr(cls, '%s_endpoint' % action, function.__name__)
 
                     return function
