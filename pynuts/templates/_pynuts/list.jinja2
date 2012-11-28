@@ -2,7 +2,7 @@
   <ul>
     {%- for view in views  %}
       <li>
-        <a href="{{ view.action_url_for('read', **(ctx_args or {})) }}">
+        <a href="{{ view.action_url_for(action or 'read', **ctx_args) }}">
           {{ view.list_form[view.list_column] | data }}
         </a>
       </li>

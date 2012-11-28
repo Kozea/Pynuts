@@ -203,7 +203,7 @@ class ModelView(object):
     @cached_property
     def read_form(self):
         """Return the read form."""
-        return self.ReadForm(obj=self.data)
+        return self.ReadForm(formdata=None, obj=self.data)
 
     @cached_property
     def update_form(self):
@@ -213,12 +213,12 @@ class ModelView(object):
     @cached_property
     def table_form(self):
         """Return the table form."""
-        return self.TableForm(obj=self.data)
+        return self.TableForm(formdata=None, obj=self.data)
 
     @cached_property
     def list_form(self):
         """Return the list form."""
-        return self.ListForm(obj=self.data)
+        return self.ListForm(formdata=None, obj=self.data)
 
     @cached_property
     def create_fields(self):
@@ -349,7 +349,7 @@ class ModelView(object):
 
     @classmethod
     def view_list(cls, query=None, no_result_message=None,
-                  elements=None, **kwargs):
+                  elements=None, action=None, ctx_args=None, **kwargs):
         """Render the HTML for list_template.
 
         :param query: The SQLAlchemy query used for rendering the list
@@ -361,9 +361,11 @@ class ModelView(object):
         :type elements: list
 
         """
+        ctx_args = ctx_args or {}
+
         return jinja2.Markup(flask.render_template(
             cls.environment.get_template(cls.view_list_template),
-            views=cls.query(query, elements),
+            views=cls.query(query, elements), action=action, ctx_args=ctx_args,
             view_class=cls, no_result_message=no_result_message, **kwargs))
 
     @classmethod
@@ -469,11 +471,10 @@ class ModelView(object):
             view_class=cls, query=query, **kwargs)
 
     def create(self, template=None, redirect=None, values=None, **kwargs):
-        """Define the create method. Also check the values in the form: \
+        """Define the create method. Also check the values in the form.
 
-        If the values are OK : commit the form with its data; \
-
-        Else : Display the form with errors.
+        If the values are OK: commit the form with its data;
+        Else: Display the form with errors.
 
         :param template: The template you want to render
         :type template: str
@@ -484,9 +485,10 @@ class ModelView(object):
         :param values: The values of the object you want to create
         :type values: dict
         """
-
         if self.handle_create_form(values):
             self.session.commit()
+            if redirect in ACTIONS:
+                redirect = self.action_url_for(redirect)
             rv = flask.redirect(
                 redirect or self.action_url_for(self.read_endpoint))
             return rv
@@ -547,12 +549,12 @@ class ModelView(object):
         :type redirect: str, func(lambda)
 
         """
-        if redirect in ACTIONS:
-            redirect = self.action_url_for(redirect)
         if self.handle_update_form():
             self.session.commit()
+            if redirect in ACTIONS:
+                redirect = self.action_url_for(redirect)
             return flask.redirect(
-                self.action_url_for(redirect or self.read_endpoint))
+                redirect or self.action_url_for(self.read_endpoint))
         return flask.render_template(
             template or self.update_template, view=self, **kwargs)
 
@@ -614,11 +616,11 @@ class ModelView(object):
         :type redirect: str, func(lambda)
 
         """
-        if redirect in ACTIONS:
-            redirect = self.action_url_for(redirect)
         if flask.request.method == 'POST':
             self.session.delete(self.data)
             self.session.commit()
+            if redirect in ACTIONS:
+                redirect = self.action_url_for(redirect)
             return flask.redirect(
                 redirect or
                 self.action_url_for(
