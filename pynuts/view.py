@@ -310,15 +310,12 @@ class ModelView(object):
         :type action: str
 
         """
-        if action in ACTIONS:
-            ep = getattr(cls, '%s_endpoint' % action, None)
-            if ep is not None:
-                if getattr(cls, '%s_auth' % action)(**kwargs):
-                    return flask.url_for(ep, **kwargs)
-                else:
-                    return
-
-        return flask.url_for(action, **kwargs)
+        if action not in ACTIONS:
+            return flask.url_for(action, **kwargs)
+        ep = getattr(cls, '%s_endpoint' % action, None)
+        if ep is not None:
+            if getattr(cls, '%s_auth' % action)(**kwargs):
+                return flask.url_for(ep, **kwargs)
 
     @classmethod
     def allow_if(cls, auth_fun, exception=None):
