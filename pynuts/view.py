@@ -10,6 +10,8 @@ from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
+ACTIONS = ('list', 'table', 'create', 'read', 'update', 'delete')
+
 
 def auth_url_for(endpoint, **kwargs):
     ep_fun = flask.current_app.view_functions.get(endpoint)
@@ -49,7 +51,7 @@ class MetaView(type):
 
         cls.list_columns = cls.list_column and (cls.list_column,)
 
-        for action in ('list', 'table', 'create', 'read', 'update', 'delete'):
+        for action in ACTIONS:
             # Make action_page
             def make_action_page(action):
                 def action_page(cls, function):
@@ -173,6 +175,12 @@ class ModelView(object):
         else:
             self.data = data
 
+        self.action_url_for = self._action_url_for
+
+    def _action_url_for(self, action, **kwargs):
+        kwargs.update(dict(self.primary_keys))
+        return type(self).action_url_for(action, **kwargs)
+
     # Properties
     @property
     def primary_keys(self):
@@ -293,42 +301,23 @@ class ModelView(object):
         # Test for attribute if the form has not "handle_errors" method.
         form.handle_errors()
 
-    def action_url_for(self, action, **kwargs):
+    @classmethod
+    def action_url_for(cls, action, **kwargs):
         """Return url_for for CRUD operation.
 
         :param action: Endpoint name
         :type action: str
 
         """
-        ep = getattr(self, '%s_endpoint' % action, None)
-        if ep is not None:
-            if action in ('read', 'update', 'delete'):
-                dict_args = dict(self.primary_keys)
-                dict_args.update(kwargs)
-            else:
-                dict_args = kwargs
-            if getattr(self, '%s_auth' % action)(**dict_args):
-                return self.template_url_for(ep, **dict_args)
+        if action in ACTIONS:
+            ep = getattr(cls, '%s_endpoint' % action, None)
+            if ep is not None:
+                if getattr(cls, '%s_auth' % action)(**kwargs):
+                    return flask.url_for(ep, **kwargs)
+                else:
+                    return
 
-    def template_url_for(self, endpoint, **kwargs):
-        """Return endpoint if callable, url_for this endpoint else.
-
-        If the given endpoint is already an url, return as is.
-
-        :param endpoint: The endpoint for the registered URL rule
-        :type endpoint: str, func(lambda)
-
-        """
-        if '/' in endpoint:
-            return endpoint
-        if endpoint in (
-                self.read_endpoint,
-                self.update_endpoint,
-                self.delete_endpoint):
-            dict_args = dict(self.primary_keys)
-            dict_args.update(kwargs)
-            kwargs = dict_args
-        return flask.url_for(endpoint, **kwargs)
+        return flask.url_for(action, **kwargs)
 
     @classmethod
     def allow_if(cls, auth_fun, exception=None):
@@ -501,7 +490,7 @@ class ModelView(object):
         if self.handle_create_form(values):
             self.session.commit()
             rv = flask.redirect(
-                self.template_url_for(redirect or self.read_endpoint))
+                redirect or self.action_url_for(self.read_endpoint))
             return rv
         return flask.render_template(
             template or self.create_template, view=self, **kwargs)
@@ -560,10 +549,12 @@ class ModelView(object):
         :type redirect: str, func(lambda)
 
         """
+        if redirect in ACTIONS:
+            redirect = self.action_url_for(redirect)
         if self.handle_update_form():
             self.session.commit()
             return flask.redirect(
-                self.template_url_for(redirect or self.read_endpoint))
+                self.action_url_for(redirect or self.read_endpoint))
         return flask.render_template(
             template or self.update_template, view=self, **kwargs)
 
@@ -625,12 +616,15 @@ class ModelView(object):
         :type redirect: str, func(lambda)
 
         """
+        if redirect in ACTIONS:
+            redirect = self.action_url_for(redirect)
         if flask.request.method == 'POST':
             self.session.delete(self.data)
             self.session.commit()
             return flask.redirect(
-                self.template_url_for(
-                    redirect or type(self).list_endpoint or
-                    type(self).table_endpoint))
+                redirect or
+                self.action_url_for(
+                    self.list_endpoint or
+                    self.table_endpoint))
         return flask.render_template(
             template or self.delete_template, view=self, **kwargs)
