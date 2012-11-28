@@ -6,10 +6,18 @@ from flask_wtf import Form, TextField
 from functools import wraps
 from werkzeug.utils import cached_property
 from werkzeug.datastructures import FileStorage
-
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+
+
+def auth_url_for(endpoint, **kwargs):
+    ep_fun = flask.current_app.view_functions.get(endpoint)
+    if ep_fun and hasattr(ep_fun, '_auth_fun'):
+        if ep_fun._auth_fun(**kwargs):
+            return flask.url_for(endpoint, **kwargs)
+        return
+    return flask.url_for(endpoint, **kwargs)
 
 
 class PynutsMROException(Exception):
@@ -372,9 +380,10 @@ class ModelView(object):
             view_class=cls, no_result_message=no_result_message, **kwargs))
 
     @classmethod
-    def view_table(cls, query=None, no_result_message=None,
-                   elements=None, actions=None, no_default_actions=False,
-                   **kwargs):
+    def view_table(
+            cls, query=None, no_result_message=None,
+            elements=None, actions=None, no_default_actions=False,
+            ctx_args=None, **kwargs):
         """Render the HTML for table_template.
 
         :param query: The SQLAlchemy query used for rendering the table
@@ -386,11 +395,27 @@ class ModelView(object):
         :type elements: list
 
         """
+        table_actions = actions or []
+        ctx_args = ctx_args or {}
+
+        def actions(view):
+            view_actions = []
+            for action in table_actions:
+                view_action = dict(action)
+                view_action.setdefault('data', {})
+                view_action['data'].update(view.primary_keys)
+                if ctx_args:
+                    view_action['data'].update(ctx_args)
+                view_action['url'] = auth_url_for(
+                    view_action['endpoint'], **view_action['data'])
+                view_actions.append(view_action)
+            return view_actions
+
         return jinja2.Markup(flask.render_template(
             cls.environment.get_template(cls.view_table_template).name,
-            views=cls.query(query, elements),
+            views=cls.query(query, elements), ctx_args=ctx_args,
             view_class=cls, no_result_message=no_result_message,
-            actions=actions or [], no_default_actions=no_default_actions,
+            actions=actions, no_default_actions=no_default_actions,
             **kwargs))
 
     def view_create(self, action=None, **kwargs):

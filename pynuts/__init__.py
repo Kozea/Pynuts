@@ -1,6 +1,6 @@
 """__init__ file for Pynuts."""
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 import os
 import flask
@@ -8,8 +8,9 @@ from werkzeug.utils import cached_property
 from flask.ext.uploads import configure_uploads, patch_request_class
 from dulwich.repo import Repo
 
-from . import document, rights, view
 from .environment import alter_environment
+from . import document, rights, view
+from .view import auth_url_for
 
 
 class Pynuts(object):
@@ -22,7 +23,7 @@ class Pynuts(object):
       `Flask Application <http://flask.pocoo.org/docs/api/>`_
 
     """
-    def __init__(self, app):
+    def __init__(self, app, authed_url_for=False):
 
         self.app = app
 
@@ -85,6 +86,11 @@ class Pynuts(object):
             environment = self.app.jinja_env
 
         alter_environment(self.app.jinja_env)
+
+        self.app.jinja_env.globals.update({'pynuts': self})
+        self.app.jinja_env.globals.update({'auth_url_for': auth_url_for})
+        if authed_url_for:
+            self.app.jinja_env.globals.update({'url_for': auth_url_for})
 
         self.ModelView = ModelView
 

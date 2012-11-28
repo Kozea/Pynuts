@@ -1,27 +1,16 @@
 {% showonmatch 'tr td' %}
   <table>
     {%- for view in views %}
+      {% set read_url = view.action_url_for('read', **ctx_args) %}
+      {% set update_url = view.action_url_for('update', **ctx_args) %}
+      {% set delete_url = view.action_url_for('delete', **ctx_args) %}
       {% if loop.first %}
         <thead>
           <tr>
             {%- for field in view.table_fields %}
               <th>{{ field.label.text }}</th>
             {% endfor -%}
-            {%- if not no_default_actions %}
-              {%- if view.read_endpoint %}
-                <th>View</th>
-              {%- endif %}
-              {%- if view.update_endpoint %}
-                <th>Edit</th>
-              {%- endif %}
-              {%- if view.delete_endpoint %}
-                <th>Delete</th>
-              {% endif -%}
-            {% endif -%}
-            {% for action in actions %}
-              <th>{{ action.title or action.label }}</th>
-            {% endfor %}
-          </tr>
+            <th class="action">Actions</th>
         </thead>
         <tbody>
       {% endif %}
@@ -32,19 +21,20 @@
           </td>
         {%- endfor %}
         {%- if not no_default_actions %}
-          {%- if view.read_endpoint %}
-            <td><a href="{{ view.action_url_for('read', **(ctx_args or {})) }}">View</a></td>
+          {%- if read_url %}
+            <td><a href="{{ read_url }}">View</a></td>
           {%- endif %}
-          {%- if view.update_endpoint %}
-            <td><a href="{{ view.action_url_for('update', **(ctx_args or {})) }}">Edit</a></td>
+          {%- if update_url %}
+            <td><a href="{{ update_url }}">Edit</a></td>
           {%- endif %}
-          {%- if view.delete_endpoint %}
-            <td><a href="{{ view.action_url_for('delete', **(ctx_args or {})) }}">Delete</a></td>
+          {%- if delete_url %}
+            <td><a href="{{ delete_url }}">Delete</a></td>
           {%- endif %}
         {% endif %}
-        {% for action in actions %}
-          {# Update the dict in line with `or` hack #}
-          <td><a href="{{ action.data.update(view.primary_keys) or action.data.update(ctx_args or {}) or url_for(action.endpoint, **action.data) }}">{{ action.label }}</a></td>
+        {% for action in actions(view) %}
+          {% if action.url %}
+            <td><a href="{{ action.url }}">{{ action.label }}</a></td>
+          {% endif %}
         {% endfor %}
       </tr>
       {% if loop.last %}
