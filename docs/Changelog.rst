@@ -3,6 +3,13 @@ Pynuts changelog
 
 Here you can see the full list of changes between each Pynuts release.
 
+Version 0.4
+-----------
+* Simplification of crud functions
+* Handle permissions on links with auth_url_for with request/link params in acl rights functions
+* Rewrite of the action_url_for
+
+
 Version 0.3
 -----------
 * The ``pynuts.Pynuts`` class no longer inherits from ``flask.Flask``.
