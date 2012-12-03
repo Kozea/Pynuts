@@ -514,7 +514,7 @@ class ModelView(object):
         form_values = self._get_form_attributes(self.create_form)
         if values:
             form_values.update(values)
-        data = self.model(**form_values)
+        self.data = self.model(**form_values)
 
         for key, value in form_values.items():
             if isinstance(value, FileStorage):
@@ -531,12 +531,11 @@ class ModelView(object):
                             'property on your view set to an UploadSet' %
                             key)
                 if value.filename:
-                    setattr(data, key, handler.save(value))
+                    setattr(self.data, key, handler.save(value))
                 else:
-                    setattr(data, key, None)
+                    setattr(self.data, key, None)
 
-        self.data = data
-        self.session.add(data)
+        self.session.add(self.data)
         return True
 
     def update(self, template=None, redirect=None, **kwargs):
