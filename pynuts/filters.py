@@ -4,7 +4,8 @@
 
 from flask import escape
 from flask.ext.wtf import (
-    QuerySelectField, QuerySelectMultipleField, BooleanField, DateField)
+    QuerySelectField, QuerySelectMultipleField, BooleanField,
+    DateField, DateTimeField)
 from .fields import UploadField, ImageField
 
 
@@ -42,7 +43,7 @@ def data(field):
             return escape(field.get_label(field.data))
     elif isinstance(field, BooleanField):
         return u'✓' if field.data else u'✕'
-    elif isinstance(field, DateField):
+    elif isinstance(field, DateField) or isinstance(field, DateTimeField):
         if field.data:
             return field.data.strftime(field.format)
     elif isinstance(field, ImageField):

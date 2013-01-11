@@ -15,7 +15,8 @@ class AllowedFile(object):
     def __call__(self, form, field):
         if not field.has_file():
             return
-        if not field.upload_set.file_allowed(field.data, field.data.filename):
+        if not field.upload_set.file_allowed(
+                field.data, field.data.filename.lower()):
             extension = field.data.filename.split('.')[-1]
             field_label = field.label.text
             raise ValidationError('The %s field does not allow the upload of '

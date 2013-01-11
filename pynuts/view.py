@@ -276,7 +276,7 @@ class ModelView(object):
             iterable = query.all()
         else:
             iterable = cls.model.query
-            if hasattr(cls, 'order_by'):
+            if hasattr(cls, 'order_by') and cls.order_by is not None:
                 iterable = iterable.order_by(cls.order_by)
             iterable = iterable.all()
 
