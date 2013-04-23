@@ -3,6 +3,7 @@
 import flask
 import jinja2
 from flask_wtf import Form, TextField
+from wtforms.fields.core import UnboundField
 from functools import wraps
 from werkzeug.utils import cached_property
 from werkzeug.datastructures import FileStorage
@@ -88,12 +89,20 @@ class MetaView(type):
                     cls.Form, field_name,
                     TextField(field_name)))
                 for field_name in columns)
+
             try:
                 form = type(class_name, tuple(classes), fields)
             except TypeError as e:
                 raise PynutsMROException(
                     'The form must inherit from the '
                     'pynuts.view.BaseForm class. (%r)' % e)
+
+            for key in dir(form):
+                if (isinstance(getattr(form, key), UnboundField) and
+                        key not in fields and
+                        key != 'csrf_token'):
+                    setattr(form, key, None)
+
             setattr(cls, class_name, form)
 
 
