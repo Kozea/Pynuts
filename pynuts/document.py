@@ -38,6 +38,7 @@ class MetaDocument(type):
                 '/_pynuts/resource/%s/update_content' % cls.type_name,
                 '_pynuts_resource_%s_update_content' % cls.type_name,
                 cls.update_content, methods=('POST',))
+
             if cls.model_path and not os.path.isabs(cls.model_path):
                 cls.model_path = os.path.join(
                     cls._app.root_path, cls.model_path)
@@ -325,42 +326,7 @@ class Document(object):
 
     @classmethod
     def update_content(cls):
-        """Update the ReST document.
-        It is used by the javascript/AJAX save function.
-        It gets the request as JSON and update all the parts of the document
-
-        return document's information as JSON.
-
-        'See the save function<>_' for more details.
-
-        """
-
-        contents = request.json['data']
-        author_name = request.json['author']
-        author_email = request.json['author_email']
-        message = request.json['message']
-
-        documents = {}
-        for values in contents:
-            key = (values['document_type'], values['document_id'])
-            if key in documents:
-                document = documents[key]
-            else:
-                cls = cls._pynuts.documents[values['document_type']]
-                document = cls(values['document_id'], values['version'])
-                documents[key] = document
-            document.git.write(values['part'],
-                               values['content'].encode('utf-8'))
-        for document in documents.values():
-            document.git.commit(
-                author_name or 'Pynuts',
-                author_email or 'pynut@pynuts.org',
-                message or 'Edit %s' % document.document_id)
-        return jsonify(documents=[{
-            'document_type': document.type_name,
-            'document_id': document.document_id,
-            'version': document.version}
-            for document in documents.values()])
+        return update_content(cls._pynuts)
 
     @classmethod
     def create(cls, author_name=None, author_email=None, message=None,
@@ -533,3 +499,42 @@ class Content(object):
             raise ConflictError
         else:
             return True
+
+
+def update_content(pynuts):
+    """Update the ReST document.
+    It is used by the javascript/AJAX save function.
+    It gets the request as JSON and update all the parts of the document
+
+    return document's information as JSON.
+
+    'See the save function<>_' for more details.
+
+    """
+
+    contents = request.json['data']
+    author_name = request.json['author']
+    author_email = request.json['author_email']
+    message = request.json['message']
+
+    documents = {}
+    for values in contents:
+        key = (values['document_type'], values['document_id'])
+        if key in documents:
+            document = documents[key]
+        else:
+            cls = pynuts.documents[values['document_type']]
+            document = cls(values['document_id'], values['version'])
+            documents[key] = document
+        document.git.write(values['part'],
+                           values['content'].encode('utf-8'))
+    for document in documents.values():
+        document.git.commit(
+            author_name or 'Pynuts',
+            author_email or 'pynut@pynuts.org',
+            message or 'Edit %s' % document.document_id)
+    return jsonify(documents=[{
+        'document_type': document.type_name,
+        'document_id': document.document_id,
+        'version': document.version}
+        for document in documents.values()])

@@ -44,6 +44,10 @@ class Pynuts(object):
         # at the /_pynuts/static/<path:filename> URL
         self.app.add_url_rule('/_pynuts/static/<path:filename>',
                               '_pynuts-static', static)
+        self.app.add_url_rule(
+            '/_pynuts/update_content', '_pynuts-update_content',
+            lambda: document.update_content(self),
+            methods=('POST',))
 
         class Document(document.Document):
             """Document base class of the application."""
