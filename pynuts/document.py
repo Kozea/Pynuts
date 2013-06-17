@@ -23,26 +23,26 @@ class InvalidId(ValueError):
 
 class MetaDocument(type):
     """Metaclass for document classes."""
-    def __init__(mcs, name, bases, dict_):
-        if mcs.document_id_template:
+    def __init__(cls, name, bases, dict_):
+        if cls.document_id_template:
             # TODO: find a better endpoint name than the name of the class
-            if not mcs.type_name:
-                mcs.type_name = mcs.__name__
-            mcs._pynuts.documents[mcs.type_name] = mcs
-            mcs._app.add_url_rule(
+            if not cls.type_name:
+                cls.type_name = cls.__name__
+            cls._pynuts.documents[cls.type_name] = cls
+            cls._app.add_url_rule(
                 '/_pynuts/resource/%s/<document_id>/'
-                '<version>/<path:filename>' % (
-                    mcs.type_name),
-                endpoint='_pynuts-resource/' + mcs.type_name,
-                view_func=mcs.static_route)
-            mcs._app.add_url_rule(
-                '/_pynuts/update_content', '_pynuts-update_content',
-                mcs.update_content, methods=('POST',))
-            if mcs.model_path and not os.path.isabs(mcs.model_path):
-                mcs.model_path = os.path.join(
-                    mcs._app.root_path, mcs.model_path)
-            mcs.document_id_template = unicode(mcs.document_id_template)
-            super(MetaDocument, mcs).__init__(name, bases, dict_)
+                '<version>/<path:filename>' % cls.type_name,
+                '_pynuts_resource_%s' % cls.type_name,
+                cls.static_route)
+            cls._app.add_url_rule(
+                '/_pynuts/resource/%s/update_content' % cls.type_name,
+                '_pynuts_resource_%s_update_content' % cls.type_name,
+                cls.update_content, methods=('POST',))
+            if cls.model_path and not os.path.isabs(cls.model_path):
+                cls.model_path = os.path.join(
+                    cls._app.root_path, cls.model_path)
+            cls.document_id_template = unicode(cls.document_id_template)
+            super(MetaDocument, cls).__init__(name, bases, dict_)
 
 
 class Document(object):
@@ -172,7 +172,7 @@ class Document(object):
     def resource_url(self, filename):
         """Resource URL for the application."""
         return url_for(
-            '_pynuts-resource/' + self.type_name,
+            '_pynuts_resource_%s' % self.type_name,
             document_id=self.document_id,
             filename=filename,
             version=self.version)
@@ -207,7 +207,8 @@ class Document(object):
         :param part: part of the document to render
         :param archive: return archive content if `True`
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
         """
         part = 'index.rst' if archive else part
@@ -226,7 +227,7 @@ class Document(object):
             part=part, archive=archive, editable=editable)
 
     def _generate_html(self, part='index.rst.jinja2', archive=False,
-                      editable=True):
+                       editable=True):
         """Generate the HTML samples of the document.
 
         The output is a dict corresponding to the different HTML samples as
@@ -235,7 +236,8 @@ class Document(object):
         :param part: part of the document to render
         :param archive: return archive content if `True`
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
 
         .. seealso::
@@ -452,7 +454,8 @@ class Document(object):
         :param version: version of the document to render
         :param archive: return archive content if `True`
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
 
         """
@@ -472,7 +475,8 @@ class Document(object):
         :param archive: set it to 'True' if you render an archive
         :param html_part: the docutils publish part to render
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
 
         """
