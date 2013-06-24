@@ -1,6 +1,6 @@
 """__init__ file for Pynuts."""
 
-__version__ = '0.4.3'
+__version__ = '0.4.3.1'
 
 import os
 import sys
