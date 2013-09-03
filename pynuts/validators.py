@@ -1,6 +1,6 @@
 """Form validators for Pynuts."""
 
-from flask.ext.wtf import ValidationError
+from wtforms.validators import ValidationError
 
 
 class AllowedFile(object):
@@ -20,7 +20,7 @@ class AllowedFile(object):
             extension = field.data.filename.split('.')[-1]
             field_label = field.label.text
             raise ValidationError('The %s field does not allow the upload of '
-                '%s files' % (field_label, extension))
+                                  '%s files' % (field_label, extension))
 
 
 class MaxSize(object):

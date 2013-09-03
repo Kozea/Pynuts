@@ -1,5 +1,6 @@
 from flask import Flask
-from flask.ext.wtf import TextField, IntegerField, Required
+from wtforms import TextField, IntegerField
+from wtforms.validators import Required
 from flask_sqlalchemy import SQLAlchemy
 
 from pynuts import Pynuts
@@ -8,7 +9,7 @@ from pynuts.view import BaseForm
 
 # The application
 CONFIG = {
-    'CSRF_ENABLED': False,
+    'WTF_CSRF_ENABLED': False,
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
 
 app = Flask(__name__)

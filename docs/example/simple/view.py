@@ -1,5 +1,5 @@
-from flask.ext.wtf import TextField, Required, IntegerField
-
+from wtforms import TextField, IntegerField
+from wtforms.validators import Required
 from pynuts.view import BaseForm
 
 import database

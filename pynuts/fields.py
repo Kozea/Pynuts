@@ -2,7 +2,7 @@
 
 from wtforms import StringField
 from wtforms.widgets import html_params, HTMLString
-from flask.ext.wtf import FileField
+from flask_wtf.file import FileField
 
 
 class Editable(object):

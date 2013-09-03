@@ -3,9 +3,9 @@
 """Jinja environment filters for Pynuts."""
 
 from flask import escape
-from flask.ext.wtf import (
-    QuerySelectField, QuerySelectMultipleField, BooleanField,
-    DateField, DateTimeField)
+from wtforms import BooleanField, DateField, DateTimeField
+from wtforms.ext.sqlalchemy.fields import (
+    QuerySelectField, QuerySelectMultipleField)
 from .fields import UploadField, ImageField
 
 
@@ -48,7 +48,8 @@ def data(field):
             return field.data.strftime(field.format)
     elif isinstance(field, ImageField):
         if field.data:
-            return '<img src="%s" alt="" />' % (field.upload_set.url(field.data))
+            return '<img src="%s" alt="" />' % (
+                field.upload_set.url(field.data))
     elif isinstance(field, UploadField):
         if field.data:
             return '<a href="%s">%s</a>' % (

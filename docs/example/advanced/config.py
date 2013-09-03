@@ -1,2 +1,2 @@
-CSRF_ENABLED = 'False'
+WTF_CSRF_ENABLED = 'False'
 LOL = 'lol'

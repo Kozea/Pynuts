@@ -31,7 +31,7 @@ class Pynuts(object):
         # Pynuts default config
         # Can be overwritten by setting
         # these parameters in the application config
-        self.app.config.setdefault('CSRF_ENABLED', False)
+        self.app.config.setdefault('WTF_CSRF_ENABLED', False)
         self.app.config.setdefault('UPLOADS_DEFAULT_DEST',
                                    os.path.join(app.instance_path, 'uploads'))
         self.app.config.setdefault('PYNUTS_DOCUMENT_REPOSITORY',

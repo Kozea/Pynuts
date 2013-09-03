@@ -2,7 +2,8 @@
 
 import flask
 import jinja2
-from flask_wtf import Form, TextField
+from flask_wtf import Form
+from wtforms import TextField
 from wtforms.fields.core import UnboundField
 from functools import wraps
 from werkzeug.utils import cached_property

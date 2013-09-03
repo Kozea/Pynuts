@@ -29,7 +29,7 @@ First, import the ``Pynuts``, ``Flask`` and ``SQLAlchemy`` classes by calling::
 Then, specify the Flask app configuration::
 
     CONFIG = {
-        'CSRF_ENABLED': False,
+        'WTF_CSRF_ENABLED': False,
         'SQLALCHEMY_DATABASE_URI': 'sqlite:////tmp/test.db'}
         
 .. note::
@@ -111,7 +111,8 @@ It is used for representing the columns from the Employee class into HTML field 
 
 .. sourcecode:: python
 
-    from flask.ext.wtf import TextField, Required, IntegerField
+    from wtforms import TextField, IntegerField
+    from wtforms.validators import Required
 
     from pynuts.view import BaseForm
 
