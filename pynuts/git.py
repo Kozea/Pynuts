@@ -52,7 +52,7 @@ class Git(object):
 
         if branch:
             self.ref = 'refs/heads/' + branch
-            commit = commit or repository.refs.read_ref(self.ref)
+            commit = commit or repository.refs.read_ref(self.ref.encode('utf-8'))
         else:
             self.ref = None
 
@@ -119,7 +119,7 @@ class Git(object):
         """
         :raises ValueError, NotFoundError, ObjectTypeError
         """
-        parts = [part for part in path.encode('utf8').split('/') if part]
+        parts = [part for part in path.split('/') if part]
         if not parts:
             raise ValueError('empty path: %r' % path)
 
@@ -247,9 +247,9 @@ class Git(object):
         for name in os.listdir(root):
             fullname = os.path.join(root, name)
             if os.path.isdir(fullname):
-                tree.add(name, 0o40000, self.store_directory(fullname).id)
+                tree.add(name.encode('utf-8'), 0o40000, self.store_directory(fullname).id)
             elif os.path.isfile(fullname):
-                tree.add(name, 0o100644, self.store_file(fullname).id)
+                tree.add(name.encode('utf-8'), 0o100644, self.store_file(fullname).id)
             #else: Ignore special files.
         self._add_object(tree)
         return tree

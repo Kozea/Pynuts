@@ -29,7 +29,7 @@ class ShowOnMatch(Extension):
 
     def parse(self, parser):
         # Parse the current block
-        lineno = parser.stream.next().lineno
+        lineno = next(parser.stream).lineno
         selector = parser.parse_expression()
         body = parser.parse_statements(('name:else', 'name:endshowonmatch'))
         token = next(parser.stream)
@@ -47,7 +47,7 @@ class ShowOnMatch(Extension):
         # Call the macro, and store the result in an anonymous variable
         # Equivalent to freevar = macro()
         assign_node = nodes.Assign(name, nodes.Call(nodes.Name(macro_name.name,
-            'load'), [], [],
+            b'load'), [], [],
                 None, None))
         assign_node = assign_node.set_lineno(lineno)
 

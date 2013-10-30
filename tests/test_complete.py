@@ -438,8 +438,8 @@ class TestComplete(object):
         content1 = EmployeeDoc(1).get_content('logo.png')
         content2 = EmployeeDoc(1).get_content('logo.png')
         try:
-            content1.write(open(filename).read())
-            content2.write(open(filename).read())
+            content1.write(open(filename, 'rb').read())
+            content2.write(open(filename, 'rb').read())
         except ConflictError:
             return
         raise Exception('This test must raise ConflictError')

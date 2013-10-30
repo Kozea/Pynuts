@@ -24,13 +24,15 @@ from functools import wraps
 
 def with_client(function):
     """Create the test_client."""
-    @wraps(function)
     def wrapper(self, *args, **kwargs):
         """Decorator for the client login."""
         client = application.app.test_client()
         application.nuts.add_upload_sets(files.upload_sets())
         client.post('login', data={'login': 'admin', 'password': 'root'})
-        return function(self, client=client, *args, **kwargs)
+        return function(self, client, *args, **kwargs)
+
+    wrapper.__name__ = function.__name__
+    wrapper.__doc__ = function.__doc__
     return wrapper
 
 

@@ -28,7 +28,7 @@ def execute_sql(app, filename):
     path = os.path.join(PYNUTS_ROOT, 'tests', 'sql', filename)
     with closing(sqlite3.connect(DATABASE)) as database:
         with app.open_resource(path) as sql_script:
-            database.cursor().executescript(sql_script.read())
+            database.cursor().executescript(sql_script.read().decode('utf-8'))
         database.commit()
 
 
