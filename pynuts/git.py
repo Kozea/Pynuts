@@ -170,11 +170,11 @@ class Git(object):
             raise ObjectTypeError('Will not overwrite a %s at %s'
                                   % (obj.type_name, path))
 
-        tree[name] = 0100644, self.store_bytes(bytestring).id
+        tree[name] = 0o100644, self.store_bytes(bytestring).id
         self._add_object(tree)
 
         for tree, name, sub_tree in reversed(steps):
-            tree[name] = 040000, sub_tree.id
+            tree[name] = 0o40000, sub_tree.id
             self._add_object(tree)
         # self.tree ends up updated in-place.
 
@@ -247,9 +247,9 @@ class Git(object):
         for name in os.listdir(root):
             fullname = os.path.join(root, name)
             if os.path.isdir(fullname):
-                tree.add(name, 040000, self.store_directory(fullname).id)
+                tree.add(name, 0o40000, self.store_directory(fullname).id)
             elif os.path.isfile(fullname):
-                tree.add(name, 0100644, self.store_file(fullname).id)
+                tree.add(name, 0o100644, self.store_file(fullname).id)
             #else: Ignore special files.
         self._add_object(tree)
         return tree

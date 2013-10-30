@@ -3,12 +3,12 @@ from wtforms import (
 from wtforms.ext.sqlalchemy.fields import (
     QuerySelectField, QuerySelectMultipleField)
 from wtforms.validators import Required
-import database
-from application import nuts
+from . import database
+from .application import nuts
 from pynuts.fields import UploadField, ImageField
 from pynuts.validators import AllowedFile, MaxSize
 from pynuts.view import BaseForm
-from files import UPLOAD_SETS
+from .files import UPLOAD_SETS
 
 
 class EmployeeView(nuts.ModelView):
@@ -25,10 +25,10 @@ class EmployeeView(nuts.ModelView):
 
     class Form(BaseForm):
         person_id = IntegerField('ID')
-        login = TextField(u'Login', validators=[Required()])
-        password = PasswordField(u'Password', validators=[Required()])
-        name = TextField(u'Surname', validators=[Required()])
-        firstname = TextField(u'Firstname', validators=[Required()])
+        login = TextField('Login', validators=[Required()])
+        password = PasswordField('Password', validators=[Required()])
+        name = TextField('Surname', validators=[Required()])
+        firstname = TextField('Firstname', validators=[Required()])
         fullname = TextField('Employee name')
         driving_license = BooleanField('Driving license')
         resume = UploadField(
@@ -40,7 +40,7 @@ class EmployeeView(nuts.ModelView):
             upload_set=UPLOAD_SETS['images'],
             validators=[AllowedFile(), MaxSize(1)])
         company = QuerySelectField(
-            u'Company', get_label='name',
+            'Company', get_label='name',
             query_factory=lambda: database.Company.query, allow_blank=True)
 
 
@@ -57,5 +57,5 @@ class CompanyView(nuts.ModelView):
         company_id = IntegerField('Company')
         name = TextField('Company name')
         employees = QuerySelectMultipleField(
-            u'Employees', get_label='fullname', query_factory=
+            'Employees', get_label='fullname', query_factory=
             lambda: database.Employee.query.filter_by(company_id=9999))

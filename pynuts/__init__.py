@@ -56,7 +56,7 @@ class Pynuts(object):
 
         self.Document = Document
 
-        class Context(object):
+        class Context(object, metaclass=rights.MetaContext):
             """Context base class of the application.
 
             You can get or set any element in the context stored in
@@ -70,7 +70,6 @@ class Pynuts(object):
                 g.context.request_time = datetime.now().strftime('%Y/%m/%d')
 
             """
-            __metaclass__ = rights.MetaContext
             _pynuts = self
 
             def __getitem__(self, key):
@@ -165,8 +164,8 @@ def install_secret_key(app, filename='secret_key'):
     try:
         app.config['SECRET_KEY'] = open(filename, 'rb').read()
     except IOError:
-        print 'Error: No secret key. Create it with:'
+        print('Error: No secret key. Create it with:')
         if not os.path.isdir(os.path.dirname(filename)):
-            print 'mkdir -p', os.path.dirname(filename)
-        print 'head -c 24 /dev/urandom >', filename
+            print('mkdir -p', os.path.dirname(filename))
+        print('head -c 24 /dev/urandom >', filename)
         sys.exit(1)

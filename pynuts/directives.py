@@ -48,7 +48,7 @@ class Editable(Directive):
                 'data-document-type': document_type,
                 'data-document-id': document_id}
 
-        for k in self.option_spec.keys():
+        for k in list(self.option_spec.keys()):
             if k == 'title':
                 attr[k] = self.options.get(k)
             elif k == 'contenteditable':
@@ -56,7 +56,7 @@ class Editable(Directive):
             else:
                 attr[k] = ' '.join(self.options.get(k, []))
         content = '<div %s>%s</div>' % (
-                ' '.join(('%s="%s"' % (k, v)) for k, v in attr.items() if v),
+                ' '.join(('%s="%s"' % (k, v)) for k, v in list(attr.items()) if v),
                 content or '')
         return [docutils.nodes.raw('', content, format='html')]
 
@@ -115,10 +115,10 @@ class Content(Directive):
                 'data-document-id': document_id,
                 'data-content': 'true'}
         attr.update(dict(
-            (key, ' '.join(values)) for key, values in self.options.items()))
+            (key, ' '.join(values)) for key, values in list(self.options.items())))
 
         content = '<div %s>%s</div>' % (
-                ' '.join(('%s="%s"' % (k, v)) for k, v in attr.items() if v),
+                ' '.join(('%s="%s"' % (k, v)) for k, v in list(attr.items()) if v),
                 render(data) or '')
         return [docutils.nodes.raw('', content, format='html')]
 

@@ -31,8 +31,8 @@ class EmployeeView(nuts.ModelView):
     list_column = 'name'
 
     class Form(BaseForm):
-        id = IntegerField(u'ID', validators=[Required()])
-        name = TextField(u'Surname', validators=[Required()])
+        id = IntegerField('ID', validators=[Required()])
+        name = TextField('Surname', validators=[Required()])
 
 
 # The executable

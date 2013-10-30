@@ -21,7 +21,7 @@ import json
 import os
 
 from flask import url_for
-from cStringIO import StringIO
+from io import StringIO
 
 from pynuts.document import InvalidId
 from pynuts.git import ConflictError
@@ -114,7 +114,9 @@ class TestComplete(object):
         with client.application.test_request_context():
             resp = request(
                 client.post, url_for('create_employee'),
-                data={'resume': (StringIO('my file contents'), 'resume.jpg')})
+                data={'login': 'Tester', 'password': 'test', 'name': 'Tester',
+                      'firstname': 'Tester',
+                      'resume': (StringIO('my file contents'), 'resume.jpg')})
             assert 'The resume field does not allow the upload '
             'of jpg files.' in resp.data
 
@@ -361,7 +363,7 @@ class TestComplete(object):
                 request(client.get, url_for('test_rights'))
             except NoPermission:
                 return
-        raise StandardError('This test must raise NoPermission')
+        raise Exception('This test must raise NoPermission')
 
     @with_client
     def test_update_content(self, client):
@@ -399,7 +401,7 @@ class TestComplete(object):
             EmployeeDoc.create()
         except InvalidId:
             return
-        raise StandardError('This test must raise InvalidId')
+        raise Exception('This test must raise InvalidId')
 
     @with_client
     def test_test_endpoint(self, client):
@@ -440,6 +442,6 @@ class TestComplete(object):
             content2.write(open(filename).read())
         except ConflictError:
             return
-        raise StandardError('This test must raise ConflictError')
+        raise Exception('This test must raise ConflictError')
 
 # pylint: enable=R0201,W0613

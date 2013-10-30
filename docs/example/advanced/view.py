@@ -19,13 +19,13 @@ class EmployeeView(nuts.ModelView):
 
     class Form(BaseForm):
         person_id = IntegerField('ID')
-        login = TextField(u'Login', validators=[Required()])
-        password = PasswordField(u'Password', validators=[Required()])
-        name = TextField(u'Surname', validators=[Required()])
-        firstname = TextField(u'Firstname', validators=[Required()])
+        login = TextField('Login', validators=[Required()])
+        password = PasswordField('Password', validators=[Required()])
+        name = TextField('Surname', validators=[Required()])
+        firstname = TextField('Firstname', validators=[Required()])
         fullname = TextField('Employee name')
         company = QuerySelectField(
-            u'Company', get_label='name',
+            'Company', get_label='name',
             query_factory=lambda: database.Company.query, allow_blank=True)
 
 
@@ -40,5 +40,5 @@ class CompanyView(nuts.ModelView):
         company_id = IntegerField('Company')
         name = TextField('Company name')
         employees = QuerySelectMultipleField(
-            u'Employees', get_label='fullname', query_factory=
+            'Employees', get_label='fullname', query_factory=
             lambda: database.Employee.query.filter_by(company_id=None))

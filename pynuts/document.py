@@ -6,7 +6,7 @@ import docutils
 import jinja2
 import docutils.core
 import mimetypes
-from urllib import quote, unquote
+from urllib.parse import quote, unquote
 from flask import (Response, render_template, request, redirect, flash,
                    url_for, jsonify)
 from werkzeug.datastructures import Headers
@@ -42,11 +42,11 @@ class MetaDocument(type):
             if cls.model_path and not os.path.isabs(cls.model_path):
                 cls.model_path = os.path.join(
                     cls._app.root_path, cls.model_path)
-            cls.document_id_template = unicode(cls.document_id_template)
+            cls.document_id_template = str(cls.document_id_template)
             super(MetaDocument, cls).__init__(name, bases, dict_)
 
 
-class Document(object):
+class Document(object, metaclass=MetaDocument):
     """This class represents a document object.
 
     :param document_id: the id of the document
@@ -55,7 +55,6 @@ class Document(object):
     :type version: str
 
     """
-    __metaclass__ = MetaDocument
 
     #: Jinja Environment
     jinja_environment = None
@@ -528,7 +527,7 @@ def update_content(pynuts):
             documents[key] = document
         document.git.write(values['part'],
                            values['content'].encode('utf-8'))
-    for document in documents.values():
+    for document in list(documents.values()):
         document.git.commit(
             author_name or 'Pynuts',
             author_email or 'pynut@pynuts.org',
@@ -537,4 +536,4 @@ def update_content(pynuts):
         'document_type': document.type_name,
         'document_id': document.document_id,
         'version': document.version}
-        for document in documents.values()])
+        for document in list(documents.values())])

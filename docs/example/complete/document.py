@@ -1,4 +1,4 @@
-from application import nuts
+from .application import nuts
 
 
 class EmployeeDoc(nuts.Document):

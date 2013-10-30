@@ -10,9 +10,9 @@ class Editable(object):
     def __call__(self, field, **kwargs):
         kwargs.setdefault('id', field.id)
         return HTMLString(
-            u'<div contenteditable="true" %s>%s</div>' %
+            '<div contenteditable="true" %s>%s</div>' %
             (html_params(name=field.name, **kwargs),
-             unicode(field._value())))
+             str(field._value())))
 
 
 class EditableField(StringField):

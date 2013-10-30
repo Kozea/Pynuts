@@ -35,14 +35,14 @@ def data(field):
     if isinstance(field, QuerySelectMultipleField):
         if field.data:
             return escape(
-                u', '.join(field.get_label(data) for data in field.data))
+                ', '.join(field.get_label(data) for data in field.data))
         else:
-            return u'∅'
+            return '∅'
     elif isinstance(field, QuerySelectField):
         if field.data:
             return escape(field.get_label(field.data))
     elif isinstance(field, BooleanField):
-        return u'✓' if field.data else u'✕'
+        return '✓' if field.data else '✕'
     elif isinstance(field, DateField) or isinstance(field, DateTimeField):
         if field.data:
             return field.data.strftime(field.format)

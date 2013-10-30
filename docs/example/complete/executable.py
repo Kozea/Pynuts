@@ -3,16 +3,16 @@ from datetime import datetime
 from flask import (
     flash, redirect, session, request, render_template, url_for, g)
 
-from application import app, nuts
+from .application import app, nuts
 from pynuts.rights import allow_if
 from pynuts.directives import Editable
 from pynuts.document import Content
-import view
-import document
-from database import Employee
-import rights as Is
-from exception import NoPermission
-from files import upload_sets
+from . import view
+from . import document
+from .database import Employee
+from . import rights as Is
+from .exception import NoPermission
+from .files import upload_sets
 
 
 @app.errorhandler(403)
@@ -136,15 +136,15 @@ def read_company(company_id=None):
     company_view = view.CompanyView(company_id)
     employee_table = view.EmployeeView.view_table(
         actions=[{
-            'label': u'٧',
-            'title': u'Down',
+            'label': '٧',
+            'title': 'Down',
             'endpoint': 'down_employee',
             'data': {
                 'company_id': company_id
             }
         }, {
-            'label': u'٨',
-            'title': u'Up',
+            'label': '٨',
+            'title': 'Up',
             'endpoint': 'up_employee',
             'data': {
                 'company_id': company_id

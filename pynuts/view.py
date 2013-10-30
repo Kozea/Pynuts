@@ -33,9 +33,9 @@ class BaseForm(Form):
     def handle_errors(self):
         """Flash all the form errors."""
         if self.errors:
-            for key, errors in self.errors.items():
+            for key, errors in list(self.errors.items()):
                 flask.flash(jinja2.Markup(
-                    u'<label for="%s">%s</label>: %s.' % (
+                    '<label for="%s">%s</label>: %s.' % (
                         key, self[key].label.text, ', '.join(errors))),
                     'error')
 
@@ -107,7 +107,7 @@ class MetaView(type):
             setattr(cls, class_name, form)
 
 
-class ModelView(object):
+class ModelView(object, metaclass=MetaView):
     """This class represents the view of a SQLAlchemy model class.
 
     It grants CRUD (Create, Read, Update, Delete) operations
@@ -120,9 +120,6 @@ class ModelView(object):
     :type data: dict
 
     """
-
-    # Metaclass
-    __metaclass__ = MetaView
 
     # Mapper
     _mapping = None
@@ -526,7 +523,7 @@ class ModelView(object):
             form_values.update(values)
         self.data = self.model(**form_values)
 
-        for key, value in form_values.items():
+        for key, value in list(form_values.items()):
             if isinstance(value, FileStorage):
                 if hasattr(self.create_form._fields[key], 'upload_set'):
                     handler = self.create_form._fields[key].upload_set
@@ -580,8 +577,8 @@ class ModelView(object):
 
         """
         if self.update_form.validate_on_submit():
-            for key, value in self._get_form_attributes(
-                    self.update_form).items():
+            for key, value in list(self._get_form_attributes(
+                    self.update_form).items()):
                 if isinstance(value, FileStorage):
                     if hasattr(self.create_form._fields[key], 'upload_set'):
                         handler = self.create_form._fields[key].upload_set

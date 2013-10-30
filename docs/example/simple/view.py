@@ -13,7 +13,7 @@ class EmployeeView(nuts.ModelView):
     create_columns = ('name', 'firstname')
 
     class Form(BaseForm):
-        id = IntegerField(u'ID')
-        name = TextField(u'Surname', validators=[Required()])
-        firstname = TextField(u'Firstname', validators=[Required()])
-        fullname = TextField(u'Fullname')
+        id = IntegerField('ID')
+        name = TextField('Surname', validators=[Required()])
+        firstname = TextField('Firstname', validators=[Required()])
+        fullname = TextField('Fullname')
