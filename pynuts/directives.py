@@ -30,7 +30,7 @@ class _Tag(Directive):
             key: ' '.join(values) for key, values in self.options.items()})
         self.attributes = {
             key: value for key, value in self.attributes.items() if value}
-        self.content = self.document.git.read(part).decode('utf-8')
+        self.parsed_content = self.document.git.read(part).decode('utf-8')
 
 
 class Editable(_Tag):
