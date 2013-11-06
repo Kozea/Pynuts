@@ -51,8 +51,8 @@ class Git(object):
         self._get_object = repository.get_object
 
         if branch:
-            self.ref = 'refs/heads/' + branch
-            commit = commit or repository.refs.read_ref(self.ref.encode('utf-8'))
+            self.ref =('refs/heads/' + branch).encode('utf-8')
+            commit = commit or repository.refs.read_ref(self.ref)
         else:
             self.ref = None
 
@@ -221,14 +221,14 @@ class Git(object):
         """
         author = '%s <%s>' % (author_name, author_email)
         commit = Commit()
-        commit.author = author.encode('utf8')
+        commit.author = author
         commit.committer = self.committer
         commit.author_time = commit.commit_time = int(time.time())
         if timezone is None:
             # UTC. TODO: use the server’s timezone? Something else?
             timezone = 0
         commit.author_timezone = commit.commit_timezone = timezone
-        commit.message = message.encode('utf8')
+        commit.message = message
         commit.tree = tree_id
         commit.parents = parents
         self._add_object(commit)
