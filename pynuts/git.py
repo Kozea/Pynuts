@@ -51,7 +51,7 @@ class Git(object):
         self._get_object = repository.get_object
 
         if branch:
-            self.ref =('refs/heads/' + branch).encode('utf-8')
+            self.ref = b'refs/heads/' + branch.encode('utf-8')
             commit = commit or repository.refs.read_ref(self.ref)
         else:
             self.ref = None
@@ -119,7 +119,9 @@ class Git(object):
         """
         :raises ValueError, NotFoundError, ObjectTypeError
         """
-        parts = [part for part in path.split('/') if part]
+        parts = [
+            part.encode('utf-8')
+            for part in path.split('/') if part]
         if not parts:
             raise ValueError('empty path: %r' % path)
 
