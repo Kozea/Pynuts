@@ -2,6 +2,7 @@
 
 """Jinja environment filters for Pynuts."""
 
+from base64 import b64encode
 from flask import escape
 from wtforms import BooleanField, DateField, DateTimeField
 from wtforms.ext.sqlalchemy.fields import (
@@ -56,3 +57,16 @@ def data(field):
                 field.upload_set.url(field.data),
                 field.data)
     return escape(field.data)
+
+
+def base64(bytestring):
+    """Return base64 bytes corresponding to the bytestring.
+
+    Example:
+
+    .. sourcecode:: html+jinja
+
+        <img src="data:image/png;base64,{{ image | base64" }} />
+
+    """
+    return b64encode(bytestring)

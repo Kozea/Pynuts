@@ -131,10 +131,11 @@ class Git(object):
         for i, name in enumerate(parts):
             if name in tree:
                 _mode, sha = tree[name]
+                print(path, name)
                 obj = self._get_object(sha)
                 # All but the last part must be trees
                 if i < last_i and obj.type_name != 'tree':
-                    path = '/'.join(name for _, name, _ in steps)
+                    path = b'/'.join(name for _, name, _ in steps)
                     raise ObjectTypeError("'%s' is a %s, expected a tree."
                                           % (path, obj.type_name))
             elif create_trees:
@@ -143,6 +144,7 @@ class Git(object):
                 raise NotFoundError(path)
             steps.append((tree, name, obj))
             tree = obj
+        print(type(obj))
         return steps, obj
 
     def read(self, path):

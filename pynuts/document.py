@@ -7,8 +7,8 @@ import jinja2
 import docutils.core
 import mimetypes
 from urllib.parse import quote, unquote
-from flask import (Response, render_template, request, redirect, flash,
-                   url_for, jsonify)
+from flask import (
+    Response, render_template, request, redirect, flash, url_for, jsonify)
 from werkzeug.datastructures import Headers
 from flask_weasyprint import HTML
 from docutils_html5 import Writer
@@ -102,9 +102,10 @@ class Document(object, metaclass=MetaDocument):
     @classmethod
     def list_document_ids(cls):
         """Return a list of document ids."""
-        base = 'refs/heads/documents/' + quote(cls.type_name.encode('utf8'))
+        base = b'refs/heads/documents/' + quote(
+            cls.type_name.encode('utf-8')).encode('utf-8')
         for doc_id in cls._pynuts.document_repository.refs.keys(base=base):
-            yield unquote(doc_id).decode('utf8')
+            yield unquote(doc_id.decode('utf-8'))
 
     @classmethod
     def list_documents(cls):
@@ -116,19 +117,19 @@ class Document(object, metaclass=MetaDocument):
         """Branch name of the document."""
         return quote((
             'documents/%s/%s' % (self.type_name, self.document_id)
-        ).encode('utf8'))
+        ).encode('utf-8'))
 
     @property
     def archive_branch(self):
         """Branch name of the document archives."""
         return quote((
             'archives/%s/%s' % (self.type_name, self.document_id)
-        ).encode('utf8'))
+        ).encode('utf-8'))
 
     @property
     def version(self):
         """Actual git version of the document."""
-        return self.git.head.id
+        return str(self.git.head.id)
 
     @property
     def datetime(self):
@@ -278,7 +279,7 @@ class Document(object, metaclass=MetaDocument):
 
         part = 'index.rst' if archive else part
         html = self._generate_html(part=part, archive=archive)['whole']
-        return HTML(string=html, encoding='utf8').write_pdf()
+        return HTML(string=html, encoding='utf-8').write_pdf()
 
     @classmethod
     def download_pdf(cls, part='index.rst.jinja2', version=None, archive=False,
@@ -325,7 +326,40 @@ class Document(object, metaclass=MetaDocument):
 
     @classmethod
     def update_content(cls):
-        return update_content(cls._pynuts)
+        """Update the ReST document.
+
+        It is used by the javascript/AJAX save function and gets the request as
+        JSON and update all the parts of the document
+
+        Return document's information as JSON.
+
+        """
+        contents = request.json['data']
+        author_name = request.json['author']
+        author_email = request.json['author_email']
+        message = request.json['message']
+
+        documents = {}
+        for values in contents:
+            key = (values['document_type'], values['document_id'])
+            if key in documents:
+                document = documents[key]
+            else:
+                cls = cls._pynuts.documents[values['document_type']]
+                document = cls(values['document_id'], values['version'])
+                documents[key] = document
+            document.git.write(values['part'],
+                               values['content'].encode('utf-8'))
+        for document in list(documents.values()):
+            document.git.commit(
+                author_name or 'Pynuts',
+                author_email or 'pynut@pynuts.org',
+                message or 'Edit %s' % document.document_id)
+        return jsonify(documents=[{
+            'document_type': document.type_name,
+            'document_id': document.document_id,
+            'version': document.version}
+            for document in list(documents.values())])
 
     @classmethod
     def create(cls, author_name=None, author_email=None, message=None,
@@ -450,7 +484,7 @@ class Document(object, metaclass=MetaDocument):
         return jinja2.Markup(
             cls.generate_html(
                 part=part, version=version, archive=archive, editable=editable,
-                **kwargs)[html_part].decode('utf-8'))
+                **kwargs)[html_part])
 
     def get_content(self, part):
         """ Return an object alllowing IO operations on any content of the part
@@ -498,42 +532,3 @@ class Content(object):
             raise ConflictError
         else:
             return True
-
-
-def update_content(pynuts):
-    """Update the ReST document.
-    It is used by the javascript/AJAX save function.
-    It gets the request as JSON and update all the parts of the document
-
-    return document's information as JSON.
-
-    'See the save function<>_' for more details.
-
-    """
-
-    contents = request.json['data']
-    author_name = request.json['author']
-    author_email = request.json['author_email']
-    message = request.json['message']
-
-    documents = {}
-    for values in contents:
-        key = (values['document_type'], values['document_id'])
-        if key in documents:
-            document = documents[key]
-        else:
-            cls = pynuts.documents[values['document_type']]
-            document = cls(values['document_id'], values['version'])
-            documents[key] = document
-        document.git.write(values['part'],
-                           values['content'].encode('utf-8'))
-    for document in list(documents.values()):
-        document.git.commit(
-            author_name or 'Pynuts',
-            author_email or 'pynut@pynuts.org',
-            message or 'Edit %s' % document.document_id)
-    return jsonify(documents=[{
-        'document_type': document.type_name,
-        'document_id': document.document_id,
-        'version': document.version}
-        for document in list(documents.values())])

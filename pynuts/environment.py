@@ -46,9 +46,8 @@ class ShowOnMatch(Extension):
 
         # Call the macro, and store the result in an anonymous variable
         # Equivalent to freevar = macro()
-        assign_node = nodes.Assign(name, nodes.Call(nodes.Name(macro_name.name,
-            b'load'), [], [],
-                None, None))
+        assign_node = nodes.Assign(name, nodes.Call(
+            nodes.Name(macro_name.name, b'load'), [], [], None, None))
         assign_node = assign_node.set_lineno(lineno)
 
         # Importe the needed lxml libraries
@@ -57,10 +56,9 @@ class ShowOnMatch(Extension):
 
         # Creates the if's test node
         # Jinja AST equivalent of CSSSelector(selector)(fromstring(freevar))
-        test_node = nodes.Call(nodes.Call(cssselector_node,
-            [selector], [], None, None), [nodes.Call(import_node,
-                [name],
-                [], None, None)], [], None, None)
+        test_node = nodes.Call(
+            nodes.Call(cssselector_node, [selector], [], None, None),
+            [nodes.Call(import_node, [name], [], None, None)], [], None, None)
 
         # Fill the if node
         if_node = nodes.If()
@@ -82,12 +80,14 @@ def create_environment(loader):
         loader=ChoiceLoader(loaders), extensions=[ShowOnMatch])
     environment.globals.update({'url_for': flask.url_for})
     environment.filters['data'] = filters.data
+    environment.filters['base64'] = filters.base64
     return environment
 
 
 def alter_environment(environment):
-    """Create a new Jinja2 environment with Pynuts helpers."""
+    """Add Pynuts helpers to a Jinja2 environment."""
     environment.loader = ChoiceLoader(
         (environment.loader, PackageLoader('pynuts', 'templates')))
     environment.add_extension(ShowOnMatch)
     environment.filters['data'] = filters.data
+    environment.filters['base64'] = filters.base64

@@ -42,10 +42,10 @@ class TestGit(unittest.TestCase):
         self.assertRaises(jinja2.TemplateNotFound, get_hello)
         self.assertRaises(ValueError, git.write, '', 'foo')  # empty path
 
-        git.write('templates/hello.jinja', 'Hello, World!')
-        self.assertRaises(ObjectTypeError, git.write, 'templates', 'foo')
+        git.write('templates/hello.jinja', b'Hello, World!')
+        self.assertRaises(ObjectTypeError, git.write, 'templates', b'foo')
         self.assertRaises(ObjectTypeError, git.write,
-                          'templates/hello.jinja/foo', 'foo')
+                          'templates/hello.jinja/foo', b'foo')
         assert list(git.history()) == []
         git.commit('Alice', 'alice@pynuts.org', 'First commit')
         commit_1 = git.head.id
@@ -54,14 +54,14 @@ class TestGit(unittest.TestCase):
                           'Alice', 'alice@pynuts.org', '(not) First commit')
 
         git.write('templates/hello.jinja',
-            '{% from "sub/name.jinja" import name %}Hello {{ name() }}!')
+            b'{% from "sub/name.jinja" import name %}Hello {{ name() }}!')
         git.write('templates/sub/name.jinja',
-            '{% macro name() %}from Pynuts{% endmacro %}')
+            b'{% macro name() %}from Pynuts{% endmacro %}')
         git.commit('Bob', 'bob@pynuts.org', 'Second commit')
         commit_2 = git.head.id
         assert commit_2 != commit_1
         assert git.head.parents == [commit_1]
-        assert git.repository.refs['refs/heads/master'] == commit_2
+        assert git.repository.refs[b'refs/heads/master'] == commit_2
         assert list(git.history()) == [commit_2, commit_1]
 
         # Make sure we read from the filesystem
@@ -78,8 +78,8 @@ class TestGit(unittest.TestCase):
         self.assertRaises(NotFoundError, git.read, 'foo')
         self.assertRaises(NotFoundError, git.read, 'foo/bar')
         self.assertRaises(NotFoundError, git.read, 'templates/bar')
-        assert git.read('templates/hello.jinja') == 'Hello, World!'
-        assert git.read('/templates//hello.jinja') == 'Hello, World!'
+        assert git.read('templates/hello.jinja') == b'Hello, World!'
+        assert git.read('/templates//hello.jinja') == b'Hello, World!'
 
         template = get_hello()
         assert template.filename.endswith(

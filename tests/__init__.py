@@ -37,10 +37,8 @@ def setup_fixture():
     app = flask.Flask('complete')
     app.config.from_pyfile('config/test.cfg')
     app.config.update({
-            'PYNUTS_DOCUMENT_REPOSITORY': os.path.join(mkdtemp(), 'documents.git'),
-            'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + DATABASE,
-                }
-            )
+        'PYNUTS_DOCUMENT_REPOSITORY': os.path.join(mkdtemp(), 'documents.git'),
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + DATABASE})
     app.db = SQLAlchemy(app)
     model.reflect(app)
     application.app = app
@@ -50,11 +48,12 @@ def setup_fixture():
 
 def teardown_fixture():
     """Remove the temp directory after the tests."""
-    path = os.path.dirname(
-            application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
-    if os.path.exists(path):
-        os.rmdir(path)
-
+    paths = (
+        os.path.dirname(application.app.config['PYNUTS_DOCUMENT_REPOSITORY']),
+        application.app.config['UPLOADS_DEFAULT_DEST'])
+    for path in paths:
+        if os.path.exists(path):
+            shutil.rmtree(path)
 
 
 def setup_func():
