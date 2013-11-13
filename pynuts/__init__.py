@@ -1,6 +1,6 @@
-"""__init__ file for Pynuts."""
+"""Pynuts: Documents for nuts."""
 
-__version__ = '0.4.3.1'
+__version__ = '0.5'
 
 import os
 import sys
@@ -66,14 +66,16 @@ class Pynuts(object):
             """Context base class of the application.
 
             You can get or set any element in the context stored in
-            the `g` flask object.
+            the ``g`` flask object.
 
-            Example : Set the current time of the request in the context, using
-            datetime :
+            Example: Set the current time of the request in the context, using
+            datetime:
 
-            @app.before_request
-            def set_request_time():
-                g.context.request_time = datetime.now().strftime('%Y/%m/%d')
+            .. sourcecode:: python
+
+                @app.before_request
+                def set_request_time():
+                    g.context.request_time = datetime.now().strftime('%m/%d')
 
             """
             _pynuts = self
@@ -108,19 +110,19 @@ class Pynuts(object):
 
     @cached_property
     def document_repository(self):
-        """ Return the application bare git document repository.
+        """Return the application bare git document repository.
 
-            If the application has a `PYNUTS_DOCUMENT_REPOSITORY`
-            configuration key expressed as an absolute path, the repo
-            will be located at this path. If this configuration key
-            is expressed as a relative path, its location will be taken
-            relatively to the application instance path.
-            Finally, if no such configuration is found, a bare git
-            repository will be created in the `documents.git` directory,
-            located at the application instance path.
+        If the application has a ``PYNUTS_DOCUMENT_REPOSITORY`` configuration
+        key expressed as an absolute path, the repo will be located at this
+        path. If this configuration key is expressed as a relative path, its
+        location will be taken relatively to the application instance path.
+        Finally, if no such configuration is found, a bare git repository will
+        be created in the ``documents.git`` directory, located at the
+        application instance path.
 
-            All parent directories will be created if needed, and if
-            non-existent, the repository will be initialized.
+        All parent directories will be created if needed, and if
+        non-existent, the repository will be initialized.
+
         """
         self.document_repository_path = (
             os.path.join(
@@ -154,6 +156,7 @@ def static(filename):
     """ Return files from Pynuts static folder.
 
     :param filename: the basename of the file contained in Pynuts static folder
+
     """
     return flask.send_from_directory(
         os.path.join(os.path.dirname(__file__), 'static'), filename)
