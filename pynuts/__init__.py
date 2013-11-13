@@ -10,8 +10,14 @@ from flask.ext.uploads import configure_uploads, patch_request_class
 from dulwich.repo import Repo
 
 from .environment import alter_environment
-from . import document, rights, view
+from . import document, view
 from .view import auth_url_for
+
+
+class MetaContext(type):
+    """Get context object for rights."""
+    def __init__(cls, name, bases, dict_):
+        cls._pynuts._context_class = cls
 
 
 class Pynuts(object):
@@ -56,7 +62,7 @@ class Pynuts(object):
 
         self.Document = Document
 
-        class Context(object, metaclass=rights.MetaContext):
+        class Context(object, metaclass=MetaContext):
             """Context base class of the application.
 
             You can get or set any element in the context stored in
