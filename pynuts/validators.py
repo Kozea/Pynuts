@@ -4,14 +4,16 @@ from wtforms.validators import ValidationError
 
 
 class AllowedFile(object):
-    """ Check if uploaded file can be saved, according to the rules
-    defined by the corresponding UploadSet.
+    """Check if uploaded file can be saved.
 
-    If the file breaks the UploadSet rule, raise a ``ValidationError``.
+    The file is checked according to the rules defined by the corresponding
+    ``UploadSet``.
+
+    If the file breaks the ``UploadSet`` rule, raise a ``ValidationError``.
 
     :raises: ValidationError
-    """
 
+    """
     def __call__(self, form, field):
         if not field.has_file():
             return
@@ -24,13 +26,15 @@ class AllowedFile(object):
 
 
 class MaxSize(object):
-    """ A validator ensuring that uploaded file size is under the allowed size.
-    If its size exceeds the maximum size, raises a ``ValidationError``.
+    """A validator ensuring that uploaded file size is under the allowed size.
+
+    If its size exceeds the maximum size, raise a ``ValidationError``.
 
     :param size: The maximum size to accept, in MB. The default value is 5MB.
     :type size: float, int
 
     :raises: ValidationError
+
     """
     def __init__(self, size=5):
         self.max_size = size
@@ -45,16 +49,13 @@ class MaxSize(object):
 
     @property
     def byte_size(self):
-        """Returns the value of the max_size attribute, in bytes."""
+        """Value of the ``max_size`` attribute in bytes."""
         return self.max_size * 1048576
 
     @staticmethod
     def stream_size(stream):
-        """Returns the size (in bytes) of a byte stream.
-
-        :seealso: https://groups.google.com/forum/?fromgroups=#!searchin/pocoo-libs/FileStorage/pocoo-libs/n9S53qFqlwo/zwYiBcDwP8gJ
-        """
-        if hasattr(stream, "getvalue"):
+        """Return the size (in bytes) of a byte stream."""
+        if hasattr(stream, 'getvalue'):
             file_size = len(stream.getvalue())
         else:
             stream.seek(0, 2)
