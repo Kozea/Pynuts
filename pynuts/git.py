@@ -57,8 +57,8 @@ class Git(object):
             self.ref = None
 
         if commit:
-            self.head = repository.commit(commit)
-            self.tree = repository.tree(self.head.tree)
+            self.head = repository[commit]
+            self.tree = repository[self.head.tree]
         else:
             self.head = None
             self.tree = Tree()
@@ -113,7 +113,7 @@ class Git(object):
             yield commit.id
             if not commit.parents:
                 break
-            commit = self.repository.commit(commit.parents[0])
+            commit = self.repository[commit.parents[0]]
 
     def _lookup(self, path, create_trees=False):
         """
