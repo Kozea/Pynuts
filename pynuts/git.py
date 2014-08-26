@@ -57,7 +57,7 @@ class Git(object):
             self.ref = None
 
         if commit:
-            self.head = repository[commit]
+            self.head = repository[commit.encode('ascii')]
             self.tree = repository[self.head.tree]
         else:
             self.head = None
