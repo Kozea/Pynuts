@@ -27,7 +27,7 @@ function save_content (options) {
     var options = options || {};
     //Params : document, message, author, author_email, ok_callback, error_callback, empty_callback
     options.document = options.document ? options.document : $(document);
-    
+
     // Get all the contenteditable elements
     var divs = $(options.document).contents().find('div[contenteditable]');
     var span_containers = $(options.document).contents().find('div[data-content=true]');
@@ -36,7 +36,7 @@ function save_content (options) {
         alert('There is no contenteditable on this document.');
         return false;
     }
-    
+
     var data = [];
     if (divs.length != 0) {
         $.each(divs, function () {

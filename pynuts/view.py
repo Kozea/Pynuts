@@ -2,7 +2,9 @@
 
 import flask
 import jinja2
-from flask_wtf import Form, TextField
+from flask_wtf import Form
+from wtforms import TextField
+from wtforms.fields.core import UnboundField
 from functools import wraps
 from werkzeug.utils import cached_property
 from werkzeug.datastructures import FileStorage
@@ -88,12 +90,20 @@ class MetaView(type):
                     cls.Form, field_name,
                     TextField(field_name)))
                 for field_name in columns)
+
             try:
                 form = type(class_name, tuple(classes), fields)
             except TypeError as e:
                 raise PynutsMROException(
                     'The form must inherit from the '
                     'pynuts.view.BaseForm class. (%r)' % e)
+
+            for key in dir(form):
+                if (isinstance(getattr(form, key), UnboundField) and
+                        key not in fields and
+                        key != 'csrf_token'):
+                    setattr(form, key, None)
+
             setattr(cls, class_name, form)
 
 
@@ -276,7 +286,7 @@ class ModelView(object):
             iterable = query.all()
         else:
             iterable = cls.model.query
-            if hasattr(cls, 'order_by'):
+            if hasattr(cls, 'order_by') and cls.order_by is not None:
                 iterable = iterable.order_by(cls.order_by)
             iterable = iterable.all()
 
@@ -514,7 +524,7 @@ class ModelView(object):
         form_values = self._get_form_attributes(self.create_form)
         if values:
             form_values.update(values)
-        data = self.model(**form_values)
+        self.data = self.model(**form_values)
 
         for key, value in form_values.items():
             if isinstance(value, FileStorage):
@@ -531,12 +541,11 @@ class ModelView(object):
                             'property on your view set to an UploadSet' %
                             key)
                 if value.filename:
-                    setattr(data, key, handler.save(value))
+                    setattr(self.data, key, handler.save(value))
                 else:
-                    setattr(data, key, None)
+                    setattr(self.data, key, None)
 
-        self.data = data
-        self.session.add(data)
+        self.session.add(self.data)
         return True
 
     def update(self, template=None, redirect=None, **kwargs):

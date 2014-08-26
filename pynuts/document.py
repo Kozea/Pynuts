@@ -23,26 +23,27 @@ class InvalidId(ValueError):
 
 class MetaDocument(type):
     """Metaclass for document classes."""
-    def __init__(mcs, name, bases, dict_):
-        if mcs.document_id_template:
+    def __init__(cls, name, bases, dict_):
+        if cls.document_id_template:
             # TODO: find a better endpoint name than the name of the class
-            if not mcs.type_name:
-                mcs.type_name = mcs.__name__
-            mcs._pynuts.documents[mcs.type_name] = mcs
-            mcs._app.add_url_rule(
+            if not cls.type_name:
+                cls.type_name = cls.__name__
+            cls._pynuts.documents[cls.type_name] = cls
+            cls._app.add_url_rule(
                 '/_pynuts/resource/%s/<document_id>/'
-                '<version>/<path:filename>' % (
-                    mcs.type_name),
-                endpoint='_pynuts-resource/' + mcs.type_name,
-                view_func=mcs.static_route)
-            mcs._app.add_url_rule(
-                '/_pynuts/update_content', '_pynuts-update_content',
-                mcs.update_content, methods=('POST',))
-            if mcs.model_path and not os.path.isabs(mcs.model_path):
-                mcs.model_path = os.path.join(
-                    mcs._app.root_path, mcs.model_path)
-            mcs.document_id_template = unicode(mcs.document_id_template)
-            super(MetaDocument, mcs).__init__(name, bases, dict_)
+                '<version>/<path:filename>' % cls.type_name,
+                '_pynuts_resource_%s' % cls.type_name,
+                cls.static_route)
+            cls._app.add_url_rule(
+                '/_pynuts/resource/%s/update_content' % cls.type_name,
+                '_pynuts_resource_%s_update_content' % cls.type_name,
+                cls.update_content, methods=('POST',))
+
+            if cls.model_path and not os.path.isabs(cls.model_path):
+                cls.model_path = os.path.join(
+                    cls._app.root_path, cls.model_path)
+            cls.document_id_template = unicode(cls.document_id_template)
+            super(MetaDocument, cls).__init__(name, bases, dict_)
 
 
 class Document(object):
@@ -172,7 +173,7 @@ class Document(object):
     def resource_url(self, filename):
         """Resource URL for the application."""
         return url_for(
-            '_pynuts-resource/' + self.type_name,
+            '_pynuts_resource_%s' % self.type_name,
             document_id=self.document_id,
             filename=filename,
             version=self.version)
@@ -207,7 +208,8 @@ class Document(object):
         :param part: part of the document to render
         :param archive: return archive content if `True`
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
         """
         part = 'index.rst' if archive else part
@@ -226,7 +228,7 @@ class Document(object):
             part=part, archive=archive, editable=editable)
 
     def _generate_html(self, part='index.rst.jinja2', archive=False,
-                      editable=True):
+                       editable=True):
         """Generate the HTML samples of the document.
 
         The output is a dict corresponding to the different HTML samples as
@@ -235,7 +237,8 @@ class Document(object):
         :param part: part of the document to render
         :param archive: return archive content if `True`
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
 
         .. seealso::
@@ -323,42 +326,7 @@ class Document(object):
 
     @classmethod
     def update_content(cls):
-        """Update the ReST document.
-        It is used by the javascript/AJAX save function.
-        It gets the request as JSON and update all the parts of the document
-
-        return document's information as JSON.
-
-        'See the save function<>_' for more details.
-
-        """
-
-        contents = request.json['data']
-        author_name = request.json['author']
-        author_email = request.json['author_email']
-        message = request.json['message']
-
-        documents = {}
-        for values in contents:
-            key = (values['document_type'], values['document_id'])
-            if key in documents:
-                document = documents[key]
-            else:
-                cls = cls._pynuts.documents[values['document_type']]
-                document = cls(values['document_id'], values['version'])
-                documents[key] = document
-            document.git.write(values['part'],
-                               values['content'].encode('utf-8'))
-        for document in documents.values():
-            document.git.commit(
-                author_name or 'Pynuts',
-                author_email or 'pynut@pynuts.org',
-                message or 'Edit %s' % document.document_id)
-        return jsonify(documents=[{
-            'document_type': document.type_name,
-            'document_id': document.document_id,
-            'version': document.version}
-            for document in documents.values()])
+        return update_content(cls._pynuts)
 
     @classmethod
     def create(cls, author_name=None, author_email=None, message=None,
@@ -452,7 +420,8 @@ class Document(object):
         :param version: version of the document to render
         :param archive: return archive content if `True`
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
 
         """
@@ -472,7 +441,8 @@ class Document(object):
         :param archive: set it to 'True' if you render an archive
         :param html_part: the docutils publish part to render
         :param editable: if you use the 'Editable' pynuts'
-            ReST directive and if you need to render html with 'contenteditable="false"',
+            ReST directive and if you need to render html with
+            'contenteditable="false"',
             set this parameter to 'False'. For more info see :ref:`api`
 
         """
@@ -529,3 +499,42 @@ class Content(object):
             raise ConflictError
         else:
             return True
+
+
+def update_content(pynuts):
+    """Update the ReST document.
+    It is used by the javascript/AJAX save function.
+    It gets the request as JSON and update all the parts of the document
+
+    return document's information as JSON.
+
+    'See the save function<>_' for more details.
+
+    """
+
+    contents = request.json['data']
+    author_name = request.json['author']
+    author_email = request.json['author_email']
+    message = request.json['message']
+
+    documents = {}
+    for values in contents:
+        key = (values['document_type'], values['document_id'])
+        if key in documents:
+            document = documents[key]
+        else:
+            cls = pynuts.documents[values['document_type']]
+            document = cls(values['document_id'], values['version'])
+            documents[key] = document
+        document.git.write(values['part'],
+                           values['content'].encode('utf-8'))
+    for document in documents.values():
+        document.git.commit(
+            author_name or 'Pynuts',
+            author_email or 'pynut@pynuts.org',
+            message or 'Edit %s' % document.document_id)
+    return jsonify(documents=[{
+        'document_type': document.type_name,
+        'document_id': document.document_id,
+        'version': document.version}
+        for document in documents.values()])

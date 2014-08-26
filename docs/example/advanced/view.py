@@ -1,7 +1,7 @@
-from flask.ext.wtf import (TextField, IntegerField,
-                           PasswordField, Required, QuerySelectField,
-                           QuerySelectMultipleField)
-
+from wtforms import TextField, IntegerField, PasswordField
+from wtforms.ext.sqlalchemy.fields import (
+    QuerySelectField, QuerySelectMultipleField)
+from wtforms.validators import Required
 from pynuts.view import BaseForm
 
 import database

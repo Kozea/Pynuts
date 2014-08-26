@@ -3,6 +3,20 @@ Pynuts changelog
 
 Here you can see the full list of changes between each Pynuts release.
 
+Version 0.4.3
+-------------
+
+* Flask 0.10 compatibility
+* API BREAK: Document update_content urls are now of the form '/_pynuts/resource/{{ document_class.__name__ }}/update_content' instead of '/_pynuts/update_content' to avoid conflicts
+
+
+Version 0.4
+-----------
+* Simplification of crud functions
+* Handle permissions on links with auth_url_for with request/link params in acl rights functions
+* Rewrite of the action_url_for
+
+
 Version 0.3
 -----------
 * The ``pynuts.Pynuts`` class no longer inherits from ``flask.Flask``.

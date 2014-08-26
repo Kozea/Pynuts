@@ -1,7 +1,8 @@
-from flask.ext.wtf import (TextField, IntegerField,
-                           PasswordField, Required, QuerySelectField,
-                           QuerySelectMultipleField, BooleanField)
-
+from wtforms import (
+    TextField, IntegerField, PasswordField, BooleanField)
+from wtforms.ext.sqlalchemy.fields import (
+    QuerySelectField, QuerySelectMultipleField)
+from wtforms.validators import Required
 import database
 from application import nuts
 from pynuts.fields import UploadField, ImageField
@@ -20,7 +21,7 @@ class EmployeeView(nuts.ModelView):
     read_columns = ('person_id', 'name', 'firstname', 'fullname', 'company',
                     'resume', 'photo', 'driving_license')
     update_columns = ('name', 'firstname', 'company', 'driving_license',
-                    'resume', 'photo', 'order')
+                      'resume', 'photo', 'order')
 
     class Form(BaseForm):
         person_id = IntegerField('ID')
@@ -30,10 +31,12 @@ class EmployeeView(nuts.ModelView):
         firstname = TextField(u'Firstname', validators=[Required()])
         fullname = TextField('Employee name')
         driving_license = BooleanField('Driving license')
-        resume = UploadField(label='resume',
+        resume = UploadField(
+            label='resume',
             upload_set=UPLOAD_SETS['resumes'],
             validators=[AllowedFile(), MaxSize(1)])
-        photo = ImageField(label='photo',
+        photo = ImageField(
+            label='photo',
             upload_set=UPLOAD_SETS['images'],
             validators=[AllowedFile(), MaxSize(1)])
         company = QuerySelectField(

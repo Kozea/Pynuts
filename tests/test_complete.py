@@ -367,7 +367,8 @@ class TestComplete(object):
     def test_update_content(self, client):
         """Test the update_content method."""
         with client.application.test_request_context():
-            response = request(client.post, url_for('_pynuts-update_content'),
+            response = request(client.post, url_for(
+                '_pynuts_resource_EmployeeDoc_update_content'),
                 data=json.dumps({
                         "data": [{
                             "part": "comments",

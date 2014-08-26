@@ -1,8 +1,9 @@
 """__init__ file for Pynuts."""
 
-__version__ = '0.4'
+__version__ = '0.4.3.1'
 
 import os
+import sys
 import flask
 from werkzeug.utils import cached_property
 from flask.ext.uploads import configure_uploads, patch_request_class
@@ -30,7 +31,7 @@ class Pynuts(object):
         # Pynuts default config
         # Can be overwritten by setting
         # these parameters in the application config
-        self.app.config.setdefault('CSRF_ENABLED', False)
+        self.app.config.setdefault('WTF_CSRF_ENABLED', False)
         self.app.config.setdefault('UPLOADS_DEFAULT_DEST',
                                    os.path.join(app.instance_path, 'uploads'))
         self.app.config.setdefault('PYNUTS_DOCUMENT_REPOSITORY',
@@ -43,6 +44,10 @@ class Pynuts(object):
         # at the /_pynuts/static/<path:filename> URL
         self.app.add_url_rule('/_pynuts/static/<path:filename>',
                               '_pynuts-static', static)
+        self.app.add_url_rule(
+            '/_pynuts/update_content', '_pynuts-update_content',
+            lambda: document.update_content(self),
+            methods=('POST',))
 
         class Document(document.Document):
             """Document base class of the application."""
@@ -147,3 +152,21 @@ def static(filename):
     """
     return flask.send_from_directory(
         os.path.join(os.path.dirname(__file__), 'static'), filename)
+
+
+def install_secret_key(app, filename='secret_key'):
+    """Configure the SECRET_KEY from a file in the instance directory.
+
+    If the file does not exist, print instructions to create it from a shell
+    with a random key, then exit.
+
+    """
+    filename = os.path.join(app.instance_path, filename)
+    try:
+        app.config['SECRET_KEY'] = open(filename, 'rb').read()
+    except IOError:
+        print 'Error: No secret key. Create it with:'
+        if not os.path.isdir(os.path.dirname(filename)):
+            print 'mkdir -p', os.path.dirname(filename)
+        print 'head -c 24 /dev/urandom >', filename
+        sys.exit(1)
