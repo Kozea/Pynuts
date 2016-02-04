@@ -133,7 +133,7 @@ class Git(object):
                 _mode, sha = tree[name]
                 obj = self._get_object(sha)
                 # All but the last part must be trees
-                if i < last_i and obj.type_name != 'tree':
+                if i < last_i and obj.type_name != b'tree':
                     path = b'/'.join(name for _, name, _ in steps)
                     raise ObjectTypeError("'%s' is a %s, expected a tree."
                                           % (path, obj.type_name))
@@ -152,7 +152,7 @@ class Git(object):
 
         """
         _, blob = self._lookup(path)
-        if blob.type_name != 'blob':
+        if blob.type_name != b'blob':
             raise ObjectTypeError("'%s' is a %s, expected a blob."
                                   % (path, blob.type_name))
         return blob.data
@@ -168,7 +168,7 @@ class Git(object):
         """
         steps, _ = self._lookup(path, create_trees=True)
         tree, name, obj = steps.pop()
-        if obj and obj.type_name != 'blob':
+        if obj and obj.type_name != b'blob':
             raise ObjectTypeError('Will not overwrite a %s at %s'
                                   % (obj.type_name, path))
 
