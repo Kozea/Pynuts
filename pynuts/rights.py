@@ -4,19 +4,13 @@ from flask import abort, request
 from functools import wraps
 
 
-class MetaContext(type):
-    """Get context object for rights."""
-    def __init__(cls, name, bases, dict_):
-        cls._pynuts._context_class = cls
-
-
 # These classes are decorators, they can begin with an lowercase letter
 class acl(object):  # pylint: disable=C0103
     """Utility decorator for access control in ``allow_if`` decorators.
 
     Allows to write:
     ``@allow_if((Is.admin | Is.in_domain) & ~Is.in_super_domain)``
-    given that Is module functions are decorated by acl
+    given that Is module functions are decorated by acl.
 
     It implements the following operators:
 

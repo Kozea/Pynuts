@@ -51,13 +51,15 @@ class Git(object):
         self._get_object = repository.get_object
 
         if branch:
-            self.ref = 'refs/heads/' + branch
+            self.ref = b'refs/heads/' + branch.encode('utf-8')
             commit = commit or repository.refs.read_ref(self.ref)
         else:
             self.ref = None
 
         if commit:
-            self.head = repository[commit.encode('ascii')]
+            if hasattr(commit, 'encode'):
+                commit = commit.encode('ascii')
+            self.head = repository[commit]
             self.tree = repository[self.head.tree]
         else:
             self.head = None
@@ -82,6 +84,7 @@ class Git(object):
             :param template: the template name
 
             :raises jinja2.TemplateNotFound
+
             """
             path = prefix + template
             try:
@@ -119,7 +122,9 @@ class Git(object):
         """
         :raises ValueError, NotFoundError, ObjectTypeError
         """
-        parts = [part for part in path.encode('utf8').split('/') if part]
+        parts = [
+            part.encode('utf-8')
+            for part in path.split('/') if part]
         if not parts:
             raise ValueError('empty path: %r' % path)
 
@@ -131,8 +136,8 @@ class Git(object):
                 _mode, sha = tree[name]
                 obj = self._get_object(sha)
                 # All but the last part must be trees
-                if i < last_i and obj.type_name != 'tree':
-                    path = '/'.join(name for _, name, _ in steps)
+                if i < last_i and obj.type_name != b'tree':
+                    path = b'/'.join(name for _, name, _ in steps)
                     raise ObjectTypeError("'%s' is a %s, expected a tree."
                                           % (path, obj.type_name))
             elif create_trees:
@@ -150,9 +155,9 @@ class Git(object):
 
         """
         _, blob = self._lookup(path)
-        if blob.type_name != 'blob':
-            raise ObjectTypeError("'%s' is a %s, expected a blob."
-                                  % (path, blob.type_name))
+        if blob.type_name != b'blob':
+            raise ObjectTypeError(
+                "'%s' is a %s, expected a blob." % (path, blob.type_name))
         return blob.data
 
     def write(self, path, bytestring):
@@ -166,15 +171,15 @@ class Git(object):
         """
         steps, _ = self._lookup(path, create_trees=True)
         tree, name, obj = steps.pop()
-        if obj and obj.type_name != 'blob':
+        if obj and obj.type_name != b'blob':
             raise ObjectTypeError('Will not overwrite a %s at %s'
                                   % (obj.type_name, path))
 
-        tree[name] = 0100644, self.store_bytes(bytestring).id
+        tree[name] = 0o100644, self.store_bytes(bytestring).id
         self._add_object(tree)
 
         for tree, name, sub_tree in reversed(steps):
-            tree[name] = 040000, sub_tree.id
+            tree[name] = 0o40000, sub_tree.id
             self._add_object(tree)
         # self.tree ends up updated in-place.
 
@@ -219,16 +224,16 @@ class Git(object):
         :param timezone: the author timezone
 
         """
-        author = '%s <%s>' % (author_name, author_email)
+        author = ('%s <%s>' % (author_name, author_email)).encode('utf-8')
         commit = Commit()
-        commit.author = author.encode('utf8')
-        commit.committer = self.committer
+        commit.author = author
+        commit.committer = self.committer.encode('utf-8')
         commit.author_time = commit.commit_time = int(time.time())
         if timezone is None:
             # UTC. TODO: use the server’s timezone? Something else?
             timezone = 0
         commit.author_timezone = commit.commit_timezone = timezone
-        commit.message = message.encode('utf8')
+        commit.message = message.encode('utf-8')
         commit.tree = tree_id
         commit.parents = parents
         self._add_object(commit)
@@ -247,9 +252,9 @@ class Git(object):
         for name in os.listdir(root):
             fullname = os.path.join(root, name)
             if os.path.isdir(fullname):
-                tree.add(name, 040000, self.store_directory(fullname).id)
+                tree.add(name.encode('utf-8'), 0o40000, self.store_directory(fullname).id)
             elif os.path.isfile(fullname):
-                tree.add(name, 0100644, self.store_file(fullname).id)
+                tree.add(name.encode('utf-8'), 0o100644, self.store_file(fullname).id)
             #else: Ignore special files.
         self._add_object(tree)
         return tree

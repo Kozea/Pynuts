@@ -28,7 +28,7 @@ def execute_sql(app, filename):
     path = os.path.join(PYNUTS_ROOT, 'tests', 'sql', filename)
     with closing(sqlite3.connect(DATABASE)) as database:
         with app.open_resource(path) as sql_script:
-            database.cursor().executescript(sql_script.read())
+            database.cursor().executescript(sql_script.read().decode('utf-8'))
         database.commit()
 
 
@@ -37,10 +37,8 @@ def setup_fixture():
     app = flask.Flask('complete')
     app.config.from_pyfile('config/test.cfg')
     app.config.update({
-            'PYNUTS_DOCUMENT_REPOSITORY': os.path.join(mkdtemp(), 'documents.git'),
-            'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + DATABASE,
-                }
-            )
+        'PYNUTS_DOCUMENT_REPOSITORY': os.path.join(mkdtemp(), 'documents.git'),
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///' + DATABASE})
     app.db = SQLAlchemy(app)
     model.reflect(app)
     application.app = app
@@ -50,11 +48,12 @@ def setup_fixture():
 
 def teardown_fixture():
     """Remove the temp directory after the tests."""
-    path = os.path.dirname(
-            application.app.config['PYNUTS_DOCUMENT_REPOSITORY'])
-    if os.path.exists(path):
-        os.rmdir(path)
-
+    paths = (
+        os.path.dirname(application.app.config['PYNUTS_DOCUMENT_REPOSITORY']),
+        application.app.config['UPLOADS_DEFAULT_DEST'])
+    for path in paths:
+        if os.path.exists(path):
+            shutil.rmtree(path)
 
 
 def setup_func():

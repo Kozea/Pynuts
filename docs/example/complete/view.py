@@ -3,12 +3,12 @@ from wtforms import (
 from wtforms.ext.sqlalchemy.fields import (
     QuerySelectField, QuerySelectMultipleField)
 from wtforms.validators import Required
-import database
-from application import nuts
+from . import database
+from .application import nuts
 from pynuts.fields import UploadField, ImageField
 from pynuts.validators import AllowedFile, MaxSize
 from pynuts.view import BaseForm
-from files import UPLOAD_SETS
+from .files import UPLOAD_SETS
 
 
 class EmployeeView(nuts.ModelView):
@@ -24,19 +24,19 @@ class EmployeeView(nuts.ModelView):
                       'resume', 'photo', 'order')
 
     class Form(BaseForm):
-        person_id = IntegerField('ID')
+        person_id = IntegerField(u'ID')
         login = TextField(u'Login', validators=[Required()])
         password = PasswordField(u'Password', validators=[Required()])
         name = TextField(u'Surname', validators=[Required()])
         firstname = TextField(u'Firstname', validators=[Required()])
-        fullname = TextField('Employee name')
-        driving_license = BooleanField('Driving license')
+        fullname = TextField(u'Employee name')
+        driving_license = BooleanField(u'Driving license')
         resume = UploadField(
-            label='resume',
+            label=u'resume',
             upload_set=UPLOAD_SETS['resumes'],
             validators=[AllowedFile(), MaxSize(1)])
         photo = ImageField(
-            label='photo',
+            label=u'photo',
             upload_set=UPLOAD_SETS['images'],
             validators=[AllowedFile(), MaxSize(1)])
         company = QuerySelectField(

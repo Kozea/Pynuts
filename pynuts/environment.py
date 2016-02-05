@@ -1,6 +1,9 @@
-"""Jinja2 environment for pynuts."""
+"""Jinja2 environment for Pynuts.
 
-# Set the jinja2 environment by defining templates location and globals.
+Set the jinja2 environment by defining templates location and globals.
+
+"""
+
 import flask
 from jinja2 import nodes, Environment, PackageLoader, ChoiceLoader
 from jinja2.ext import Extension
@@ -29,7 +32,7 @@ class ShowOnMatch(Extension):
 
     def parse(self, parser):
         # Parse the current block
-        lineno = parser.stream.next().lineno
+        lineno = next(parser.stream).lineno
         selector = parser.parse_expression()
         body = parser.parse_statements(('name:else', 'name:endshowonmatch'))
         token = next(parser.stream)
@@ -46,9 +49,8 @@ class ShowOnMatch(Extension):
 
         # Call the macro, and store the result in an anonymous variable
         # Equivalent to freevar = macro()
-        assign_node = nodes.Assign(name, nodes.Call(nodes.Name(macro_name.name,
-            'load'), [], [],
-                None, None))
+        assign_node = nodes.Assign(name, nodes.Call(
+            nodes.Name(macro_name.name, b'load'), [], [], None, None))
         assign_node = assign_node.set_lineno(lineno)
 
         # Importe the needed lxml libraries
@@ -57,10 +59,9 @@ class ShowOnMatch(Extension):
 
         # Creates the if's test node
         # Jinja AST equivalent of CSSSelector(selector)(fromstring(freevar))
-        test_node = nodes.Call(nodes.Call(cssselector_node,
-            [selector], [], None, None), [nodes.Call(import_node,
-                [name],
-                [], None, None)], [], None, None)
+        test_node = nodes.Call(
+            nodes.Call(cssselector_node, [selector], [], None, None),
+            [nodes.Call(import_node, [name], [], None, None)], [], None, None)
 
         # Fill the if node
         if_node = nodes.If()
@@ -82,12 +83,14 @@ def create_environment(loader):
         loader=ChoiceLoader(loaders), extensions=[ShowOnMatch])
     environment.globals.update({'url_for': flask.url_for})
     environment.filters['data'] = filters.data
+    environment.filters['base64'] = filters.base64
     return environment
 
 
 def alter_environment(environment):
-    """Create a new Jinja2 environment with Pynuts helpers."""
+    """Add Pynuts helpers to a Jinja2 environment."""
     environment.loader = ChoiceLoader(
         (environment.loader, PackageLoader('pynuts', 'templates')))
     environment.add_extension(ShowOnMatch)
     environment.filters['data'] = filters.data
+    environment.filters['base64'] = filters.base64

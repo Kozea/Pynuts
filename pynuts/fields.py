@@ -4,6 +4,11 @@ from wtforms import StringField
 from wtforms.widgets import html_params, HTMLString
 from flask_wtf.file import FileField
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 class Editable(object):
     """Contenteditable widget."""

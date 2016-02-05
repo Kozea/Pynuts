@@ -23,7 +23,7 @@ class EmployeeView(nuts.ModelView):
         password = PasswordField(u'Password', validators=[Required()])
         name = TextField(u'Surname', validators=[Required()])
         firstname = TextField(u'Firstname', validators=[Required()])
-        fullname = TextField('Employee name')
+        fullname = TextField(u'Employee name')
         company = QuerySelectField(
             u'Company', get_label='name',
             query_factory=lambda: database.Company.query, allow_blank=True)

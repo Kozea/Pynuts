@@ -1,5 +1,5 @@
 from flask import session, request, g
-from application import nuts
+from .application import nuts
 from pynuts.rights import acl
 
 

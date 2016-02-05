@@ -1,6 +1,6 @@
-"""__init__ file for Pynuts."""
+"""Pynuts: Documents for nuts."""
 
-__version__ = '0.4.3.1'
+__version__ = '0.5'
 
 import os
 import sys
@@ -10,8 +10,14 @@ from flask.ext.uploads import configure_uploads, patch_request_class
 from dulwich.repo import Repo
 
 from .environment import alter_environment
-from . import document, rights, view
+from . import document, view
 from .view import auth_url_for
+
+
+class MetaContext(type):
+    """Get context object for rights."""
+    def __init__(cls, name, bases, dict_):
+        cls._pynuts._context_class = cls
 
 
 class Pynuts(object):
@@ -56,21 +62,23 @@ class Pynuts(object):
 
         self.Document = Document
 
-        class Context(object):
+        class Context(object, metaclass=MetaContext):
             """Context base class of the application.
 
             You can get or set any element in the context stored in
-            the `g` flask object.
+            the ``g`` flask object.
 
-            Example : Set the current time of the request in the context, using
-            datetime :
+            Example: Set the current time of the request in the context, using
+            datetime:
 
-            @app.before_request
-            def set_request_time():
-                g.context.request_time = datetime.now().strftime('%Y/%m/%d')
+            .. sourcecode:: python
+
+                @app.before_request
+                def set_request_time():
+                    g.context.request_time = datetime.now().strftime('%m/%d')
 
             """
-            __metaclass__ = rights.MetaContext
+            __metaclass__ = MetaContext
             _pynuts = self
 
             def __getitem__(self, key):
@@ -103,19 +111,19 @@ class Pynuts(object):
 
     @cached_property
     def document_repository(self):
-        """ Return the application bare git document repository.
+        """Return the application bare git document repository.
 
-            If the application has a `PYNUTS_DOCUMENT_REPOSITORY`
-            configuration key expressed as an absolute path, the repo
-            will be located at this path. If this configuration key
-            is expressed as a relative path, its location will be taken
-            relatively to the application instance path.
-            Finally, if no such configuration is found, a bare git
-            repository will be created in the `documents.git` directory,
-            located at the application instance path.
+        If the application has a ``PYNUTS_DOCUMENT_REPOSITORY`` configuration
+        key expressed as an absolute path, the repo will be located at this
+        path. If this configuration key is expressed as a relative path, its
+        location will be taken relatively to the application instance path.
+        Finally, if no such configuration is found, a bare git repository will
+        be created in the ``documents.git`` directory, located at the
+        application instance path.
 
-            All parent directories will be created if needed, and if
-            non-existent, the repository will be initialized.
+        All parent directories will be created if needed, and if
+        non-existent, the repository will be initialized.
+
         """
         self.document_repository_path = (
             os.path.join(
@@ -149,6 +157,7 @@ def static(filename):
     """ Return files from Pynuts static folder.
 
     :param filename: the basename of the file contained in Pynuts static folder
+
     """
     return flask.send_from_directory(
         os.path.join(os.path.dirname(__file__), 'static'), filename)
@@ -165,8 +174,8 @@ def install_secret_key(app, filename='secret_key'):
     try:
         app.config['SECRET_KEY'] = open(filename, 'rb').read()
     except IOError:
-        print 'Error: No secret key. Create it with:'
+        print('Error: No secret key. Create it with:')
         if not os.path.isdir(os.path.dirname(filename)):
-            print 'mkdir -p', os.path.dirname(filename)
-        print 'head -c 24 /dev/urandom >', filename
+            print('mkdir -p', os.path.dirname(filename))
+        print('head -c 24 /dev/urandom >', filename)
         sys.exit(1)

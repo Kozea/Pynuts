@@ -29,7 +29,7 @@
   {{ view.view_read() }}
 
   <h2>Employee Content</h2>
-  <img src="data:image/png;base64,{{ content.read().encode('base64') }}"/>
+  <img src="data:image/png;base64,{{ content.read() | base64 }}"/>
   <a href="{{ url_for('edit_image', person_id=view.data.person_id) }}">Edit it !</a>
   
   <h2>Current report</h2>

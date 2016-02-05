@@ -107,7 +107,7 @@ class MetaView(type):
             setattr(cls, class_name, form)
 
 
-class ModelView(object):
+class ModelView(object, metaclass=MetaView):
     """This class represents the view of a SQLAlchemy model class.
 
     It grants CRUD (Create, Read, Update, Delete) operations
@@ -120,8 +120,6 @@ class ModelView(object):
     :type data: dict
 
     """
-
-    # Metaclass
     __metaclass__ = MetaView
 
     # Mapper
