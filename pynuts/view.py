@@ -12,6 +12,8 @@ from sqlalchemy.orm import class_mapper
 from sqlalchemy.util import classproperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
+from .helpers import with_metaclass
+
 ACTIONS = ('list', 'table', 'create', 'read', 'update', 'delete')
 
 
@@ -107,7 +109,7 @@ class MetaView(type):
             setattr(cls, class_name, form)
 
 
-class ModelView(object, metaclass=MetaView):
+class ModelView(object, with_metaclass(MetaView)):
     """This class represents the view of a SQLAlchemy model class.
 
     It grants CRUD (Create, Read, Update, Delete) operations
@@ -120,8 +122,6 @@ class ModelView(object, metaclass=MetaView):
     :type data: dict
 
     """
-    __metaclass__ = MetaView
-
     # Mapper
     _mapping = None
 

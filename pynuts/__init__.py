@@ -11,6 +11,7 @@ from dulwich.repo import Repo
 
 from .environment import alter_environment
 from . import document, view
+from .helpers import with_metaclass
 from .view import auth_url_for
 
 
@@ -62,7 +63,7 @@ class Pynuts(object):
 
         self.Document = Document
 
-        class Context(object, metaclass=MetaContext):
+        class Context(object, with_metaclass(MetaContext)):
             """Context base class of the application.
 
             You can get or set any element in the context stored in
@@ -78,7 +79,6 @@ class Pynuts(object):
                     g.context.request_time = datetime.now().strftime('%m/%d')
 
             """
-            __metaclass__ = MetaContext
             _pynuts = self
 
             def __getitem__(self, key):

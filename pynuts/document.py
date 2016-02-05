@@ -19,6 +19,7 @@ except ImportError:
 
 from .environment import create_environment
 from .git import Git, ConflictError
+from .helpers import with_metaclass
 
 
 class InvalidId(ValueError):
@@ -50,7 +51,7 @@ class MetaDocument(type):
             super(MetaDocument, cls).__init__(name, bases, dict_)
 
 
-class Document(object, metaclass=MetaDocument):
+class Document(object, with_metaclass(MetaDocument)):
     """This class represents a document object.
 
     :param document_id: the id of the document
@@ -59,8 +60,6 @@ class Document(object, metaclass=MetaDocument):
     :type version: str
 
     """
-    __metaclass__ = MetaDocument
-
     #: Jinja Environment
     jinja_environment = None
 
