@@ -136,7 +136,7 @@ def read_company(company_id=None):
     company_view = view.CompanyView(company_id)
     employee_table = view.EmployeeView.view_table(
         actions=[{
-            'label': '٧',
+            'label': u'٧',
             'title': u'Down',
             'endpoint': u'down_employee',
             'data': {
