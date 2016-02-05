@@ -489,7 +489,7 @@ class Document(object, with_metaclass(MetaDocument)):
             part=part, version=version, archive=archive, editable=editable,
             **kwargs)[html_part]
         if hasattr(html, 'decode'):
-            html = htmly.decode('utf-8')
+            html = html.decode('utf-8')
         return jinja2.Markup(html)
 
     def get_content(self, part):
