@@ -485,10 +485,12 @@ class Document(object, with_metaclass(MetaDocument)):
         """
         part = 'index.rst' if archive else part
         editable = False if archive else editable
-        return jinja2.Markup(
-            cls.generate_html(
-                part=part, version=version, archive=archive, editable=editable,
-                **kwargs)[html_part])
+        html = cls.generate_html(
+            part=part, version=version, archive=archive, editable=editable,
+            **kwargs)[html_part]
+        if hasattr(html, 'decode'):
+            html = htmly.decode('utf-8')
+        return jinja2.Markup(html)
 
     def get_content(self, part):
         """ Return an object alllowing IO operations on any content of the part
