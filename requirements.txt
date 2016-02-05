@@ -3,9 +3,8 @@ Flask-WTF
 Flask-WeasyPrint
 docutils
 docutils_html5_writer
+dulwich
 
 # Python3 unofficial ports
 #Flask-Uploads
 hg+https://bitbucket.org/mattupstate/flask-uploads
-#dulwich
-git+https://github.com/eberle1080/dulwich-py3k.git
