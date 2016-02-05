@@ -2,7 +2,7 @@ BEGIN;
 
 -- Tables
 
-CREATE TABLE "Employee" (
+CREATE TABLE Employee (
 	person_id INTEGER NOT NULL, 
 	name VARCHAR, 
 	firstname VARCHAR, 
@@ -15,10 +15,10 @@ CREATE TABLE "Employee" (
 	resume VARCHAR,
 	reflected VARCHAR, 
 	PRIMARY KEY (person_id), 
-	FOREIGN KEY(company_id) REFERENCES "Company" (company_id)
+	FOREIGN KEY(company_id) REFERENCES Company (company_id)
 );
 
-CREATE TABLE "Company" (
+CREATE TABLE Company (
 	company_id INTEGER NOT NULL, 
 	name VARCHAR,
 	PRIMARY KEY (company_id)
