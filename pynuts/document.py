@@ -338,32 +338,7 @@ class Document(object, with_metaclass(MetaDocument)):
         Return document's information as JSON.
 
         """
-        contents = request.json['data']
-        author_name = request.json['author']
-        author_email = request.json['author_email']
-        message = request.json['message']
-
-        documents = {}
-        for values in contents:
-            key = (values['document_type'], values['document_id'])
-            if key in documents:
-                document = documents[key]
-            else:
-                cls = cls._pynuts.documents[values['document_type']]
-                document = cls(values['document_id'], values['version'])
-                documents[key] = document
-            document.git.write(values['part'],
-                               values['content'].encode('utf-8'))
-        for document in list(documents.values()):
-            document.git.commit(
-                author_name or 'Pynuts',
-                author_email or 'pynut@pynuts.org',
-                message or 'Edit %s' % document.document_id)
-        return jsonify(documents=[{
-            'document_type': document.type_name,
-            'document_id': document.document_id,
-            'version': document.version}
-            for document in list(documents.values())])
+        return update_content(cls._pynuts)
 
     @classmethod
     def create(cls, author_name=None, author_email=None, message=None,
@@ -538,3 +513,32 @@ class Content(object):
             raise ConflictError
         else:
             return True
+
+
+def update_content(pynuts):
+    contents = request.json['data']
+    author_name = request.json['author']
+    author_email = request.json['author_email']
+    message = request.json['message']
+
+    documents = {}
+    for values in contents:
+        key = (values['document_type'], values['document_id'])
+        if key in documents:
+            document = documents[key]
+        else:
+            cls = pynuts.documents[values['document_type']]
+            document = cls(values['document_id'], values['version'])
+            documents[key] = document
+        document.git.write(values['part'],
+                           values['content'].encode('utf-8'))
+    for document in list(documents.values()):
+        document.git.commit(
+            author_name or 'Pynuts',
+            author_email or 'pynut@pynuts.org',
+            message or 'Edit %s' % document.document_id)
+    return jsonify(documents=[{
+        'document_type': document.type_name,
+        'document_id': document.document_id,
+        'version': document.version}
+        for document in list(documents.values())])
