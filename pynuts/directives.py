@@ -59,6 +59,13 @@ class Editable(_Tag):
         except NotFoundError:
             self.parsed_content = docutils.core.publish_parts(
                 '\n'.join(self.content), writer_name='html')['body']
+        for key in self.option_spec:
+            if key == 'title':
+                self.attributes[key] = self.options.get(key)
+            elif key == 'contenteditable':
+                self.attributes[key] = ' '.join(self.options.get(key, ['true']))
+            else:
+                self.attributes[key] = ' '.join(self.options.get(key, []))
         content = '<div %s>%s</div>' % (
             ' '.join(('%s="%s"' % a) for a in self.attributes.items()),
             self.parsed_content or '')
